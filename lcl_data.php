@@ -1,0 +1,741 @@
+<?php
+session_start();
+include "koneksi.php"; 
+include "session_log.php"; 
+include "lib.php";
+
+
+
+if(!isset($_SESSION['id_user'])  ){
+ header('location:logout.php'); 
+}
+
+if($_SERVER['REQUEST_METHOD'] == "POST")
+{		
+	$mode = $_POST['mode'];
+	$id_jo = $_POST['id_jo'];	
+	$tgl_jo = $_POST['tgl_jo'];	
+	$id_cust = $_POST['id_cust'];
+	$id_asal = $_POST['id_asal'];
+	$unit = $_POST['unit'];
+	$id_tujuan = $_POST['id_tujuan'];
+	$nama_penerima = addslashes(trim(strtoupper($_POST['nama_penerima'])));
+	$alamat_penerima = addslashes($_POST['alamat_penerima']);
+	$nama_barang = addslashes(trim(strtoupper($_POST['nama_barang'])));
+	$ket = addslashes($_POST['ket']);
+	$tgl_jox = ConverTglSql($tgl_jo);
+	
+	$biaya_kirim = $_POST['biaya_kirim'];	
+	$berat = $_POST['berat'];
+	$vol = $_POST['vol'];
+	$biaya_kirim = str_replace(",","", $biaya_kirim);
+	$berat = str_replace(",","", $berat);
+	$vol = str_replace(",","", $vol);
+	
+	if($unit == 'Kg')
+	{
+		$qty = $berat;
+	}else{
+		$qty = $vol;
+	}
+	
+	
+	if($mode == 'Add' )
+	{
+		$ptgl = explode("-", $tgl_jo);
+		$tg = $ptgl[0];
+		$bl = $ptgl[1];
+		$th = $ptgl[2];	
+		$query = "SELECT max(right(no_jo,5)) as maxID FROM t_jo_tr where  year(tgl_jo) = '$th' and tipe = 'LCL' ";
+		$hasil = mysqli_query($koneksi, $query);    
+		$data  = mysqli_fetch_array($hasil);
+		$idMax = $data['maxID'];
+		if ($idMax == '99999'){
+			$idMax='0000';
+		}
+		$noUrut = (int) $idMax;   
+		$noUrut++;  
+		if(strlen($noUrut)=='1'){
+			$noUrut="0000$noUrut";
+			}elseif(strlen($noUrut)=='2'){
+			$noUrut="000$noUrut";
+			}elseif(strlen($noUrut)=='3'){
+			$noUrut="00$noUrut";
+			}elseif(strlen($noUrut)=='4'){
+			$noUrut="0$noUrut";
+		}   
+		$year = substr($th,2,2);
+		$month = $bl;
+		
+		$no_jo = "LCL-$year$noUrut";
+		
+		$sql="INSERT INTO t_jo_tr 
+			  (tipe, no_jo, tgl_jo, id_cust, id_asal, id_tujuan, penerima, alamat_penerima, nama_barang,
+			  berat, vol, unit, biaya_kirim, ket, created)
+			  values 
+			  ('LCL', '$no_jo', '$tgl_jox', '$id_cust', '$id_asal', '$id_tujuan', '$nama_penerima', '$alamat_penerima', '$nama_barang',
+			  '$berat', '$vol', '$unit', '$biaya_kirim', '$ket', '$id_user')";
+		$hasil=mysqli_query($koneksi, $sql);	
+		
+		$sql = mysqli_query($koneksi, "select max(id_jo)as id from t_jo_tr ");			
+		$row = mysqli_fetch_array($sql);
+		$id_jo = $row['id'];	
+		
+		$sql="INSERT INTO t_jo_biaya_tr
+			  (id_jo, id_cost, qty, unit, harga, kunci)
+			  values 
+			  ('$id_jo', '1', '$qty', '$unit', '$biaya_kirim', '1')";
+		$hasil=mysqli_query($koneksi, $sql);
+		
+	}else{
+		
+		$sql="UPDATE t_jo_tr set 
+			  tgl_jo = '$tgl_jox',
+			  id_cust = '$id_cust',
+			  id_asal = '$id_asal',
+			  id_tujuan = '$id_tujuan',
+			  penerima = '$nama_penerima',
+			  alamat_penerima = '$alamat_penerima',
+			  nama_barang = '$nama_barang',
+			  berat = '$berat',
+			  vol = '$vol',
+			  unit = '$unit',
+			  biaya_kirim = '$biaya_kirim',
+			  ket = '$ket'
+			  where id_jo = '$id_jo'"; 
+		$hasil=mysqli_query($koneksi,$sql);
+		
+		$sql="update t_jo_biaya_tr set harga = '$biaya_kirim', qty = '$qty', unit = '$unit' where id_jo = '$id_jo' and kunci = '1' and id_cost = '1' ";
+		$hasil=mysqli_query($koneksi, $sql);
+		
+	}
+	
+	$cat ="Data saved...";
+	$xy1="Edit|$id_jo|$cat";
+	$xy1=base64_encode($xy1);
+	header("Location: lcl_data.php?id=$xy1");
+}
+else
+{	
+	$idx = $_GET['id'];	
+	$x=base64_decode($idx);
+	$pecah = explode("|", $x);
+	$mode= $pecah[0];
+	$id_jo = $pecah[1];
+	$cat = $pecah[2];
+}
+
+if($mode == 'Add')
+{
+	$no_jo = '-- Auto -- ';
+	$tgl_jo = date('d-m-Y');
+	$pq = mysqli_query($koneksi,"select * from m_kota_tr where id_kota = '4'");
+	$rq=mysqli_fetch_array($pq);	
+	$id_asal = $rq['id_kota'];
+	$nama_asal = $rq['nama_kota'];
+}else{
+	
+	$pq = mysqli_query($koneksi, "select t_jo_tr.*, m_cust_tr.nama_cust, m_kota_tr.nama_kota as asal,
+		m_kota1.nama_kota as tujuan
+		  from 
+		  t_jo_tr inner join m_cust_tr on  t_jo_tr.id_cust = m_cust_tr.id_cust
+		  left join m_kota_tr on t_jo_tr.id_asal = m_kota_tr.id_kota
+		  left join m_kota_tr as m_kota1 on t_jo_tr.id_tujuan = m_kota1.id_kota
+		  where t_jo_tr.id_jo = '$id_jo'  ");
+	$rq=mysqli_fetch_array($pq);	
+	$no_jo = $rq['no_jo'];
+	$tgl_jo = ConverTgl($rq['tgl_jo']);
+	$id_cust = $rq['id_cust'];
+	$nama_cust = $rq['nama_cust'];
+	$id_asal = $rq['id_asal'];
+	$nama_asal = $rq['asal'];
+	$id_tujuan = $rq['id_tujuan'];
+	$nama_tujuan = $rq['tujuan'];
+	$nama_penerima = $rq['penerima'];
+	$alamat_penerima = str_replace("\'","'",$rq['alamat_penerima']); 
+	$nama_barang = str_replace("\'","'",$rq['nama_barang']);	
+	$unit = $rq['unit'];
+	$berat = number_format($rq['berat'],2);
+	$vol = number_format($rq['vol'],2);
+	$biaya_kirim = number_format($rq['biaya_kirim'],0);
+	$ket = str_replace("\'","'",$rq['ket']);
+	
+	
+}
+
+if($mode == 'View')
+{
+	$dis = "Disabled";
+}
+
+?>
+
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title><?php echo $aplikasi; ?></title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	<link rel="icon" type="image/png" sizes="16x16" href="img/pav.png">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/ionicons.min.css">
+    <link rel="stylesheet" href="css/dist/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="css/dist/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="css/plugins/iCheck/flat/blue.css">
+    <link rel="stylesheet" href="css/plugins/morris/morris.css">
+    <link rel="stylesheet" href="css/plugins/jvectormap/jquery-jvectormap-1.2.2.css">
+    <link rel="stylesheet" href="css/plugins/datepicker/datepicker3.css">
+    <link rel="stylesheet" href="css/plugins/daterangepicker/daterangepicker-bs3.css">
+    <link rel="stylesheet" href="css/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+	<link rel="stylesheet" href="css/plugins/select2/select2.min.css">
+	<script src="css/plugins/jQuery/jQuery-2.1.4.min.js" type="text/javascript"></script>
+	
+	<style>
+		.datepicker{z-index:1151 !important;}
+	</style>
+	<script>
+		$(document).ready(function () {
+			var date_input=$('input[name="tgl_jo"]'); 
+			var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+			date_input.datepicker({
+				format: 'dd-mm-yyyy',
+				container: container,
+				todayHighlight: true,
+				autoclose: true,
+			})	
+			ReadData();
+		});
+		function ReadData() {	
+			var id_jo = $("#id_jo").val();
+			var mode = $("#mode").val();
+			$.get("ajax/lcl_crud.php", {mode:mode,id_jo:id_jo, type:"Read_Biaya" }, function (data, status) {
+				$(".tampil_data").html(data);
+			});
+		}
+		function Rupiah(num) {
+			num = num.toString().replace(/\$|\,/g,'');
+			if(isNaN(num))
+				num = "0";
+				sign = (num == (num = Math.abs(num)));
+				num = Math.floor(num*100+0.50000000001);
+				cents = num%100;
+				num = Math.floor(num/100).toString();
+			if(cents<10)
+				cents = "0" + cents;
+				for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++)
+					num = num.substring(0,num.length-(4*i+3))+','+
+					num.substring(num.length-(4*i+3));
+			//return (((sign)?'':'-') + '' + num + '.' + cents);
+			return (((sign)?'':'-') + '' + num);
+			
+		}
+		function Desimal(num) {
+			num = num.toString().replace(/\$|\,/g,'');
+			if(isNaN(num))
+				num = "0";
+				sign = (num == (num = Math.abs(num)));
+				num = Math.floor(num*100+0.50000000001);
+				cents = num%100;
+				num = Math.floor(num/100).toString();
+			if(cents<10)
+				cents = "0" + cents;
+				for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++)
+					num = num.substring(0,num.length-(4*i+3))+','+
+					num.substring(num.length-(4*i+3));
+			return (((sign)?'':'-') + '' + num + '.' + cents);
+			//return (((sign)?'':'-') + '' + num);
+			
+		}
+		function isNumber(evt) {
+			evt = (evt) ? evt : window.event;
+			var charCode = (evt.which) ? evt.which : evt.keyCode;
+			if (charCode > 31 && (charCode < 46 || charCode > 57)) {
+				return false;
+			}
+			return true;
+		}
+		
+		function changeDateFormat(inputDate){
+			var splitDate = inputDate.split('-');
+			if(splitDate.count == 0){
+				return null;
+			}
+			var year = splitDate[0];
+			var month = splitDate[2];
+			var day = splitDate[1]; 
+			return month + '-' + day + '-' + year;
+		}
+		
+		function TampilCust(){	
+			$("#cari").val('');
+			ListCust();
+			$('#DaftarCust').modal('show');
+		}
+		function ListCust() {	
+			var cari = $("#cari").val();
+			$.get("ajax/cust_crud.php", {cari:cari,  type:"ListCust" }, function (data, status) {
+				$(".tampil_cust").html(data);
+				$("#hal").val(hal);
+			});
+		}
+		function PilihCust(id) {	
+			$.post("ajax/cust_crud.php", {
+					id: id, type:"DetilData"
+				},
+				function (data, status) {
+					var data = JSON.parse(data);	
+					$("#nama_cust").val(data.nama_cust);
+					$("#id_cust").val(id);
+					CekRate();
+				}
+			);
+			$("#DaftarCust").modal("hide");
+		}
+		function checkvalue() {
+			var id_cust = document.getElementById('id_cust').value; 
+			var id_asal = document.getElementById('id_asal').value; 
+			var id_tujuan = document.getElementById('id_tujuan').value; 
+			var nama_penerima = document.getElementById('nama_penerima').value; 
+			var alamat_penerima = document.getElementById('alamat_penerima').value; 
+			var nama_barang = document.getElementById('nama_barang').value; 
+			var berat = document.getElementById('berat').value;
+			var vol = document.getElementById('vol').value;
+			var unit = document.getElementById('unit').value;
+			var biaya_kirim = document.getElementById('biaya_kirim').value;
+			if(id_cust == '') {
+				alert ('Customer harus diisi..');				
+				return false;		
+			}else if(id_asal == '') {
+				alert ('Asal harus diisi..');				
+				return false;
+			}else if(id_tujuan == '') {
+				alert ('Tujuan harus diisi..');				
+				return false;	
+			}else if(nama_penerima == '') {
+				alert ('Nama Penerima harus diisi..');				
+				return false;	
+			}else if(alamat_penerima == '') {
+				alert ('alamat Penerima harus diisi..');				
+				return false;	
+			}else if(nama_barang == '') {
+				alert ('Nama Barang harus diisi..');				
+				return false;		
+			}else if(berat <= 0) {
+				alert ('Berat harus diisi..');				
+				return false;			
+			}else if(vol <= 0) {
+				alert ('Volume harus diisi..');				
+				return false;	
+			}else if(biaya_kirim <= 0) {
+				alert ('Biaya Kirim harus diisi..');				
+				return false;
+			}else if(unit == '') {
+				alert ('Unit Biaya Kirim harus diisi..');				
+				return false;		
+			}else{
+				return true;
+			}	
+		}
+		
+		function CekRate()
+		{
+			var id_asal = $("#id_asal").val();
+			var id_tujuan = $("#id_tujuan").val();
+			var jenis_mobil = $("#jenis_mobil").val();
+			var id_cust = $("#id_cust").val();
+			$("#biaya_kirim").val('');	
+			
+			var jenis_jo = $("#jenis_jo").val();
+			if(jenis_jo == '1')
+			{	
+				$.post("ajax/lcl_crud.php", {
+					id_cust:id_cust, id_asal: id_asal, id_tujuan:id_tujuan, jenis_mobil:jenis_mobil, type:"Rate_Cust"
+					},
+					function (data, status) {
+						var data = JSON.parse(data);
+						//alert(data.status);
+						if(data.status == '200')
+						{
+							//alert(data+"xx");
+							CekRate_Umum();
+						}else{
+							$("#biaya_kirim").val(Rupiah(data.harga));
+						}
+					}
+				);
+			}
+			else
+			{
+				//CekRate_Umum();
+			}
+		
+		}
+		
+	
+		function TampilBiaya() 
+		{
+			$("#qty_biaya").val('');
+			$("#harga_biaya").val('');
+			$("#mode_biaya").val('Add');
+			$('#DataBiaya').modal('show');
+		}
+		function AddBiaya() {
+			var qty = $("#qty_biaya").val();	
+			var harga = $("#harga_biaya").val();	
+			if(qty <= 0){
+				alert("QTY harus diisi !..");
+			}
+			else if(harga <= 0)
+			{
+				alert("Harga harus diisi !..");
+			}
+			else
+			{
+				var r = confirm("Are you sure ?...");
+				if (r == true) {	
+					var id_biaya = $("#id_biaya").val();
+					var id_jo = $("#id_jo").val();
+					var id_cost = $("#id_cost").val();
+					var unit = $("#unit_biaya").val();
+					var qty = $("#qty_biaya").val();
+					var harga = $("#harga_biaya").val();
+					var mode = $("#mode_biaya").val();
+					$.post("ajax/lcl_crud.php", {
+						id_biaya:id_biaya,
+						id_jo:id_jo,
+						id_cost:id_cost,
+						unit:unit,
+						qty:qty,
+						harga:harga,
+						mode:mode,
+						type : "Add_Biaya"
+						}, function (data, status) {
+						
+						ReadData();
+						$("#DataBiaya").modal("hide");	
+					});
+				}
+			}	
+		}
+		function GetBiaya(id) {
+			$("#id_biaya").val(id);	
+			$.post("ajax/lcl_crud.php", {
+					id: id, type:"Detil_Biaya"
+				},
+				function (data, status) {
+					var data = JSON.parse(data);
+					$("#id_cost").val(data.id_cost);
+					$("#qty_biaya").val(data.qty);
+					$("#unit_biaya").val(data.unit);
+					$("#harga_biaya").val(Rupiah(data.harga));
+					$("#mode_biaya").val('Edit');			
+				}
+			);
+			$("#DataBiaya").modal("show");
+		}
+		function DelBiaya(id) {
+			var conf = confirm("Are you sure to Delete ?");
+			if (conf == true) {
+				$.post("ajax/lcl_crud.php", {
+						id: id,type:"Del_Biaya"
+					},
+					function (data, status) {
+						
+						ReadData();
+						
+					}
+				);
+			}
+		}
+		
+	
+    </script>
+	
+  </head>
+  <body class="hold-transition skin-blue sidebar-mini sidebar-collapse" onload="initMap()">
+	
+	<div class="wrapper">
+		<header class="main-header">
+			<?php include "header.php"; ?>	 
+		</header>
+		<aside class="main-sidebar">
+			<?php include "menu.php" ; ?>	
+		</aside>	
+		
+		<form method="post" name ="myform"  class="form-horizontal" onsubmit="return checkvalue(this)" > 
+		<div class="content-wrapper" style="min-height:750px">
+			<br>
+			<ol class="breadcrumb">
+				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Order (LCL)</b></font></h1></li>					
+			</ol>
+			<br>
+			<?php if($cat != '') {?>
+			<div class="callout callout-Danger" style="margin-bottom: 0!important;width:98%;color:#fff">
+				<i class="icon 	fa fa-info-circle" style="color:#000;font-size:16px"></i>&nbsp;&nbsp;<font color="#000"><?php echo "$cat"; ?></font>
+			</div>
+			<?php }?>
+			
+			<div class="col-md-6" >
+				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:300px">					
+					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;
+					text-align:left;padding:5px;margin-bottom:1px">							
+						<b><i class="fa fa-list"></i>&nbsp;Data Order</b>
+					</div>
+					<br>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;"><b>#No Order :</b></span>
+						<input type="text"  id ="no_jo" name="no_jo" value="<?php echo $no_jo; ?>" 
+						style="text-align: center;width:16%" readonly <?php echo $dis;?> >						
+						<input type="hidden"  id ="id_jo" name="id_jo" value="<?php echo $id_jo; ?>" >	
+						<input type="hidden"  id ="mode" name="mode" value="<?php echo $mode; ?>" >
+						
+					</div>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
+						<input type="text"  id ="tgl_jo" name="tgl_jo" value="<?php echo $tgl_jo; ?>" 
+						style="text-align: center;width:16%" readonly <?php echo $dis;?>  >
+					</div>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;"><b>Customer :</b></span>
+						<input type="text"  id ="nama_cust" name="nama_cust" value="<?php echo $nama_cust; ?>" 
+						style="text-align: left;width:75%;font-weight:bold" readonly <?php echo $dis;?> >
+						<input type="hidden"  id ="id_cust" name="id_cust" value="<?php echo $id_cust; ?>" >
+						<button class="btn btn-block btn-default"  <?php echo $dis;?>
+							style="padding:6px;margin-top:-4px;border-radius:0px" type="button" 
+							onClick="javascript:TampilCust()">
+							<span class="glyphicon glyphicon-search"></span>
+						</button>	
+					</div>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;"><b>Asal :</b></span>
+						<select id="id_asal" name="id_asal" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
+							<?php
+							$t1="select * from m_kota_tr where status = '1' order by nama_kota  ";
+							$h1=mysqli_query($koneksi, $t1);       
+							while ($d1=mysqli_fetch_array($h1)){?>
+							<option value="<?php echo $d1['id_kota'];?>" ><?php echo $d1['nama_kota'];?></option>
+							<?php }?>
+							<option value="<?php echo $id_asal;?>" selected ><?php echo $nama_asal;?></option>
+						</select>
+					</div>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;"><b>Tujuan :</b></span>
+						<select id="id_tujuan" name="id_tujuan" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
+							<?php
+							$t1="select * from m_kota_tr where status = '1' order by nama_kota  ";
+							$h1=mysqli_query($koneksi, $t1);       
+							while ($d1=mysqli_fetch_array($h1)){?>
+							<option value="<?php echo $d1['id_kota'];?>" ><?php echo $d1['nama_kota'];?></option>
+							<?php }?>
+							<option value="<?php echo $id_tujuan;?>" selected><?php echo $nama_tujuan;?></option>
+						</select>
+					</div>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;"><b>Penerima :</b></span>
+						<input type="text"  id ="nama_penerima" name="nama_penerima" value="<?php echo $nama_penerima; ?>" 
+						style="text-transform: uppercase;text-align: left;width:80%"  <?php echo $dis;?>  >
+					</div>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;"><b>Alamat Penerima :</b></span>
+						<textarea name="alamat_penerima" id="alamat_penerima"
+						style="resize:none;width: 80%; height: 55px; font-size: 11px; line-height: 12px; 
+						border: 1px solid #4; padding: 5px;" <?php echo $dis;?> ><?php echo $alamat_penerima; ?></textarea>
+					</div>
+					<br>	
+				</div>
+            </div>
+			
+			<div class="col-md-6" >
+				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:300px">					
+					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+						<b><i class="fa fa-list"></i>&nbsp;Description</b>
+					</div>
+					<br>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;min-width:160px"><b>Nama Barang :</b></span>
+						<input type="text"  id ="nama_barang" name="nama_barang" value="<?php echo $nama_barang; ?>" 
+						style="text-transform: uppercase;text-align: left;width:80%"  <?php echo $dis;?>  >
+					</div>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;min-width:160px"><b>Berat :</b></span>
+						<input type="text"  id ="berat" name="berat" value="<?php echo $berat; ?>" onchange="CekRate()"
+						style="text-align: right;width:15%;padding:3px" onBlur ="this.value=Desimal(this.value);" 
+						onkeypress="return isNumber(event)" <?php echo $dis;?> > &nbsp;<b>Kg</b>
+					</div>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;min-width:160px"><b>Volume :</b></span>
+						<input type="text"  id ="vol" name="vol" value="<?php echo $vol; ?>" onchange="CekRate()"
+						style="text-align: right;width:15%;padding:3px" onkeypress="return isNumber(event)" 
+						onBlur ="this.value=Desimal(this.value);" <?php echo $dis;?> >
+						&nbsp;<b>M3</b>	
+					</div>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;min-width:160px"><b>Biaya Kirim :</b></span>
+						<input type="text" id="biaya_kirim" name="biaya_kirim" value="<?php echo $biaya_kirim;?>" style="text-align: right;width:15%;" 
+						onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  <?php echo $dis;?> >
+						<select id="unit" name="unit"  <?php echo $dis;?> style="width: 10%;padding:4px">
+							<option value="Kg" >Kg</option>
+							<option value="M3" >M3</option>
+							<option value="<?php echo $unit;?>" selected><?php echo $unit;?></option>
+						</select>	
+					</div>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;min-width:160px"><b>Remarks :</b></span>
+						<textarea name="ket" id="ket"
+						style="resize:none;width: 80%; height: 110px; font-size: 11px; line-height: 12px; 
+						border: 1px solid #4; padding: 5px;" <?php echo $dis;?> ><?php echo $ket; ?></textarea>
+					</div>	
+					<br>	
+				</div>
+            </div>
+		
+			<?php if($mode != 'Add'){?>	
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;min-height:195px">
+						<?php if($mode == 'Edit'){?>
+							<button class="btn btn-block btn-success" 
+								style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px" type="button" 
+								onClick="javascript:TampilBiaya()"  <?php echo $dis;?> <?php echo $dis_copy;?> >
+								<span class="fa  fa-plus-square"></span>
+								<b>Add Biaya Lainnya</b>
+							</button>
+						<?php }?>
+						<div class="table-responsive mailbox-messages" style="min-height:10px">									
+							<div class="tampil_data"></div>
+						</div>	
+					</div>
+				</div>
+			<?php }?>
+				
+			<?php
+				$link = "lcl.php?id=$xy1";
+				$xy1="$id_jo";
+				$idx=base64_encode($xy1);
+			?>
+			<div class="col-md-12" >
+				<div style="width:98%;background:none;margin-left:0;margin-top:0px;border-top:0px;border-bottom:0px" class="input-group">
+					<?php if($mode != 'View'){?>
+				<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
+				<?php }?>
+				<button type="button" class="btn btn-danger" onclick="window.location.href='<?php echo $link; ?>'"><span class="fa fa-backward"></span>&nbsp;&nbsp;<b>Back</b></button>	
+				
+				</div>
+			</div>
+			<div style="width:100%;border:none;background:none" class="input-group">
+					<span class="input-group-addon" style="text-align:right;background:none"></span>						
+				</div>
+				<div style="width:100%;border:none;background:none" class="input-group">
+					<span class="input-group-addon" style="text-align:right;background:none"></span>						
+				</div>
+				<div style="width:100%;border:none;background:none" class="input-group">
+					<span class="input-group-addon" style="text-align:right;background:none"></span>						
+				</div>
+		</div>		
+		</form>
+	</div>	
+	
+	
+	<div class="modal fade" id="DaftarCust"  role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content" style="background: none">	
+				<div class="modal-body">						
+					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Customer</b>
+							</div>	
+							<br>
+							<div style="width:100%" class="input-group" style="background:none !important;">
+								<span class="input-group-addon" style="width:80%;text-align:left;padding:0px">
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Search :</b>&nbsp;&nbsp;
+									<input type="text"  id ="cari" name="cari" value="<?php echo $cari; ?>" 
+									style="text-align: left;width:200px" onkeypress="ListCust()" >
+									<button class="btn btn-block btn-primary" 
+									style="margin:0px;margin-left:-3px;margin-bottom:3px;border-radius:2px;padding:5px" 
+									onClick="javascript:ListCust()" ">
+									<span class="glyphicon glyphicon-search"></span>
+									</button>
+									<button class="btn btn-block btn-danger" 
+									style="margin:0px;margin-left:-2px;margin-bottom:3px;border-radius:2px;padding:5px"  
+									data-dismiss="modal" >
+									<span class="glyphicon glyphicon-remove"></span>
+									</button>
+								</span>
+								<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+								</span>
+							</div>							
+							<div class="table-responsive mailbox-messages" >									
+								<div class="tampil_cust"></div>
+							</div>
+							<br>
+						</div>		
+					</div>		
+				</div>	
+			</div>
+		</div>	
+    </div>
+	
+	<div class="modal fade" id="DataBiaya"  role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content" style="background: none">
+				<div class="modal-body">
+					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Biaya Lainnya</b>
+							</div>	
+							<br>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Biaya :</b></span>
+								<select id="id_cost" style="width: 80%;padding:4px" <?php echo $dis;?>  >
+									<?php 
+									$t1="select * from m_cost_tr where status = '1' and id_cost <> '1' order by nama_cost";
+									$h1=mysqli_query($koneksi, $t1);       
+									while ($d1=mysqli_fetch_array($h1)){  
+									?>
+									<option value="<?php echo $d1['id_cost']; ?>" ><?php echo $d1['nama_cost'];?></option>
+									<?php }?>
+								</select>
+								<input type="hidden" id="id_biaya"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
+								<input type="hidden" id="mode_biaya"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
+							</div>		
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Qty :</b></span>
+								<input type="text" id="qty_biaya" value="" style="text-align: center;width:12%;border:1px solid rgb(169, 169, 169)"
+								onkeypress="return isNumber(event)"	/>	
+								<select id="unit_biaya" style="width:25%;padding:4px" <?php echo $dis;?>  >
+									<?php 
+									$t1="select * from m_unit_tr   order by nama";
+									$h1=mysqli_query($koneksi, $t1);       
+									while ($d1=mysqli_fetch_array($h1)){  
+									?>
+									<option value="<?php echo $d1['nama']; ?>"><?php echo $d1['nama'];?></option>
+									<?php }?>
+								</select>	
+							</div>	
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Harga :</b></span>								
+								<input type="text" id="harga_biaya" value="" style="text-align: right;width:20%;border:1px solid rgb(169, 169, 169)"
+								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"	/>	
+							</div>							
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
+								<button type="button" class="btn btn-success" onclick="AddBiaya()">&nbsp;&nbsp;Save&nbsp;&nbsp;</button>	
+								<button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>	
+							</div>
+							<br>
+						</div>
+					</div>			
+				</div>
+			
+			</div>
+		</div>	
+    </div>
+	
+	<?php include "footer.php"; ?>
+	<?php include "js.php"; ?>
+	
+  </body>
+</html>
