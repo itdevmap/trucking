@@ -42,24 +42,24 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="7%" style="text-align: center;">TANGGAL</th>
-					<th rowspan="2" width="9%" style="text-align: center;">POSISI</th>
-					<th rowspan="2" width="8%" style="text-align: center;">NO. POLISI</th>
-					<th rowspan="2" width="7%" style="text-align: center;">NO. SERI</th>
-					<th rowspan="2" width="7%" style="text-align: center;">JENIS</th>
-					<th rowspan="2" width="14%" style="text-align: center;">MERK</th>
-					<th rowspan="2" width="6%" style="text-align: center;">KETEBALAN</th>
+					<th rowspan="2" width="7%" style="text-align: center;">DATE</th>
+					<th rowspan="2" width="9%" style="text-align: center;">POSITION</th>
+					<th rowspan="2" width="8%" style="text-align: center;">NO. POLICE</th>
+					<th rowspan="2" width="7%" style="text-align: center;">NO. SERIES</th>
+					<th rowspan="2" width="7%" style="text-align: center;">TYPE</th>
+					<th rowspan="2" width="14%" style="text-align: center;">BRAND</th>
+					<th rowspan="2" width="6%" style="text-align: center;">THICKNESS</th>
 					<th rowspan="2" width="6%" style="text-align: center;">KM</th>
-					<th colspan="4" width="25%" style="text-align: center;">POSISI SAAT INI</th>
+					<th colspan="4" width="25%" style="text-align: center;">CURRENT POSITION</th>
 					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>
 					<th rowspan="2" width="2%" style="text-align: center;">DEL</th>
-					<th rowspan="2" width="2%" style="text-align: center;">ADD ROTASI</th>
-					<th rowspan="2" width="2%" style="text-align: center;">VIEW ROTASI</th>
+					<th rowspan="2" width="2%" style="text-align: center;">ADD ROTATION</th>
+					<th rowspan="2" width="2%" style="text-align: center;">VIEW ROTATION</th>
 				</tr>
 				<tr>
-					<th  width="6%" style="text-align: center;">POSISI</th>
-					<th  width="7%" style="text-align: center;">NO. POLISI</th>
-					<th  width="6%" style="text-align: center;">KETEBALAN</th>
+					<th  width="6%" style="text-align: center;">POSITION</th>
+					<th  width="7%" style="text-align: center;">NO. POLICE</th>
+					<th  width="6%" style="text-align: center;">THICKNESS</th>
 					<th  width="6%" style="text-align: center;">KM</th>
 				</tr>	
 			</thead>';			
@@ -87,7 +87,7 @@ if ($_GET['type'] == "Read")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -231,7 +231,7 @@ if ($_GET['type'] == "Read")
 	
     $query = "DELETE FROM t_ban WHERE id_ban = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 	
 }else if ($_POST['type'] == "Add_Ban"){		
@@ -288,7 +288,7 @@ if ($_GET['type'] == "Read")
 	$id = $_POST['id'];	
     $query = "select * from t_ban where id_ban  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -342,13 +342,13 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>	
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="9%" style="text-align: center;">TANGGAL</th>
-					<th rowspan="2" width="8%" style="text-align: center;">NO. POLISI</th>
-					<th rowspan="2" width="18%" style="text-align: center;">JENIS PEKERJAAN</th>		
-					<th rowspan="2" width="12%" style="text-align: center;">POSISI</th>	
-					<th rowspan="2" width="8%" style="text-align: center;">KETEBALAN</th>
+					<th rowspan="2" width="9%" style="text-align: center;">DATE</th>
+					<th rowspan="2" width="8%" style="text-align: center;">NO. POLICE</th>
+					<th rowspan="2" width="18%" style="text-align: center;">TYPE OF WORK</th>		
+					<th rowspan="2" width="12%" style="text-align: center;">POSITION</th>	
+					<th rowspan="2" width="8%" style="text-align: center;">THICKNESS</th>
 					<th rowspan="2" width="8%" style="text-align: center;">KM</th>	
-					<th rowspan="2" width="19%" style="text-align: center;">KETERANGAN</th>	
+					<th rowspan="2" width="19%" style="text-align: center;">INFORMATION</th>	
 					<th rowspan="2" width="10%" style="text-align: center;">CREATED</th>
 					<th rowspan="2" width="5%" style="text-align: center;">DEL</th>				
 				</tr>
@@ -398,7 +398,7 @@ if ($_GET['type'] == "Read")
 	
     $query = "DELETE FROM t_ban_detil WHERE id_detil = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 	
 }

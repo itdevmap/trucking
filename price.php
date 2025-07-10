@@ -111,6 +111,7 @@ else
 					$("#id_asal").val(data.id_asal);
 					$("#id_tujuan").val(data.id_tujuan);
 					$("#jenis_mobil").val(data.jenis_mobil);
+					$("#km").val(data.km);
 					$("#rate").val(Desimal(data.rate));
 					$("#uj").val(Desimal(data.uj));
 					$("#ritase").val(Desimal(data.ritase));
@@ -129,6 +130,7 @@ else
 				var id_tujuan = $("#id_tujuan").val();
 				var rate = $("#rate").val();
 				var jenis_mobil = $("#jenis_mobil").val();
+				var km = $("#km").val();
 				var uj = $("#uj").val();
 				var ritase = $("#ritase").val();
 				var stat = $("#stat").val();
@@ -139,6 +141,7 @@ else
 					id_asal:id_asal,
 					id_tujuan:id_tujuan,
 					jenis_mobil:jenis_mobil,
+					km:km,
 					rate:rate,
 					ritase:ritase,
 					uj:uj,
@@ -165,6 +168,7 @@ else
 			$("#mode").val('Add');
 			$('#Data').modal('show');
 		}
+
     </script>
 	
   </head>
@@ -179,115 +183,118 @@ else
 		</aside>	
 		
 		<form method="post" name ="myform"  class="form-horizontal" > 
-		<div class="content-wrapper" style="min-height:750px">
-			<br>
-			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Price List</b></font></h1></li>					
-			</ol>
-			<br>
-		
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
-					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-							<b><i class="fa fa-search"></i>&nbsp;Filter Data</b>
-					</div>
-					<br>	
-					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Filter By :</b></span>
-						<select size="1" id="field1"  name="field1" style="padding:4px;margin-right:2px;width: 85px">
-							<option>Asal</option>
-							<option>Tujuan</option>
-							<option>Jenis</option>
-							<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
-						</select>
-						<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
-						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
-					</div>	
-					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"></span>
-						<select size="1" id="field2"  name="field2" style="padding:4px;margin-right:2px;width: 85px">
-							<option>Asal</option>
-							<option>Tujuan</option>
-							<option>Jenis</option>
-							<option value="<?php echo $field2; ?>" selected><?php echo $field2; ?></option>
-						</select>
-						<input type="text"  id ="search_name2" name="search_name2" value="<?php echo $search_name2; ?>" 
-						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
-						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
-						
-						<button class="btn btn-block btn-primary" 
-								style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding-top:6px;padding-bottom:6px" type="submit" 
-								>
-								<span class="glyphicon glyphicon-search"></span>
-						</button>	
-					</div>
-					<br>	
-				</div>
-            </div>
+			<div class="content-wrapper" style="min-height:750px">
+				<br>
+				<ol class="breadcrumb">
+					<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Price List</b></font></h1></li>					
+				</ol>
+				<br>
 			
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
-					<div style="width:100%;background: #fff;" class="input-group" >
-						<span class="input-group-addon" style="width:50%;text-align:left;padding:0px">
-							<?php if ($m_add == '1'){?>
-							<button class="btn btn-block btn-success" 
-								style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:2px" type="button" 
-								onClick="javascript:TampilData()">
-								<span class="fa  fa-plus-square"></span>
-								<b>Add New</b>
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
+						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+								<b><i class="fa fa-search"></i>&nbsp;Filter Data</b>
+						</div>
+						<br>	
+						<div style="width:100%" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Filter By :</b></span>
+							<select size="1" id="field1"  name="field1" style="padding:4px;margin-right:2px;width: 85px">
+								<option>Origin</option>
+								<option>Destination</option>
+								<option>Type</option>
+								<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
+							</select>
+							<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
+							style="text-align: left;width:200px" onkeypress="ReadData(1)" >
+						</div>	
+						<div style="width:100%" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"></span>
+							<select size="1" id="field2"  name="field2" style="padding:4px;margin-right:2px;width: 85px">
+								<option>Origin</option>
+								<option>Destination</option>
+								<option>Type</option>
+								<option value="<?php echo $field2; ?>" selected><?php echo $field2; ?></option>
+							</select>
+							<input type="text"  id ="search_name2" name="search_name2" value="<?php echo $search_name2; ?>" 
+							style="text-align: left;width:200px" onkeypress="ReadData(1)" >
+							<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
+							
+							<button class="btn btn-block btn-primary" 
+									style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding-top:6px;padding-bottom:6px" type="submit" 
+									>
+									<span class="glyphicon glyphicon-search"></span>
 							</button>	
-							<?php }?>								
-						</span>
-						<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
-						Row Page :&nbsp;
-						<select size="1" id="paging"  name="paging" onchange="ReadData(1)" style="padding:4px;margin-right:2px">
-							<?php 
-							$tampil1="select * from m_paging  order by baris";
-							$hasil1=mysqli_query($koneksi, $tampil1);       
-							while ($data1=mysqli_fetch_array($hasil1)){  
-							?>
-							<option><?php echo $data1['baris'];?></option>
-							<?php }?>
-							<option value="<?php echo $paging; ?>" selected><?php echo $paging; ?></option>
-						</select>	
-						</span>	
-					</div>		
-				</div>
-            </div>			
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
-					<div class="table-responsive mailbox-messages" style="min-height:10px">									
-						<div class="tampil_data"></div>
+						</div>
+						<br>	
 					</div>
-				</div>	
-            </div>
-			<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
+				</div>
+				
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
+						<div style="width:100%;background: #fff;" class="input-group" >
+							<span class="input-group-addon" style="width:50%;text-align:left;padding:0px">
+								<?php if ($m_add == '1'){?>
+								<button class="btn btn-block btn-success" 
+									style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:2px" type="button" 
+									onClick="javascript:TampilData()">
+									<span class="fa  fa-plus-square"></span>
+									<b>Add New</b>
+								</button>	
+								<?php }?>								
+							</span>
+							<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
+							Row Page :&nbsp;
+							<select size="1" id="paging"  name="paging" onchange="ReadData(1)" style="padding:4px;margin-right:2px">
+								<?php 
+								$tampil1="select * from m_paging  order by baris";
+								$hasil1=mysqli_query($koneksi, $tampil1);       
+								while ($data1=mysqli_fetch_array($hasil1)){  
+								?>
+								<option><?php echo $data1['baris'];?></option>
+								<?php }?>
+								<option value="<?php echo $paging; ?>" selected><?php echo $paging; ?></option>
+							</select>	
+							</span>	
+						</div>		
+					</div>
+				</div>			
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
+						<div class="table-responsive mailbox-messages" style="min-height:10px">									
+							<div class="tampil_data"></div>
+						</div>
+					</div>	
 				</div>
 				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-		</div>		
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+			</div>		
 		</form>
 	</div>	
 		
-	
-	
+	<!-- --------------------- MODAL ADD DATA --------------------- -->
 	<div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">
 				<div class="modal-body">	
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
-							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Rate</b>
-							</div>	
+							<div class="" style="display: flex; justify-content: space-between; width: auto;font-size:12px; font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7; padding:5px;align-items: center;">
+								<div class="small-box bg" style=" text-align:left;margin-bottom:1px;">							
+									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Rate</b>
+								</div>	
+								<button type="button" class="btn btn-danger" data-dismiss="modal">
+								<span class="fa fa-close"></span></button>	
+							</div>
 							<br>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Asal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
 								<select size="1" id="id_asal"  style="padding:4px;margin-right:2px;width:75%">
 									<?php 
 									$t1="select * from m_kota_tr where status = '1'  order by nama_kota";
@@ -300,8 +307,9 @@ else
 								<input type="hidden" id="id"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
 								<input type="hidden" id="mode"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
 							</div>	
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tujuan :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
 								<select size="1" id="id_tujuan"  style="padding:4px;margin-right:2px;width:75%">
 									<?php 
 									$t1="select * from m_kota_tr where status = '1'  order by nama_kota";
@@ -312,6 +320,8 @@ else
 									<?php }?>
 								</select>		
 							</div>	
+							
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
 								<select size="1" id="jenis_mobil"  style="padding:4px;margin-right:2px;width:75%">
@@ -325,28 +335,33 @@ else
 								</select>		
 							</div>		
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Price :</b></span>
-								<input type="text" id="rate" value="" style="text-align: right;width:20%;" 
+								<span class="input-group-addon" style="text-align:right;;min-width:150px"><b>Distance/KM :</b></span>
+								<input type="text" id="km" value="" style="text-align: right;width:30%;" 
 								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Uang Jalan :</b></span>
-								<input type="text" id="uj" value="" style="text-align: right;width:20%;" 
+								<span class="input-group-addon" style="text-align:right;;min-width:150px"><b>Price :</b></span>
+								<input type="text" id="rate" value="" style="text-align: right;width:30%;" 
+								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Road Fee :</b></span>
+								<input type="text" id="uj" value="" style="text-align: right;width:30%;" 
 								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ritase :</b></span>
-								<input type="text" id="ritase" value="" style="text-align: right;width:20%;" 
+								<input type="text" id="ritase" value="" style="text-align: right;width:30%;" 
 								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Status :</b></span>
-								<select id="stat"  style="width: 20%;">
+								<select id="stat"  style="width: 30%;">
 									<option value="1" >Active</option>
 									<option value="0" >In Active</option>
 								</select>						
 							</div>
-							<div style="width:100%;" class="input-group">
+							<div style="width:100%; margin-top: 1rem;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
 								<button type="button" class="btn btn-success"  onclick="add()">
 								<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
@@ -360,8 +375,6 @@ else
 			</div>
 		</div>	
     </div>
-	
-	
 	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>

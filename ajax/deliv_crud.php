@@ -903,7 +903,7 @@ if ($_GET['type'] == "Read")
 	$jenis_mobil = $_POST['jenis_mobil'];	
     $query = "select * from m_rate_tr where id_asal  = '$id_asal' and id_tujuan = '$id_tujuan' and jenis_mobil = '$jenis_mobil' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -914,8 +914,6 @@ if ($_GET['type'] == "Read")
     else
     {
 		echo "Data not found!";
-        //$response['status'] = 200;
-        //$response['message'] = "Data not found!";
     }
     echo json_encode($response);		
 	

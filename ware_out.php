@@ -239,7 +239,7 @@ else
 					</div>
 					<br>
 					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
 						<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
 						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
 						&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
@@ -261,9 +261,9 @@ else
 							<option>No SJ</option>
 							<option>No Ref</option>
 							<option>Customer</option>
-							<option>Gudang</option>
-							<option>Supir</option>
-							<option>No Polisi</option>
+							<option>Warehouse</option>
+							<option>Driver</option>
+							<option>No Police</option>
 							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
@@ -275,9 +275,9 @@ else
 							<option>No SJ</option>
 							<option>No Ref</option>
 							<option>Customer</option>
-							<option>Gudang</option>
-							<option>Supir</option>
-							<option>No Polisi</option>
+							<option>Warehouse</option>
+							<option>Driver</option>
+							<option>No Police</option>
 							<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
 						</select>
 						<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
@@ -309,7 +309,7 @@ else
 								style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = "Created Order"
 								onClick="window.location.href = 'ware_out_jasa.php?id=<?php echo $xy1; ?>' ">
 								<span class="fa  fa-plus-square"></span>
-								<b>Add Jasa</b>
+								<b>Add Service</b>
 								</button>	
 							<?php }?>	
 							<button class="btn btn-block btn-warning" 

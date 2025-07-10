@@ -52,17 +52,17 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="7%" style="text-align: center;">TANGGAL</th>
+					<th rowspan="2" width="7%" style="text-align: center;">DATE</th>
 					<th rowspan="2" width="10%" style="text-align: center;">NO. SPK</th>
 					<th rowspan="2" width="6%" style="text-align: center;">START</th>
 					<th rowspan="2" width="6%" style="text-align: center;">FINISH</th>
-					<th rowspan="2" width="8%" style="text-align: center;">NO. POLISI</th>
+					<th rowspan="2" width="8%" style="text-align: center;">NO. POLICE</th>
 					<th rowspan="2" width="6%" style="text-align: center;">KM</th>
-					<th rowspan="2" width="39%" style="text-align: center;">JENIS PEKERJAAN</th>
-					<th rowspan="2" width="3%" style="text-align: center;">FOTO</th>
+					<th rowspan="2" width="39%" style="text-align: center;">TYPE OF WORK</th>
+					<th rowspan="2" width="3%" style="text-align: center;">PHOTO</th>
 					<th rowspan="2" width="6%" style="text-align: center;">CREATED</th>
 					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>	
-					<th rowspan="2" width="2%" style="text-align: center;">ADD<br>FOTO</th>	
+					<th rowspan="2" width="2%" style="text-align: center;">ADD<br>PHOTO</th>	
 					<th rowspan="2" width="2%" style="text-align: center;">DEL</th>	
 				</tr>
 			</thead>';			
@@ -85,7 +85,7 @@ if ($_GET['type'] == "Read")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -233,7 +233,7 @@ if ($_GET['type'] == "Read")
 	
     $query = "DELETE FROM t_spk WHERE id_spk = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 
 }
@@ -259,7 +259,7 @@ else if($_GET['type'] == "Read_Data")
 			where t_spk_part.id_spk = '$id_spk'  order by  t_spk_part.id_detil";
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -313,7 +313,7 @@ else if($_GET['type'] == "Read_Data")
 			
 		if (!$hasil) {
 	        			
-			//exit(mysqli_error());
+			//exit(mysqli_error($koneksi));
 			echo "Data Error...!";
 	    }
 		else
@@ -328,7 +328,7 @@ else if($_GET['type'] == "Read_Data")
 	$id = $_POST['id'];	
     $query = "select * from t_spk where id_spk  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -357,7 +357,7 @@ else if($_GET['type'] == "Read_Data")
 			
     $query = "DELETE FROM t_spk_part WHERE id_detil = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 
 	

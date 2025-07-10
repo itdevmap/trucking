@@ -65,7 +65,7 @@ if ($_GET['type'] == "Read")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -185,7 +185,7 @@ if ($_GET['type'] == "Read")
 	
     $query = "DELETE FROM m_part WHERE id_part = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 	
 }else if ($_POST['type'] == "Add_Data"){		
@@ -215,7 +215,7 @@ if ($_GET['type'] == "Read")
 		}
 		if (!$hasil) {
 	        			
-			//exit(mysqli_error());
+			//exit(mysqli_error($koneksi));
 			echo "Data Error...!";
 	    }
 		else
@@ -229,7 +229,7 @@ if ($_GET['type'] == "Read")
 	$id = $_POST['id'];	
     $query = "select * from m_part where id_part  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -272,7 +272,7 @@ else if ($_GET['type'] == "Read_In")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="7%" style="text-align: center;">TANGGAL</th>
+					<th rowspan="2" width="7%" style="text-align: center;">DATE</th>
 					<th rowspan="2" width="8%" style="text-align: center;">NO PO</th>
 					<th rowspan="2" width="10%" style="text-align: center;">ITEM NUMBER</th>
 					<th rowspan="2" width="53%" style="text-align: center;">DESCRIPTION</th>
@@ -299,7 +299,7 @@ else if ($_GET['type'] == "Read_In")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -406,7 +406,7 @@ else if ($_GET['type'] == "Read_In")
 		
 		if (!$hasil) {
 	        			
-			//exit(mysqli_error());
+			//exit(mysqli_error($koneksi));
 			echo "Data Error...!";
 	    }
 		else
@@ -428,7 +428,7 @@ else if ($_GET['type'] == "Read_In")
 			
     $query = "DELETE FROM m_part_masuk WHERE id_masuk = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }	
 
 }
@@ -460,9 +460,9 @@ else if ($_GET['type'] == "Read_Out")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="7%" style="text-align: center;">TANGGAL</th>
+					<th rowspan="2" width="7%" style="text-align: center;">DATE</th>
 					<th rowspan="2" width="10%" style="text-align: center;">NO. SPK</th>
-					<th rowspan="2" width="8%" style="text-align: center;">NO. POLISI</th>
+					<th rowspan="2" width="8%" style="text-align: center;">NO. POLICE</th>
 					<th rowspan="2" width="10%" style="text-align: center;">ITEM NUMBER</th>
 					<th rowspan="2" width="45%" style="text-align: center;">ITEM DESCRIPTION</th>
 					<th rowspan="2" width="5%" style="text-align: center;">QTY</th>
@@ -491,7 +491,7 @@ else if ($_GET['type'] == "Read_Out")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -579,9 +579,9 @@ else if ($_GET['type'] == "Read_Out")
 			<thead style="font-weight:500px !important">
 				<tr>	
 					<th rowspan="2" width="5%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="12%" style="text-align: center;">TANGGAL</th>
+					<th rowspan="2" width="12%" style="text-align: center;">DATE</th>
 					<th rowspan="2" width="25%" style="text-align: center;">NO. SPK</th>
-					<th rowspan="2" width="20%" style="text-align: center;">NO. POLISI</th>
+					<th rowspan="2" width="20%" style="text-align: center;">NO. POLICE</th>
 					<th rowspan="2" width="10%" style="text-align: center;">QTY</th>		
 					<th rowspan="2" width="10%" style="text-align: center;">CREATED</th>
 								
@@ -621,7 +621,7 @@ else if ($_GET['type'] == "Read_Out")
 			<thead style="font-weight:500px !important">
 				<tr>	
 					<th rowspan="2" width="5%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="12%" style="text-align: center;">TANGGAL</th>
+					<th rowspan="2" width="12%" style="text-align: center;">DATE</th>
 					<th rowspan="2" width="45%" style="text-align: center;">NO. PO</th>
 					<th rowspan="2" width="10%" style="text-align: center;">QTY</th>		
 					<th rowspan="2" width="10%" style="text-align: center;">CREATED</th>	
@@ -667,7 +667,7 @@ else if ($_GET['type'] == "Read_Out")
 	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -710,7 +710,7 @@ else if ($_GET['type'] == "Read_Out")
 	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {

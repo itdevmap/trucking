@@ -49,11 +49,12 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="28%" style="text-align: center;">ASAL</th>
-					<th rowspan="2" width="28%" style="text-align: center;">TUJUAN</th>
+					<th rowspan="2" width="28%" style="text-align: center;">ORIGIN</th>
+					<th rowspan="2" width="28%" style="text-align: center;">DESTINATION</th>
 					<th rowspan="2" width="13%" style="text-align: center;">TYPE</th>
+					<th rowspan="2" width="13%" style="text-align: center;">KM</th>
 					<th rowspan="2" width="7%" style="text-align: center;">PRICE</th>
-					<th rowspan="2" width="7%" style="text-align: center;">UANG JALAN</th>
+					<th rowspan="2" width="7%" style="text-align: center;">ROAD FEE</th>
 					<th rowspan="2" width="7%" style="text-align: center;">RITASE</th>
 					<th rowspan="2" width="10%" style="text-align: center;">CREATED</th>
 					<th rowspan="2" width="7%" style="text-align: center;">STATUS</th>
@@ -76,8 +77,9 @@ if ($_GET['type'] == "Read")
 			where $f1 LIKE '%$cari1%' and $f2 LIKE '%$cari2%' 
 			order by m_kota_tr.nama_kota asc, m_kota_tr1.nama_kota, m_rate_tr.jenis_mobil LIMIT $offset, $jmlperhalaman";	
 	$query = mysqli_query($koneksi, $SQL);	
+	// die($SQL);
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -91,7 +93,8 @@ if ($_GET['type'] == "Read")
 				<td style="text-align:center">'.$posisi.'.</td>	
 				<td style="text-align:center">'.$row['asal'].'</td>
 				<td style="text-align:center">'.$row['tujuan'].'</td>
-				<td style="text-align:center">'.$row['jenis_mobil'].'</td>				
+				<td style="text-align:center">'.$row['jenis_mobil'].'</td>
+				<td style="text-align:center">'.($row['km'] ?? '-').'</td>
 				<td style="text-align:right">'.$rate.'</td>
 				<td style="text-align:right">'.$uj.'</td>
 				<td style="text-align:right">'.$ritase.'</td>
@@ -180,13 +183,16 @@ if ($_GET['type'] == "Read")
 				
     echo $data;
 
-}else if ($_POST['type'] == "Add_Data"){		
+}
+// --------------------- ADD DATA  ---------------------
+else if ($_POST['type'] == "Add_Data"){		
 	if($_POST['mode'] != '' )
 	{	
 		$id = $_POST['id'];
 		$id_asal = $_POST['id_asal'];
 		$id_tujuan = $_POST['id_tujuan'];
 		$jenis_mobil = $_POST['jenis_mobil'];
+		$km = $_POST['km'];
 		$rate = $_POST['rate'];
 		$uj = $_POST['uj'];
 		$ritase = $_POST['ritase'];
@@ -199,8 +205,7 @@ if ($_GET['type'] == "Read")
 		
 		if($mode == 'Add')
 		{			
-			$sql = "INSERT INTO m_rate_tr (id_asal, id_tujuan, jenis_mobil, rate, uj,ritase,  status, created) values
-					('$id_asal','$id_tujuan','$jenis_mobil', '$rate', '$uj', '$ritase', '1', '$id_user')";
+			$sql = "INSERT INTO m_rate_tr (id_asal, id_tujuan, jenis_mobil, km, rate, uj,ritase,  status, created) values ('$id_asal','$id_tujuan','$jenis_mobil', '$km', '$rate', '$uj', '$ritase', '1', '$id_user')";
 			$hasil=mysqli_query($koneksi, $sql);
 		}
 		else
@@ -209,6 +214,7 @@ if ($_GET['type'] == "Read")
 					id_asal = '$id_asal',
 					id_tujuan = '$id_tujuan',
 					jenis_mobil = '$jenis_mobil',
+					km = '$km',
 					rate = '$rate',
 					uj = '$uj',
 					ritase = '$ritase',
@@ -217,9 +223,7 @@ if ($_GET['type'] == "Read")
 					where id_rate = '$id'	";
 			$hasil=mysqli_query($koneksi, $sql);
 		}
-		if (!$hasil) {
-	        			
-			//exit(mysqli_error());
+		if (!$hasil) {	
 			echo "Price has found...!";
 	    }
 		else
@@ -232,7 +236,7 @@ if ($_GET['type'] == "Read")
 	$id = $_POST['id'];	
     $query = "select * from m_rate_tr where id_rate  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -266,7 +270,7 @@ if ($_GET['type'] == "Read")
 	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -357,7 +361,7 @@ if ($_GET['type'] == "Read")
 			order by m_kota_tr.nama_kota asc, m_kota_tr1.nama_kota LIMIT $offset, $jmlperhalaman";	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -491,7 +495,7 @@ if ($_GET['type'] == "Read")
 		}
 		if (!$hasil) {
 	        			
-			//exit(mysqli_error());
+			//exit(mysqli_error($koneksi));
 			echo "Rate has found...!";
 	    }
 		else
@@ -504,7 +508,7 @@ if ($_GET['type'] == "Read")
 	$id = $_POST['id'];	
     $query = "select * from m_rate_tr_lcl where id_rate  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {

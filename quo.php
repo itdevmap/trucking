@@ -64,9 +64,17 @@ else
 	<link rel="stylesheet" href="css/plugins/select2/select2.min.css">
 	<script src="css/plugins/jQuery/jQuery-2.1.4.min.js" type="text/javascript"></script>
 	
+	<!-- ---------------------- LEAFLET ---------------------- -->
+	<!-- <link rel="stylesheet" href="leaflet/leaftet.css">
+	<script src="leaflet/leaflet.js" type="text/javascript"></script> -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
 	<style>
 		.datepicker{z-index:1151 !important;}
 	</style>
+	
 	<script>
 		$(document).ready(function () {
 			var date_input=$('input[name="tgl1"]'); 
@@ -93,6 +101,7 @@ else
 			var hal = $("#hal").val();
 			ReadData(hal);
 		});
+		
 		function changeDateFormat(inputDate){
 			var splitDate = inputDate.split('-');
 			if(splitDate.count == 0){
@@ -103,6 +112,7 @@ else
 			var day = splitDate[1]; 
 			return month + '-' + day + '-' + year;
 		}
+		
 		function Desimal(num) {
 			num = num.toString().replace(/\$|\,/g,'');
 			if(isNaN(num))
@@ -120,6 +130,7 @@ else
 			//return (((sign)?'':'-') + '' + num);
 			
 		}
+
 		function Rupiah(num) {
 			num = num.toString().replace(/\$|\,/g,'');
 			if(isNaN(num))
@@ -137,6 +148,7 @@ else
 			return (((sign)?'':'-') + '' + num);
 			
 		}
+
 		function isNumber(evt) {
 			evt = (evt) ? evt : window.event;
 			var charCode = (evt.which) ? evt.which : evt.keyCode;
@@ -145,6 +157,7 @@ else
 			}
 			return true;
 		}
+
 		function ReadData(hal) 
 		{
 			var tgl1 = $("#tgl1").val();
@@ -169,7 +182,8 @@ else
 				$(".tampil_data").html(data);
 				$("#hal").val(hal);
 			});
-		}		
+		}	
+
 		function DelQuo(id) {
 			var conf = confirm("Are you sure to Delete ?");
 			if (conf == true) {
@@ -182,6 +196,7 @@ else
 				);
 			}
 		}
+
 		function DelData(id) {
 			var conf = confirm("Are you sure to Delete ?");
 			if (conf == true) {
@@ -194,6 +209,7 @@ else
 				);
 			}
 		}
+
 		function Confirm(id) {
 			var hal = $("#hal").val();
 			var conf = confirm("Are you sure to Executed ?");
@@ -207,6 +223,7 @@ else
 				);
 			}
 		}
+
 		function CekRate()
 		{
 			var id_asal = $("#id_asal").val();
@@ -222,10 +239,11 @@ else
 					
 					$("#uj").val(Rupiah(data.uj));
 					$("#ritase").val(Rupiah(data.ritase));
-					
+					$("#km").val(Rupiah(data.km));
 				}
 			);
 		}
+
 		function GetOrder(id) 
 		{
 			var jenis_role = $("#jenis_role").val();
@@ -278,21 +296,18 @@ else
 			$("#mode").val('Add');
 			$('#Data').modal('show');
 		}
+
 		function AddOrder() {	
 			var tanggal = $("#tanggal").val();
 			var no_do = $("#no_do").val();
-			if(tanggal == '' )
-			{
+
+			if (tanggal === '') {
 				alert("Tanggal harus diisi !..");
-			}
-			else if(no_do == '')
-			{
+			} else if (no_do === '') {
 				alert("No. DO/PO harus diisi !..");
-			}
-			else
-			{
+			} else {
 				var r = confirm("Are you sure ?...");
-				if (r == true) {
+				if (r === true) {
 					var id_detil = $("#id_detil").val();	
 					var id_cust = $("#id_cust").val();					
 					var tanggal = $("#tanggal").val();
@@ -312,28 +327,29 @@ else
 					var uj = $("#uj").val();
 					var ritase = $("#ritase").val();
 					var ket = $("#ket").val();
+
 					$.post("ajax/quo_crud.php", {
-						id_detil:id_detil,
-						id_cust:id_cust,
-						tanggal:tanggal,
-						no_do:no_do,
-						penerima:penerima,
-						barang:barang,
-						berat:berat,
-						vol:vol,
-						no_cont:no_cont,						
-						no_seal:no_seal,						
-						id_asal:id_asal,
-						id_tujuan:id_tujuan,
-						jenis_mobil:jenis_mobil,						
-						id_mobil:id_mobil,						
-						id_supir:id_supir,
-						biaya:biaya,
-						uj:uj,
-						ritase:ritase,
-						ket:ket,
-						type : "AddOrder"
-						}, function (data, status) {
+						id_detil: id_detil,
+						id_cust: id_cust,
+						tanggal: tanggal,
+						no_do: no_do,
+						penerima: penerima,
+						barang: barang,
+						berat: berat,
+						vol: vol,
+						no_cont: no_cont,						
+						no_seal: no_seal,						
+						id_asal: id_asal,
+						id_tujuan: id_tujuan,
+						jenis_mobil: jenis_mobil,						
+						id_mobil: id_mobil,						
+						id_supir: id_supir,
+						biaya: biaya,
+						uj: uj,
+						ritase: ritase,
+						ket: ket,
+						type: "AddOrder"
+					}, function (data, status) {
 						alert(data);
 						$("#Data").modal("hide");				
 						ReadData(1);
@@ -341,7 +357,7 @@ else
 				}
 			}	
 		}
-		
+
 		function Download() 
 		{
 			var tgl1 = $("#tgl1").val();
@@ -354,7 +370,7 @@ else
 			var id = tgl1+'|'+tgl2+'|'+stat+'|'+field+'|'+cari+'|'+field1+'|'+cari1;
 			var idx = btoa(id);
 			var win = window.open('fcl_excel.php?id='+idx);
-		}	
+		}
 	</script>	
 	
   </head>
@@ -384,7 +400,7 @@ else
 					</div>
 					<br>
 					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
 						<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
 						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
 						&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
@@ -405,9 +421,9 @@ else
 						<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">
 							<option>Quo No</option>
 							<option>Customer</option>
-							<option>Asal</option>
-							<option>Tujuan</option>
-							<option>Jenis</option>
+							<option>Origin</option>
+							<option>Destination</option>
+							<option>Type</option>
 							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
@@ -418,9 +434,9 @@ else
 						<select size="1" id="field1"  onchange="ReadData(1)" name="field1" style="padding:4px;margin-right:2px;width: 85px">
 							<option>Quo No</option>
 							<option>Customer</option>
-							<option>Asal</option>
-							<option>Tujuan</option>
-							<option>Jenis</option>
+							<option>Origin</option>
+							<option>Destination</option>
+							<option>Type</option>
 							<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
 						</select>
 						<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
@@ -495,6 +511,7 @@ else
 		</form>
 	</div>	
 
+	<!-- --------------------------- MODAL ADD ORDER --------------------------- -->
 	<div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">	
@@ -513,7 +530,7 @@ else
 								<input type="hidden" id="id_detil"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
 							</div>						
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tanggal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
 								<input type="text"  id ="tanggal" style="text-align: center;width:22%" readonly  >
 							</div>
 							<div style="width:100%;" class="input-group">
@@ -521,18 +538,18 @@ else
 								<input type="text" id="no_do" value="" style="text-transform: uppercase;text-align: left;width:80%;"   >	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Penerima :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Receiver :</b></span>
 								<textarea id="penerima"
 								style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; 
-								border: 1px solid #4; padding: 5px;"  ></textarea>	
+								border: 1px solid #444; padding: 5px;"  ></textarea>	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Barang :</b></span>								
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Itemname :</b></span>								
 								<input type="text" id="barang" value="" style="text-transform: uppercase;text-align: left;width:80%;"   >	
 							</div>
 							
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Berat :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Weight :</b></span>
 								<input type="text" id="berat" value="0" style="text-align: right;width:22%;" 
 								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  > &nbsp;<b>KG</b>	
 							</div>
@@ -549,22 +566,39 @@ else
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Seal :</b></span>
 								<input type="text"  id ="no_seal" style="text-transform: uppercase;text-align: center;width:22%"  >														
 							</div>
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Asal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
 								<input type="hidden" id="id_asal"   value=""  />
 								<input type="text" id="nama_asal" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
 							</div>
+
+							<!-- -------------- ORIGIN CHECK LOCATION -------------- -->
+							<!-- <div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b></b></span>
+								<textarea id="origin_address" class="form-textarea" rows="3" style="width:80%" placeholder="Input Origin Address"></textarea>
+
+								<div id="origin_map" style="height: 200px; width: 80%;display: none;"></div>
+								<input type="text" id="origin_lat" readonly placeholder="Latitude" />
+								<input type="text" id="origin_lon" readonly placeholder="Longitude" />
+								<br>
+								<button type="button" class="btn btn-success" onclick="origin_address()" style="margin-top: 5px;">
+									<b>Check Origin</b>
+								</button>
+							</div> -->
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tujuan :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
 								<input type="hidden" id="id_tujuan"   value=""  />
 								<input type="text" id="nama_tujuan" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
 							</div>
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Jenis :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
 								<input type="text" id="jenis_mobil" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
 							</div>							
 							<div style="width:100%;" class="input-group">
-									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Polisi :</b></span>
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Police Num :</b></span>
 									<select id="id_mobil"  style="width: 80%;padding:4px">
 										<?php
 										$t1="select * from m_mobil_tr where status = '1' order by no_polisi  ";
@@ -576,7 +610,7 @@ else
 							</div>
 						
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Supir :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Driver :</b></span>
 								<select id="id_supir"  style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_supir_tr where status = '1' order by nama_supir  ";
@@ -587,21 +621,21 @@ else
 								</select>
 							</div>
 							<div  id="tampil_uj" style="display:none;">
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Biaya Kirim :</b></span>								
-								<input type="text" id="biaya" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Uang Jalan :</b></span>								
-								<input type="text" id="uj" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ritase :</b></span>								
-								<input type="text" id="ritase" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  readonly>	
-							</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Deliv. Cost :</b></span>								
+									<input type="text" id="biaya" value="0" style="text-align: right;width:22%;" 
+									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Road Fee :</b></span>								
+									<input type="text" id="uj" value="0" style="text-align: right;width:22%;" 
+									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ritase :</b></span>								
+									<input type="text" id="ritase" value="0" style="text-align: right;width:22%;" onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>	
+								</div>
+								<input type="hidden" id="km" value="0" style="text-align: right;width:22%;" onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>	
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Remarks :</b></span>

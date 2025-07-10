@@ -23,7 +23,7 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="60%" style="text-align: center;">NAMA BIAYA</th>
+					<th rowspan="2" width="60%" style="text-align: center;">COST NAME</th>
 					<th rowspan="2" width="5%" style="text-align: center;">SAP CODE SIM</th>
 					<th rowspan="2" width="5%" style="text-align: center;">SAP CODE AMA</th>
 					<th rowspan="2" width="5%" style="text-align: center;">SAP CODE PTL</th>
@@ -45,7 +45,7 @@ if ($_GET['type'] == "Read")
 	$SQL = "select * from m_cost_tr where nama_cost LIKE '%$cari%' order by nama_cost  LIMIT $offset, $jmlperhalaman";	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -174,7 +174,7 @@ if ($_GET['type'] == "Read")
 		}
 		if (!$hasil) {
 	        			
-			//exit(mysqli_error());
+			//exit(mysqli_error($koneksi));
 			echo "Cost Name has found...!";
 	    }
 		else
@@ -187,7 +187,7 @@ if ($_GET['type'] == "Read")
 	$id = $_POST['id'];	
     $query = "select * from m_cost_tr where id_cost  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -221,7 +221,7 @@ if ($_GET['type'] == "Read")
 	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {

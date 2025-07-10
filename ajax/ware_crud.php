@@ -67,12 +67,13 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
+					<th rowspan="2" width="3%" style="text-align: center;">PROJECT CODE</th>
 					<th rowspan="2" width="7%" style="text-align: center;">DATE</th>
 					<th rowspan="2" width="8%" style="text-align: center;">QUO NO</th>
 					<th rowspan="2" width="34%" style="text-align: center;">CUSTOMER</th>
-					<th rowspan="2" width="9%" style="text-align: center;">NO KONTRAK</th>
+					<th rowspan="2" width="9%" style="text-align: center;">NO CONTRACT</th>
 					<th rowspan="2" width="3%" style="text-align: center;">AGING</th>
-					<th rowspan="2" width="5%" style="text-align: center;">HARGA<br>SEWA</th>
+					<th rowspan="2" width="5%" style="text-align: center;">COST<br>RENTAL</th>
 					<th rowspan="2" width="5%" style="text-align: center;">HANDLING</th>
 					<th rowspan="2" width="5%" style="text-align: center;">MAX CBM</th>
 					<th rowspan="2" width="9%" style="text-align: center;">SALES</th>
@@ -112,7 +113,7 @@ if ($_GET['type'] == "Read")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -139,6 +140,7 @@ if ($_GET['type'] == "Read")
 			$link = "ware_data.php?id=$xy1";
 			$data .= '<tr>							
 				<td style="text-align:center">'.$posisi.'.</td>	
+				<td style="text-align:center">' . (!empty($row['project_code']) ? $row['project_code'] : '-') . '</td>
 				<td style="text-align:center">'.$tanggal.'</td>	
 				<td style="text-align:center"><a href="'.$link.'" title="">'.$row['quo_no'].'</a></td>	
 				<td style="text-align:left">'.$row['nama_cust'].'</td>
@@ -311,13 +313,13 @@ else if ($_GET['type'] == "Read_Barang")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="11%" style="text-align: center;">KODE BARANG</th>
-					<th rowspan="2" width="30%" style="text-align: center;">NAMA BARANG</th>
+					<th rowspan="2" width="11%" style="text-align: center;">ITEM CODE</th>
+					<th rowspan="2" width="30%" style="text-align: center;">ITEM NAME</th>
 					<th rowspan="2" width="4%" style="text-align: center;">UoM</th>
-					<th rowspan="2" width="4%" style="text-align: center;">BERAT</th>
-					<th rowspan="2" width="4%" style="text-align: center;">PANJANG</th>
-					<th rowspan="2" width="4%" style="text-align: center;">LEBAR</th>
-					<th rowspan="2" width="4%" style="text-align: center;">TINGGI</th>
+					<th rowspan="2" width="4%" style="text-align: center;">WEIGHT</th>
+					<th rowspan="2" width="4%" style="text-align: center;">LENGTH</th>
+					<th rowspan="2" width="4%" style="text-align: center;">WIDE</th>
+					<th rowspan="2" width="4%" style="text-align: center;">HEIGHT</th>
 					<th rowspan="2" width="4%" style="text-align: center;">VOL</th>
 					<th rowspan="2" width="7%" style="text-align: center;">QUO NO</th>
 					<th rowspan="2" width="14%" style="text-align: center;">CUSTOMER</th>
@@ -352,7 +354,7 @@ else if ($_GET['type'] == "Read_Barang")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -479,7 +481,7 @@ else if ($_GET['type'] == "Read_Barang")
     $query = "DELETE FROM t_ware_quo WHERE id_quo = '$id' ";
 	
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }	
 
 }else if ($_POST['type'] == "Executed"){		
@@ -492,17 +494,14 @@ else if ($_GET['type'] == "Read_Barang")
 			$hasil=mysqli_query($koneksi, $sql);
 		if (!$hasil) {
 	        			
-			exit(mysql_error());
+			exit(mysqli_error($koneksi));
 			echo "Data error...!";
 	    }
 		else
 		{	
-	
 			echo "Data Executed!";
 		}
 	}	
-	
-
 }else if($_GET['type'] == "Read_Data_Quo")
 {
 	$id_quo = $_GET['id_quo'];
@@ -516,10 +515,10 @@ else if ($_GET['type'] == "Read_Barang")
 					<th rowspan="2" width="12%" style="text-align: center;">ITEM NO</th>
 					<th rowspan="2" width="51%" style="text-align: center;">ITEM DESCRIPTION</th>
 					<th rowspan="2" width="5%" style="text-align: center;">UOM</th>
-					<th rowspan="2" width="5%" style="text-align: center;">BERAT</th>
-					<th rowspan="2" width="5%" style="text-align: center;">PANJANG</th>
-					<th rowspan="2" width="5%" style="text-align: center;">LEBAR</th>
-					<th rowspan="2" width="5%" style="text-align: center;">TINGGI</th>
+					<th rowspan="2" width="5%" style="text-align: center;">WEIGHT</th>
+					<th rowspan="2" width="5%" style="text-align: center;">LENGTH</th>
+					<th rowspan="2" width="5%" style="text-align: center;">WIDE</th>
+					<th rowspan="2" width="5%" style="text-align: center;">HEIGHT</th>
 					<th rowspan="2" width="5%" style="text-align: center;">VOL</th>
 					<th colspan="2" width="4%" style="text-align: center;">ACTION</th>						
 				</tr>
@@ -531,7 +530,7 @@ else if ($_GET['type'] == "Read_Barang")
 	$SQL = "select * from t_ware  where id_quo = '$id_quo' order by  id_ware";
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -541,7 +540,7 @@ else if ($_GET['type'] == "Read_Barang")
     	{	
 			$posisi++;	
 			$berat = number_format($row['berat'],2);
-			$vol = number_format($row['vol'],2);
+			$vol = number_format($row['vol'],5);
 			$panjang = number_format($row['panjang'],2);
 			$lebar = number_format($row['lebar'],2);	
 			$tinggi = number_format($row['tinggi'],2);
@@ -609,8 +608,8 @@ else if ($_GET['type'] == "Read_Barang")
 			<thead style="font-weight:500px !important">
 				<tr>	
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>	
-					<th rowspan="2" width="85%" style="text-align: center;">NAMA BIAYA</th>
-					<th rowspan="2" width="8%" style="text-align: center;">HARGA</th>
+					<th rowspan="2" width="85%" style="text-align: center;">COST NAME</th>
+					<th rowspan="2" width="8%" style="text-align: center;">COST</th>
 					<th colspan="2" width="4%" style="text-align: center;">ACTION</th>						
 				</tr>
 				<tr>
@@ -624,7 +623,7 @@ else if ($_GET['type'] == "Read_Barang")
 			where t_ware_quo_biaya.id_quo = '$id_quo' order by  t_ware_quo_biaya.id_detil";
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -696,18 +695,16 @@ else if ($_GET['type'] == "Read_Barang")
 		$berat = $_POST['berat'];
 		$mode = $_POST['mode'];
 		
-		
 		$vol = str_replace(",","", $vol);
+		// die($vol );
 		$berat = str_replace(",","", $berat);
 		
 		if($mode == 'Add')
 		{			
-			$sql = "INSERT INTO t_ware (kode, id_quo, nama, unit, panjang, lebar, tinggi, berat, vol) values
-					('$kode', '$id_quo', '$nama', '$unit', '$panjang', '$lebar', '$tinggi', '$berat', '$vol')";
-			$hasil=mysqli_query($koneksi, $sql);
-		}
-		else
-		{
+			$sql = "INSERT INTO t_ware (kode, id_quo, nama, unit, panjang, lebar, tinggi, berat, vol) values ('$kode', '$id_quo', '$nama', '$unit', '$panjang', '$lebar', '$tinggi', '$berat', '$vol')";
+
+			// $hasil=mysqli_query($koneksi, $sql);
+		} else {
 			$sql = "update t_ware set 
 					kode = '$kode',
 					nama = '$nama',
@@ -718,17 +715,18 @@ else if ($_GET['type'] == "Read_Barang")
 					berat = '$berat',
 					vol = '$vol'
 					where 	id_ware = '$id'	";
-			$hasil=mysqli_query($koneksi, $sql);
+			// $hasil=mysqli_query($koneksi, $sql);
 		}
+
+		$hasil = mysqli_query($koneksi, $sql);
+
 		if (!$hasil) {
-	        			
-			//exit(mysqli_error());
-			echo "Data Error...!";
-	    }
-		else
-		{	
+			echo "Data Error: " . mysqli_error($koneksi) . "<br>";
+			echo "Query: " . $sql;
+		} else {
 			echo "Data saved!";
 		}
+		die();
 	}		
 
 }else if ($_POST['type'] == "Detil_Data_Quo"){
@@ -739,7 +737,7 @@ else if ($_GET['type'] == "Read_Barang")
 		   left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
 		   where t_ware.id_ware = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -760,7 +758,7 @@ else if ($_GET['type'] == "Read_Barang")
 		from t_ware_quo_biaya left join m_cost_tr on t_ware_quo_biaya.id_biaya = m_cost_tr.id_cost
 		   where t_ware_quo_biaya.id_detil = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -779,7 +777,7 @@ else if ($_GET['type'] == "Read_Barang")
 	$id = $_POST['id'];	
     $query = "select * from t_ware where id_ware = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -799,7 +797,7 @@ else if ($_GET['type'] == "Read_Barang")
 	
     $query = "DELETE FROM t_ware WHERE id_ware = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 	
 }else if ($_POST['type'] == "Del_Data_Quo_Jasa"){
@@ -807,7 +805,7 @@ else if ($_GET['type'] == "Read_Barang")
 	
     $query = "DELETE FROM t_ware_quo_biaya WHERE id_detil = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }	
 	
 }else if ($_POST['type'] == "Add_Data_Quo_Biaya"){		
@@ -905,25 +903,24 @@ else if ($_GET['type'] == "Read_In")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="7%" style="text-align: center;">TANGGAL</th>					
+					<th rowspan="2" width="7%" style="text-align: center;">DATE</th>					
 					<th rowspan="2" width="6%" style="text-align: center;">#NO DOC</th>
 					<th rowspan="2" width="8%" style="text-align: center;">CONTAINER</th>					
 					<th rowspan="2" width="13%" style="text-align: center;">ITEM NUMBER</th>
 					<th rowspan="2" width="25%" style="text-align: center;">DESCRIPTION</th>
 					<th rowspan="2" width="11%" style="text-align: center;">CUSTOMER</th>
-					<th rowspan="2" width="7%" style="text-align: center;">LOKASI</th>
+					<th rowspan="2" width="7%" style="text-align: center;">LOCATION</th>
 					<th rowspan="2" width="5%" style="text-align: center;">STATUS</th>
 					<th colspan="3" width="9%" style="text-align: center;">STOCK</th>
 					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>
 					<th rowspan="2" width="2%" style="text-align: center;">DEL</th>
 					<th rowspan="2" width="2%" style="text-align: center;">EXEC</th>
 					<th rowspan="2" width="2%" style="text-align: center;">PRINT</th>
-					</tr>
+				</tr>
 				<tr>
-					<th   width="3%" style="text-align: center;">IN</th>
-					<th   width="3%" style="text-align: center;">OUT</th>
-					<th   width="3%" style="text-align: center;">WHSE</th>
-					
+					<th width="3%" style="text-align: center;">IN</th>
+					<th width="3%" style="text-align: center;">OUT</th>
+					<th width="3%" style="text-align: center;">WHSE</th>
 				</tr>	
 				
 			</thead>';			
@@ -968,7 +965,7 @@ else if ($_GET['type'] == "Read_In")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -1209,7 +1206,7 @@ else if($_GET['type'] == "Read_In_Data")
 					<th rowspan="2" width="55%" style="text-align: center;">ITEM DESCRIPTION</th>
 					<th rowspan="2" width="5%" style="text-align: center;">QTY</th>
 					<th rowspan="2" width="5%" style="text-align: center;">UoM</th>
-					<th rowspan="2" width="8%" style="text-align: center;">LOKASI</th>
+					<th rowspan="2" width="8%" style="text-align: center;">LOCATION</th>
 					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>
 					<th rowspan="2" width="2%" style="text-align: center;">DEL</th>						
 				</tr>
@@ -1222,7 +1219,7 @@ else if($_GET['type'] == "Read_In_Data")
 			where t_ware_data_detil.id_data = '$id_data'  order by  t_ware_data_detil.id_detil";
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -1318,7 +1315,7 @@ else if($_GET['type'] == "Read_In_Data")
 		
 	$query = "update t_ware_data_detil set masuk = '$qty_masuk' where id_detil = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }else{
 		echo "Data saved!";
 	}		
@@ -1331,7 +1328,7 @@ else if ($_POST['type'] == "Detil_Data_In")
 				from  t_ware_data_detil left join t_ware on t_ware_data_detil.id_ware = t_ware.id_ware 
 				where t_ware_data_detil.id_detil  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -1352,7 +1349,7 @@ else if ($_POST['type'] == "Del_Data_In")
 	$id = $_POST['id']; 	
     $query = "DELETE FROM t_ware_data WHERE id_data = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }	
 }
 else if ($_POST['type'] == "Del_Detil_In")
@@ -1361,7 +1358,7 @@ else if ($_POST['type'] == "Del_Detil_In")
 
     $query = "DELETE FROM t_ware_data_detil WHERE id_detil = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }		
 	
 }
@@ -1380,7 +1377,7 @@ else if ($_POST['type'] == "Executed_In")
 	
 	$query = "update t_ware_data set status = '1' where id_data = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }	
 	
 }
@@ -1390,7 +1387,7 @@ else if ($_POST['type'] == "UpdateLokasi")
 	$id_lokasi = $_POST['id_lokasi']; 
 	$query = "update t_ware_data_detil set id_lokasi = '$id_lokasi' where id_detil = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }else{
 		echo "Data saved!";
 	}
@@ -1405,7 +1402,7 @@ else if ($_POST['type'] == "Detil_Data_Barang")
 		   left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
 		   where t_ware.id_ware = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -1454,11 +1451,13 @@ else if ($_GET['type'] == "List_Barang")
 		   left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
 		   where $f LIKE '%$cari%' and t_ware_quo.status = '1' and t_ware_quo.id_cust = '$id_cust'  and $f LIKE '%$cari%'
 		   order by t_ware_quo.quo_no, t_ware.nama LIMIT 0,25";
-			
-	$query = mysqli_query($koneksi, $SQL);	
+	// die($SQL);
+	$query = mysqli_query($koneksi, $SQL);
+
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
+
     if(mysqli_num_rows($result) > 0)
     {
     	while($row = mysqli_fetch_assoc($result))
@@ -1548,13 +1547,13 @@ else if ($_GET['type'] == "Read_Out")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="7%" style="text-align: center;">TANGGAL</th>
+					<th rowspan="2" width="7%" style="text-align: center;">DATE</th>
 					<th rowspan="2" width="8%" style="text-align: center;">NO. SJ<br>NO. REF</th>
 					<th rowspan="2" width="26%" style="text-align: center;">CUSTOMER</th>
-					<th rowspan="2" width="10%" style="text-align: center;">GUDANG</th>
+					<th rowspan="2" width="10%" style="text-align: center;">WAREHOUSE</th>
 					<th rowspan="2" width="10%" style="text-align: center;">SUPIR</th>
 					<th rowspan="2" width="8%" style="text-align: center;">NO. POLISI</th>
-					<th rowspan="2" width="6%" style="text-align: center;">TAGIHAN</th>
+					<th rowspan="2" width="6%" style="text-align: center;">BILL</th>
 					<th rowspan="2" width="7%" style="text-align: center;">CREATED</th>	
 					<th rowspan="2" width="5%" style="text-align: center;">STATUS</th>					
 					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>					
@@ -1596,7 +1595,7 @@ else if ($_GET['type'] == "Read_Out")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -1811,7 +1810,7 @@ else if ($_GET['type'] == "ListPart_In")
 			<thead style="font-weight:500px !important">
 				<tr>
 					<th width="4%" rowspan="2" style="text-align: center;">NO</th>
-					<th width="10%" rowspan="2" style="text-align: center;">TANGGAL</th>
+					<th width="10%" rowspan="2" style="text-align: center;">DATE</th>
 					<th width="10%" rowspan="2" style="text-align: center;">NO. DOC</th>
 					<th width="10%" rowspan="2" style="text-align: center;">ITEM NUMBER</th>
 					<th width="37%" rowspan="2" style="text-align: center;">ITEM DESCRIPTION</th>
@@ -1838,7 +1837,7 @@ else if ($_GET['type'] == "ListPart_In")
 				
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-		exit(mysqli_error());
+		exit(mysqli_error($koneksi));
 	}
 	if(mysqli_num_rows($result) > 0)
 	{
@@ -1889,7 +1888,7 @@ else if ($_GET['type'] == "ListPart_In")
 	
 	$query = "update t_ware_data set status = '1' where id_data = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 	
 }
@@ -1906,7 +1905,7 @@ else if ($_POST['type'] == "Del_Out")
 	$del = mysqli_query($koneksi, "DELETE FROM t_ware_data_detil WHERE id_data = '$id'");		
     $query = "DELETE FROM t_ware_data WHERE id_data = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 	
 }
@@ -1922,12 +1921,12 @@ else if($_GET['type'] == "Read_Out_Data")
 					<th rowspan="2" width="11%" style="text-align: center;">BATCH</th>
 					<th rowspan="2" width="11%" style="text-align: center;">ITEM NUMBER</th>
 					<th rowspan="2" width="27%" style="text-align: center;">ITEM DESCRIPTION</th>									
-					<th rowspan="2" width="5%" style="text-align: center;">AGING<br>SEWA</th>
-					<th rowspan="2" width="5%" style="text-align: center;">LAMA<br>INAP</th>
+					<th rowspan="2" width="5%" style="text-align: center;">AGING<br>RENTAL</th>
+					<th rowspan="2" width="5%" style="text-align: center;">LENGTH<br>STAY</th>
 					<th rowspan="2" width="5%" style="text-align: center;">QTY</th>	
 					<th rowspan="2" width="5%" style="text-align: center;">CBM</th>					
-					<th rowspan="2" width="5%" style="text-align: center;">BIAYA<br>HANDLING</th>
-					<th rowspan="2" width="7%" style="text-align: center;">JUMLAH</th>
+					<th rowspan="2" width="5%" style="text-align: center;">HANDLING<br>COST</th>
+					<th rowspan="2" width="7%" style="text-align: center;">TOTAL</th>
 					<th rowspan="2" width="12%" style="text-align: center;">REMARK</th>
 					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>
 					<th rowspan="2" width="2%" style="text-align: center;">DEL</th>						
@@ -1949,7 +1948,7 @@ else if($_GET['type'] == "Read_Out_Data")
 			where t_ware_data_detil.id_data = '$id_data'  order by  t_ware_data_detil.id_detil";
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -2114,7 +2113,7 @@ else if ($_POST['type'] == "Detil_Data_Out")
 			left join t_ware_data as t_ware_data1 on t_ware_data_detil.id_data = t_ware_data1.id_data
 			where t_ware_data_detil.id_detil  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -2144,7 +2143,7 @@ else if ($_POST['type'] == "Del_Data_Out")
 	
     $query = "DELETE FROM t_ware_data_detil WHERE id_detil = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 	
 	
@@ -2158,8 +2157,8 @@ else if ($_POST['type'] == "Del_Data_Out")
 			<thead style="font-weight:500px !important">
 				<tr>	
 					<th rowspan="2" width="5%" style="text-align: center;">NO</th>	
-					<th rowspan="2" width="78%" style="text-align: center;">NAMA BIAYA</th>
-					<th rowspan="2" width="12%" style="text-align: center;">HARGA</th>
+					<th rowspan="2" width="78%" style="text-align: center;">COST NAME</th>
+					<th rowspan="2" width="12%" style="text-align: center;">COST</th>
 					<th rowspan="2" width="5%" style="text-align: center;">ADD</th>						
 				</tr>
 			</thead>';	
@@ -2169,7 +2168,7 @@ else if ($_POST['type'] == "Del_Data_Out")
 			where t_ware_quo_biaya.id_quo = '$id_quo' order by  t_ware_quo_biaya.id_detil";
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -2232,7 +2231,7 @@ else if($_GET['type'] == "ListBarang_Quo")
 	$SQL = "select * from t_ware where id_quo = '$id_quo' and $f LIKE '%$cari%' order by  nama";
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -2277,11 +2276,11 @@ else if($_GET['type'] == "Read_Jasa_Biaya")
 			<thead style="font-weight:500px !important">
 				<tr>	
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="43%" style="text-align: center;">NAMA JASA</th>
+					<th rowspan="2" width="43%" style="text-align: center;">SERVICE NAME</th>
 					<th rowspan="2" width="30%" style="text-align: center;">REMARK</th>
 					<th rowspan="2" width="5%" style="text-align: center;">QTY</th>									
-					<th rowspan="2" width="7%" style="text-align: center;">HARGA</th>
-					<th rowspan="2" width="8%" style="text-align: center;">JUMLAH</th>
+					<th rowspan="2" width="7%" style="text-align: center;">COST</th>
+					<th rowspan="2" width="8%" style="text-align: center;">TOTAL</th>
 					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>
 					<th rowspan="2" width="2%" style="text-align: center;">DEL</th>						
 				</tr>
@@ -2296,7 +2295,7 @@ else if($_GET['type'] == "Read_Jasa_Biaya")
 			where t_ware_jasa_biaya.id_data = '$id_data'  order by  t_ware_jasa_biaya.id_detil";
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -2422,7 +2421,7 @@ else if ($_POST['type'] == "Detil_Data_Jasa")
 			left join m_cost_tr on t_ware_quo_biaya.id_biaya = m_cost_tr.id_cost
 			where t_ware_jasa_biaya.id_detil  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -2444,7 +2443,7 @@ else if ($_POST['type'] == "Del_Data_Jasa")
 	
     $query = "DELETE FROM  t_ware_jasa_biaya WHERE id_detil = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 	
 
@@ -2475,7 +2474,7 @@ else if($_GET['type'] == "Read_Jasa_Barang")
 			where  t_ware_jasa_barang.id_data = '$id_data'  order by   t_ware_jasa_barang.id_detil";
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -2579,7 +2578,7 @@ else if ($_POST['type'] == "Detil_Jasa_Barang")
 			  t_ware_jasa_barang inner join t_ware on  t_ware_jasa_barang.id_ware = t_ware.id_ware
 			where t_ware_jasa_barang.id_detil  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -2645,11 +2644,11 @@ else if ($_GET['type'] == "Read_Sewa")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="7%" style="text-align: center;">TANGGAL</th>
+					<th rowspan="2" width="7%" style="text-align: center;">DATE</th>
 					<th rowspan="2" width="8%" style="text-align: center;">NO. SO</th>
 					<th rowspan="2" width="40%" style="text-align: center;">CUSTOMER</th>
-					<th rowspan="2" width="14%" style="text-align: center;">JENIS SEWA</th>
-					<th rowspan="2" width="7%" style="text-align: center;">TAGIHAN</th>
+					<th rowspan="2" width="14%" style="text-align: center;">RENTAL TYPE</th>
+					<th rowspan="2" width="7%" style="text-align: center;">BILL</th>
 					<th rowspan="2" width="7%" style="text-align: center;">CREATED</th>	
 					<th rowspan="2" width="6%" style="text-align: center;">STATUS</th>					
 					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>					
@@ -2691,7 +2690,7 @@ else if ($_GET['type'] == "Read_Sewa")
 		
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -2854,7 +2853,7 @@ else if ($_GET['type'] == "Read_Sewa")
 	
     $query = "DELETE FROM t_ware_sewa WHERE id_sewa = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 	
 }
@@ -2903,7 +2902,7 @@ else if($_GET['type'] == "Read_Sewa_Data")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -3005,7 +3004,7 @@ else if($_GET['type'] == "Read_Sewa_Data")
 	
 	$query = "update t_ware_sewa set status = '1' where id_sewa = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
 	
 }

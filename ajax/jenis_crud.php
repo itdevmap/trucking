@@ -23,7 +23,7 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="80%" style="text-align: center;">JENIS MOBIL/FEET</th>
+					<th rowspan="2" width="80%" style="text-align: center;">CAR TYPE/FEETD</th>
 					<th rowspan="2" width="9%" style="text-align: center;">CREATED</th>
 					<th rowspan="2" width="5%" style="text-align: center;">STATUS</th>
 					<th rowspan="2" width="3%" style="text-align: center;">EDIT</th>	
@@ -41,7 +41,7 @@ if ($_GET['type'] == "Read")
 	$SQL = "select * from m_jenis_mobil_tr where nama LIKE '%$cari%' order by nama  LIMIT $offset, $jmlperhalaman";	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -157,7 +157,7 @@ if ($_GET['type'] == "Read")
 		}
 		if (!$hasil) {
 	        			
-			//exit(mysqli_error());
+			//exit(mysqli_error($koneksi));
 			echo "Jenis Mobil has found...!";
 	    }
 		else
@@ -170,7 +170,7 @@ if ($_GET['type'] == "Read")
 	$id = $_POST['id'];	
     $query = "select * from m_jenis_mobil_tr where id_jenis  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -204,7 +204,7 @@ if ($_GET['type'] == "Read")
 	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {

@@ -319,7 +319,7 @@ else
 					</div>
 					<br>
 					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
 						<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
 						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
 						&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
@@ -438,12 +438,12 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Lokasi</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Location</b>
 							</div>	
 							<br>
 							
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Lokasi :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Location :</b></span>
 								<select id="id_lokasix"  style="width: 80%;padding:4px">
 									<?php
 									$tampil1="select * from m_lokasi_ware where status = '1' order by nama  ";

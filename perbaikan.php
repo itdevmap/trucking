@@ -1,43 +1,43 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-//include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	//include "lib.php";
 
-$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='24' ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+	$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='24' ");
+	$rq=mysqli_fetch_array($pq);	
+	$m_edit = $rq['m_edit'];
+	$m_add = $rq['m_add'];
+	$m_del = $rq['m_del'];
+	$m_view = $rq['m_view'];
+	$m_exe = $rq['m_exe'];
 
-if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
- header('location:logout.php'); 
-}
+	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
+	header('location:logout.php'); 
+	}
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{	
-	$hal='1';	
-	$field = $_POST['field'];
-	$search_name = $_POST['search_name'];
-	$tgl1 = $_POST['tgl1'];
-	$tgl2 = $_POST['tgl2'];
-	$paging = $_POST['paging'];
-	$stat = $_POST['stat'];
-	$field1 = $_POST['field1'];
-	$search_name1 = $_POST['search_name1'];
-}
-else
-{	
-	$tahun= date("Y") ;
-	$tgl1= date("01-01-$tahunx");
-	$tgl2= date("31-12-$tahun");
-	$paging='10';	
-	$hal='1';
-	$field = 'No Polisi';
-	$field1 = 'Jenis Pekerjaan';
-}
+	if($_SERVER['REQUEST_METHOD'] == "POST")
+	{	
+		$hal='1';	
+		$field = $_POST['field'];
+		$search_name = $_POST['search_name'];
+		$tgl1 = $_POST['tgl1'];
+		$tgl2 = $_POST['tgl2'];
+		$paging = $_POST['paging'];
+		$stat = $_POST['stat'];
+		$field1 = $_POST['field1'];
+		$search_name1 = $_POST['search_name1'];
+	}
+	else
+	{	
+		$tahun= date("Y") ;
+		$tgl1= date("01-01-$tahunx");
+		$tgl2= date("31-12-$tahun");
+		$paging='10';	
+		$hal='1';
+		$field = 'No Polisi';
+		$field1 = 'Jenis Pekerjaan';
+	}
 
 ?>
 
@@ -334,7 +334,7 @@ else
 		<div class="content-wrapper" style="min-height:750px">
 			<br>
 			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Perbaikan Mobil</b></font></h1></li>					
+				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Car Repair Data</b></font></h1></li>					
 			</ol>
 			<br>
 			
@@ -346,7 +346,7 @@ else
 					</div>
 					<br>
 					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
 						<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
 						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
 						&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
@@ -357,8 +357,8 @@ else
 						<span class="input-group-addon" style="text-align:right;"><b>Filter By :</b></span>
 						<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">
 							<option>No SPK</option>
-							<option>No Polisi</option>
-							<option>Jenis Pekerjaan</option>
+							<option>No Police</option>
+							<option>Type of work</option>
 							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
@@ -368,8 +368,8 @@ else
 						<span class="input-group-addon" style="text-align:right;"></span>
 						<select size="1" id="field1"  onchange="ReadData(1)" name="field1" style="padding:4px;margin-right:2px;width: 85px">
 							<option>No SPK</option>
-							<option>No Polisi</option>
-							<option>Jenis Pekerjaan</option>
+							<option>No Police</option>
+							<option>Type of work</option>
 							<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
 						</select>
 						<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
@@ -459,7 +459,7 @@ else
 								<input type="hidden" id="mode"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tanggal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
 								<input type="text" id="tanggal"  value="" style="padding:4px;text-align: center;width:24.5%;border:1px solid rgb(169, 169, 169);background:#eee"  />
 								
 							</div>
@@ -520,7 +520,7 @@ else
 								</select>	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Polisi :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Police :</b></span>
 								<select id="id_mobil"  style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_mobil_tr where status = '1' order by no_polisi  ";
@@ -532,7 +532,7 @@ else
 									
 							</div>		
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tempelan :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Patch (Tempelan) :</b></span>
 								<input type="text" id="tempelan"  value="" style="text-transform: uppercase;
 								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
 							</div>	
@@ -541,7 +541,7 @@ else
 								<input type="text" id="km"  value="" style="text-align: right;width:20%;border:1px solid rgb(169, 169, 169)" onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)" />	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Jenis Pekerjaan :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type of work :</b></span>
 								<select id="jenis_spk"  style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_jenis_spk where status = '1' order by nama  ";
@@ -552,15 +552,15 @@ else
 								</select>
 							</div>							
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Pemakaian Part :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Part Usage :</b></span>
 								<input type="text" id="part"  value="" style="text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
 							</div>
 							
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Keterangan :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Information :</b></span>
 								<textarea name="ket" id="ket"
 								style="resize:none;width: 80%; height: 80px; font-size: 11px; line-height: 12px; 
-								border: 1px solid #4; padding: 5px;"  ></textarea>		
+								border: 1px solid #444; padding: 5px;"  ></textarea>		
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
@@ -595,7 +595,7 @@ else
 								<div class="file-tab panel-body">
 									<div>
 										<button type="button" class="btn btn-default btn-file">
-											<span>Pilih Photo</span>
+											<span>Select Photo</span>
 											<input type="file" name="image" id ="uploadImage" >											
 										</button>	
 										<button type="button" class="btn btn-default">Remove</button>		

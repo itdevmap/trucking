@@ -24,7 +24,7 @@ if ($_GET['type'] == "Read")
 				<tr>	
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
 					<th rowspan="2" width="10%" style="text-align: center;">#ID USER</th>					
-					<th rowspan="2" width="35%" style="text-align: center;">NAMA USER</th>
+					<th rowspan="2" width="35%" style="text-align: center;">USER NAME</th>
 					<th rowspan="2" width="10%" style="text-align: center;">ROLE</th>
 					<th rowspan="2" width="10%" style="text-align: center;">NO. HANDPHONE</th>
 					<th rowspan="2" width="23%" style="text-align: center;">EMAIL</th>
@@ -47,7 +47,7 @@ if ($_GET['type'] == "Read")
 			 LIMIT $offset, $jmlperhalaman";	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -184,7 +184,7 @@ if ($_GET['type'] == "Read")
 		
 		if (!$hasil) {
 	        			
-			exit(mysqli_error());
+			exit(mysqli_error($koneksi));
 			echo "Data telah terdaftar...!";
 	    }
 		else
@@ -197,7 +197,7 @@ if ($_GET['type'] == "Read")
 	$id = $_POST['id'];	
     $query = "select * from m_user_tr where id  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {

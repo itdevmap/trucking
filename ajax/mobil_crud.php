@@ -34,14 +34,14 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>	
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="8%" style="text-align: center;">NOMOR<br>POLISI</th>	
-					<th rowspan="2" width="27%" style="text-align: center;">MERK</th>
-					<th rowspan="2" width="5%" style="text-align: center;">TAHUN<br></th>
-					<th rowspan="2" width="11%" style="text-align: center;">NO. RANGKA</th>
-					<th rowspan="2" width="13%" style="text-align: center;">WARNA</th>
+					<th rowspan="2" width="8%" style="text-align: center;">POLICE<br>NUMBER</th>	
+					<th rowspan="2" width="27%" style="text-align: center;">BRAND</th>
+					<th rowspan="2" width="5%" style="text-align: center;">YEAR<br></th>
+					<th rowspan="2" width="11%" style="text-align: center;">FRAME NUMBER</th>
+					<th rowspan="2" width="13%" style="text-align: center;">COLOR</th>
 					<th colspan="3" width="6%" style="text-align: center;">DOWNLOAD<br>DOCUMENT</th>
-					<th rowspan="2" width="7%" style="text-align: center;">TANGGAl<br>BERLAKU<br>STNK</th>	
-					<th rowspan="2" width="7%" style="text-align: center;">TANGGAl<br>BERLAKU<br>KIR</th>	
+					<th rowspan="2" width="7%" style="text-align: center;">VALID<br>DATE OF <br>STNK</th>	
+					<th rowspan="2" width="7%" style="text-align: center;">VALID<br>DATE OF <br>KIR</th>	
 					<th rowspan="2" width="7%" style="text-align: center;">STATUS</th>
 					<th colspan="3" width="6%" style="text-align: center;">ACTION</th>						
 				</tr>
@@ -80,7 +80,7 @@ if ($_GET['type'] == "Read")
 			order by m_mobil_tr.no_polisi asc LIMIT $offset, $jmlperhalaman";
 	$query = mysqli_query($koneksi,$SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -368,7 +368,7 @@ if ($_GET['type'] == "Read")
 		}
 		if (!$hasil) {
 	        			
-			exit(mysqli_error());
+			exit(mysqli_error($koneksi));
 			echo "No. Polisi sudah terdaftar...!";
 	    }
 		else
@@ -382,7 +382,7 @@ if ($_GET['type'] == "Read")
 	$id = $_POST['id'];	
     $query = "select * from m_mobil_tr where id_mobil  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -406,8 +406,8 @@ if ($_GET['type'] == "Read")
 	$data = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">
 				<tr>
-					<th width="90%" style="text-align: center;">NO. POLISI</th>
-					<th width="10%" style="text-align: center;">PILIH</th>
+					<th width="90%" style="text-align: center;">NO. POLICE</th>
+					<th width="10%" style="text-align: center;">SELECT</th>
 				</tr>
 			</thead>';	
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
@@ -416,7 +416,7 @@ if ($_GET['type'] == "Read")
 	$SQL = "select * from m_mobil_tr where no_polisi LIKE '%$cari%' order by no_polisi LIMIT 0, 25";	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {

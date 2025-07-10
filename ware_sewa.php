@@ -209,7 +209,7 @@ else
 		<div class="content-wrapper" style="min-height:750px">
 			<br>
 			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Sewa</b></font></h1></li>					
+				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Service Data</b></font></h1></li>					
 			</ol>
 			<br>
 			<!--
@@ -239,7 +239,7 @@ else
 					</div>
 					<br>
 					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
 						<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
 						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
 						&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
@@ -260,7 +260,7 @@ else
 						<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">
 							<option>No SO</option>
 							<option>Customer</option>
-							<option>Jenis Sewa</option>
+							<option>Service Type</option>
 							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
@@ -271,7 +271,7 @@ else
 						<select size="1" id="field1"  onchange="ReadData(1)" name="field1" style="padding:4px;margin-right:2px;width: 85px">
 							<option>No SO</option>
 							<option>Customer</option>
-							<option>Jenis Sewa</option>
+							<option>Service Type</option>
 							<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
 						</select>
 						<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 

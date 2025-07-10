@@ -350,7 +350,7 @@ else
 		<div class="content-wrapper" style="min-height:750px">
 			<br>
 			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Spare Part</b></font></h1></li>					
+				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Spare Parts Data</b></font></h1></li>					
 			</ol>
 			<br>
 			
@@ -365,7 +365,7 @@ else
 						?>
 					<div id="tabs5" >
 						<ul> 
-							<li id="current"><?php echo "<a href=$link1>"; ?><span><b>Data Stok </b></span></a></li> 
+							<li id="current"><?php echo "<a href=$link1>"; ?><span><b>Data Stock </b></span></a></li> 
 							<li ><?php echo "<a href=$link2>"; ?><span><b>Data In</b></span></a></li>
 							<li ><?php echo "<a href=$link3>"; ?><span><b>Data Out</b></span></a></li>
 						</ul>
@@ -457,7 +457,7 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Spare Part</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Spare Parts Data</b>
 							</div>	
 							<br>					
 							<div style="width:100%;" class="input-group">
@@ -498,7 +498,7 @@ else
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 						
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Daftar Spare Part (Masuk)</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Spare Parts Data (Incoming)</b>
 							</div>	
 							<div  class="input-group" style="background:none !important;">
 								<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background: none;">	
@@ -533,7 +533,7 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Spare Part Masuk</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Spare Part Data Incoming</b>
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
@@ -542,7 +542,7 @@ else
 								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)"  readonly />	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tanggal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
 								<input type="text" id="tanggal"  value="" style="padding:4px;text-align: center;width:85px;border:1px solid rgb(169, 169, 169);background:#eee"  />
 							</div>
 							<div style="width:100%;" class="input-group">
@@ -580,7 +580,7 @@ else
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 						
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Daftar Spare Part (Keluar)</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Spare Part List (Out)</b>
 							</div>	
 							<div  class="input-group" style="background:none !important;">
 								<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background: none;">	

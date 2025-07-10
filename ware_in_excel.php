@@ -128,9 +128,7 @@ if($field == 'Customer')
 		$batch = "$tg.$bl.$year $d1[no_cont]";	
 		$sisa  = $d1['masuk'] - $d1['keluar'];
 		$cbm = $sisa * $d1['vol'];
-		
 	?>
-	
 		<tr>
 			<td style="text-align:center"><?php echo "$n.";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[tanggal]";?></b></td>
@@ -140,12 +138,10 @@ if($field == 'Customer')
 			<td style="text-align:center"><?php echo "$d1[nama]";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[nama_cust]";?></b></td>
 			<td style="text-align:center"><?php echo "$sisa";?></b></td>
-			<td style="text-align:center"><?php echo "$cbm";?></b></td>
+			<td style="text-align:center"><?php echo rtrim(rtrim(number_format($cbm, 10, '.', ''), '0'), '.'); ?></td>
 			<td style="text-align:center"><?php echo "$d1[nama_lokasi]";?></b></td>
-			
 		</tr>
 
-		
 	<?php }
 	$t_sisa = $t_tag - $t_bayar;
 	?>

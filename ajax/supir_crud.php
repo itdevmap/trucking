@@ -26,14 +26,14 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>	
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="31%" style="text-align: center;">NAMA SUPIR</th>	
-					<th rowspan="2" width="7%" style="text-align: center;">TGL<br>LAHIR</th>
-					<th rowspan="2" width="7%" style="text-align: center;">KELAMIN</th>
-					<th rowspan="2" width="7%" style="text-align: center;">STATUS<br>PERKAWINAN</th>
-					<th rowspan="2" width="7%" style="text-align: center;">AGAMA</th>
+					<th rowspan="2" width="31%" style="text-align: center;">DRIVER NAME</th>	
+					<th rowspan="2" width="7%" style="text-align: center;">DATE OF <br>BIRTH</th>
+					<th rowspan="2" width="7%" style="text-align: center;">GEBDER</th>
+					<th rowspan="2" width="7%" style="text-align: center;">MARITIAL<br>STATUS</th>
+					<th rowspan="2" width="7%" style="text-align: center;">RELIGION</th>
 					<th rowspan="2" width="8%" style="text-align: center;">NO. TELP</th>	
-					<th rowspan="2" width="5%" style="text-align: center;">JENIS<br>SIM</th>	
-					<th rowspan="2" width="7%" style="text-align: center;">MASA<br>BERLAKU<br>SIM</th>	
+					<th rowspan="2" width="5%" style="text-align: center;">SIM<br>TYPE</th>	
+					<th rowspan="2" width="7%" style="text-align: center;">SIM<br>VALIDITY <br>PERIOD</th>	
 					<th colspan="3" width="6%" style="text-align: center;">DOWNLOAD<br>DOCUMENT</th>	
 					<th rowspan="2" width="6%" style="text-align: center;">STATUS</th>
 					<th colspan="3" width="6%" style="text-align: center;">ACTION</th>						
@@ -62,7 +62,7 @@ if ($_GET['type'] == "Read")
 	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -307,7 +307,7 @@ if ($_GET['type'] == "Read")
 		}
 		if (!$hasil) {
 	        			
-			exit(mysqli_error());
+			exit(mysqli_error($koneksi));
 			echo "Nama Supir sudah terdaftar...!";
 	    }
 		else
@@ -331,7 +331,7 @@ if ($_GET['type'] == "Read")
 	$hasil=mysqli_query($koneksi, $sql);
 			
 	if (!$hasil) {	
-		exit(mysqli_error());
+		exit(mysqli_error($koneksi));
 		echo "Nama Supir sudah terdaftar...!";
 	}
 	else
@@ -343,7 +343,7 @@ if ($_GET['type'] == "Read")
 	$id = $_POST['id'];	
     $query = "select * from m_supir_tr where id_supir  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {

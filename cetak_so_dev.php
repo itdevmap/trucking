@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 require('pdf/code128.php');
 include "koneksi.php"; 
@@ -258,6 +259,7 @@ $pdf->Cell(50,4,"GM Logistic",0,1,'C');
 $sql = "UPDATE tr_jo set tagihan = '$total' where id_jo = '$id_jo'  "; 
 $hasil=mysqli_query($koneksi, $sql);	
 	
+ob_end_clean();
 $pdf->Output();
 
 ?>

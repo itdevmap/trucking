@@ -1,44 +1,44 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-//include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	//include "lib.php";
 
-$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='3' ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+	$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='3' ");
+	$rq=mysqli_fetch_array($pq);	
+	$m_edit = $rq['m_edit'];
+	$m_add = $rq['m_add'];
+	$m_del = $rq['m_del'];
+	$m_view = $rq['m_view'];
+	$m_exe = $rq['m_exe'];
 
-if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
- header('location:logout.php'); 
-}
+	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
+	header('location:logout.php'); 
+	}
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{	
-	$hal='1';	
-	$field = $_POST['field'];
-	$search_name = $_POST['search_name'];
-	$tgl1 = $_POST['tgl1'];
-	$tgl2 = $_POST['tgl2'];
-	$paging = $_POST['paging'];
-	$stat = $_POST['stat'];
-	$field1 = $_POST['field1'];
-	$search_name1 = $_POST['search_name1'];
-}
-else
-{	
-	$tahun= date("Y") ;
-	$tgl1= date("01-01-$tahunx");
-	$tgl2= date("31-12-$tahun");
-	$paging='10';
-	$hal='1';
-	$stat = 'All';
-	$field = 'No Order';
-	$field1 = 'No DO';
-}
+	if($_SERVER['REQUEST_METHOD'] == "POST")
+	{	
+		$hal='1';	
+		$field = $_POST['field'];
+		$search_name = $_POST['search_name'];
+		$tgl1 = $_POST['tgl1'];
+		$tgl2 = $_POST['tgl2'];
+		$paging = $_POST['paging'];
+		$stat = $_POST['stat'];
+		$field1 = $_POST['field1'];
+		$search_name1 = $_POST['search_name1'];
+	}
+	else
+	{	
+		$tahun= date("Y") ;
+		$tgl1= date("01-01-$tahunx");
+		$tgl2= date("31-12-$tahun");
+		$paging='10';
+		$hal='1';
+		$stat = 'All';
+		$field = 'No Order';
+		$field1 = 'No DO';
+	}
 
 ?>
 
@@ -63,9 +63,21 @@ else
     <link rel="stylesheet" href="css/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
 	<link rel="stylesheet" href="css/plugins/select2/select2.min.css">
 	<script src="css/plugins/jQuery/jQuery-2.1.4.min.js" type="text/javascript"></script>
+
+	<!-- ---------------------- LEAFLET ---------------------- -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 	
 	<style>
 		.datepicker{z-index:1151 !important;}
+		.modal-backdrop.in {
+			z-index: 1040 !important;
+		}
+		.modal.in {
+			z-index: 1050 !important;
+			overflow-y: auto;
+		}
+
 	</style>
 	<script>
 		$(document).ready(function () {
@@ -360,6 +372,7 @@ else
 				);
 			}
 		}
+		
 		function ListBiaya_Lain(id, stat) {
 			$("#id_jo").val(id);
 			$("#stat_biaya").val(stat);
@@ -386,12 +399,16 @@ else
 			var id = $("#id_biaya_lain").val();
 			var id_cost = $("#id_cost_biaya").val();
 			var biaya = $("#biaya_lain").val();
+			var pph = $("#pph").val();
+			var wtax = $("#wtax").val();
 			var mode = $("#mode_biaya_lain").val();
 			$.post("ajax/jo_crud.php", {
 				id_jo:id_jo,
 				id:id,
 				id_cost:id_cost,
 				biaya:biaya,
+				pph:pph,
+				wtax:wtax,
 				mode:mode,
 				type : "Add_Biaya_Lain"
 				}, function (data, status) {
@@ -399,9 +416,11 @@ else
 				
 				var id = $("#id_jo").val();
 				var stat = $("#stat_biaya").val();
+
 				$.get("ajax/jo_crud.php", {mode:mode, stat:stat, id:id,  type:"List_Biaya_Lain" }, function (data, status) {
 					$(".tampil_biaya_lain").html(data);
 				});
+
 				ReadData(1);
 				$("#DataBiayaLain").modal("hide");				
 				
@@ -416,6 +435,8 @@ else
 					var data = JSON.parse(data);
 					$("#id_cost").val(data.id_cost);
 					$("#biaya_lain").val(Rupiah(data.harga));
+					$("#pph").val(Rupiah(data.pph));
+					$("#wtax").val(Rupiah(data.wtax));
 					$("#mode_biaya_lain").val('Edit');							
 				}
 			);
@@ -520,9 +541,6 @@ else
 			}
 		}
 		
-		
-		
-		
 		function TampilData() 
 		{
 			var jenis_role = $("#jenis_role").val();
@@ -578,6 +596,11 @@ else
 			ListPO();
 			$('#DaftarPO').modal('show');
 		}
+		$(document).on('hidden.bs.modal', '.modal', function () {
+			if ($('.modal:visible').length) {
+				$('body').addClass('modal-open');
+			}
+		});
 		function ListPO() {	
 			var cari = $("#cari_po").val();
 			$.get("ajax/jo_crud.php", {cari:cari,  type:"ListPO" }, function (data, status) {
@@ -640,6 +663,7 @@ else
 			var tanggal = $("#tanggalx").val();
 			var id_asal = $("#id_asalx").val();
 			var id_tujuan = $("#id_tujuanx").val();
+
 			if(tanggal == '')
 			{
 				alert ("Tanggal harus diisi !..");				
@@ -684,28 +708,28 @@ else
 				var ritase = $("#ritasex").val();
 				var ket = $("#ketx").val();
 				$.post("ajax/jo_crud.php", {
-				tanggal:tanggal,
-				id_detil_bc:id_detil_bc,
-				jenis_po:jenis_po,
-				id_cont:id_cont,
-				id_cust:id_cust,
-				no_do:no_do,
-				penerima:penerima,
-				barang:barang,
-				berat:berat,
-				vol:vol,
-				no_cont:no_cont,
-				no_seal:no_seal,
-				id_asal:id_asal,
-				id_tujuan:id_tujuan,
-				jenis:jenis,
-				id_mobil:id_mobil,
-				id_supir:id_supir,
-				biaya:biaya,
-				uj:uj,
-				ritase:ritase,
-				ket:ket,
-				type : "Add_Order"
+					tanggal:tanggal,
+					id_detil_bc:id_detil_bc,
+					jenis_po:jenis_po,
+					id_cont:id_cont,
+					id_cust:id_cust,
+					no_do:no_do,
+					penerima:penerima,
+					barang:barang,
+					berat:berat,
+					vol:vol,
+					no_cont:no_cont,
+					no_seal:no_seal,
+					id_asal:id_asal,
+					id_tujuan:id_tujuan,
+					jenis:jenis,
+					id_mobil:id_mobil,
+					id_supir:id_supir,
+					biaya:biaya,
+					uj:uj,
+					ritase:ritase,
+					ket:ket,
+					type : "Add_Order"
 				}, function (data, status) {
 					alert(data);
 					$("#DataBaru").modal("hide");				
@@ -792,6 +816,54 @@ else
 			var idx = btoa(id);
 			var win = window.open('jo_excel.php?id='+idx);
 		}	
+
+		// ------------------- FUNCTION ADD ATTACHMENT -------------------
+		function AddAttc(id_jo) {
+			document.getElementById('id_jo_attc').value = id_jo;
+			$('#DataAttc').modal('show');
+		}
+
+		function SaveAttc() {
+			const fileSo     = document.getElementById('file_so').files[0];
+			const fileSj     = document.getElementById('file_sj').files[0];
+			const fileMutasi = document.getElementById('file_mutasi').files[0];
+			const idJo       = document.getElementById('id_jo_attc').value;
+
+			if (!fileSo && !fileSj && !fileMutasi) {
+				alert("Minimal satu file harus dipilih.");
+				return;
+			}
+			if (!idJo) {
+				alert("ID JO wajib diisi.");
+				return;
+			}
+
+			const formData = new FormData();
+			formData.append("id_jo", idJo);
+			if (fileSo)     formData.append("file_so", fileSo);
+			if (fileSj)     formData.append("file_sj", fileSj);
+			if (fileMutasi) formData.append("file_mutasi", fileMutasi);
+
+			$.ajax({
+				url: "upload_attachment.php",
+				type: "POST",
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function (response) {
+					alert("✅ Sukses:\n" + response);
+					$('#DataAttc').modal('hide');
+					// Reset input
+					document.getElementById('file_so').value = '';
+					document.getElementById('file_sj').value = '';
+					document.getElementById('file_mutasi').value = '';
+				},
+				error: function (xhr, status, error) {
+					alert("Gagal upload:\n" + error);
+				}
+			});
+		}
+
 	</script>	
 	
   </head>
@@ -821,7 +893,7 @@ else
 					</div>
 					<br>
 					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
 						<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
 						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
 						&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
@@ -846,11 +918,11 @@ else
 							<option>No Quo</option>
 							<option>No DO</option>
 							<option>Customer</option>
-							<option>Asal</option>
-							<option>Tujuan</option>
+							<option>Origin</option>
+							<option>Destination</option>
 							<option>No Cont</option>
-							<option>No Polisi</option>
-							<option>Supir</option>
+							<option>No Police</option>
+							<option>Driver</option>
 							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
@@ -863,11 +935,11 @@ else
 							<option>No Quo</option>
 							<option>No DO</option>
 							<option>Customer</option>
-							<option>Asal</option>
-							<option>Tujuan</option>
+							<option>Origin</option>
+							<option>Destination</option>
 							<option>No Cont</option>
-							<option>No Polisi</option>
-							<option>Supir</option>
+							<option>No Police</option>
+							<option>Driver</option>
 							<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
 						</select>
 						<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
@@ -958,9 +1030,13 @@ else
 								<input type="checkbox"  id="cek_ptl" style="margin-bottom:0px;" value="1"  onclick='CekPTL(this);'  > &nbsp;<b>PTL</b>
 								<input type="hidden" id="jenis_po"   style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
 							</div>	
-								
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tanggal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Project Code :</b></span>
+								<input type="text"  id ="project_code" style="text-align: center;width:22%" readonly placeholder="-- Auto --">
+							</div>	
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
 								<input type="text"  id ="tanggalx" style="text-align: center;width:22%" readonly  >
 							</div>
 							
@@ -986,18 +1062,18 @@ else
 								<input type="hidden" id="id_cust"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Penerima :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Receiver :</b></span>
 								<textarea id="penerimax"
 								style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; 
-								border: 1px solid #4; padding: 5px;"  ></textarea>	
+								border: 1px solid #444; padding: 5px;"  ></textarea>	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Barang :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Item Name :</b></span>
 								<input type="text" id="barangx" value="" style="text-transform: uppercase;text-align: left;width:80%;"   >	
 							</div>
 							
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Berat :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Weight :</b></span>
 								<input type="text" id="beratx" value="0" style="text-align: right;width:22%;" 
 								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  > &nbsp;<b>KG</b>	
 							</div>
@@ -1015,7 +1091,7 @@ else
 								<input type="text"  id ="no_sealx" style="text-transform: uppercase;text-align: center;width:22%"  >														
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Asal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
 								<select id="id_asalx"  onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_kota_tr where status = '1' order by nama_kota  ";
@@ -1025,8 +1101,9 @@ else
 									<?php }?>
 								</select>
 							</div>
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tujuan :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
 								<select id="id_tujuanx" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_kota_tr where status = '1' order by nama_kota  ";
@@ -1036,8 +1113,10 @@ else
 									<?php }?>
 								</select>
 							</div>
+
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Jenis :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
 								<select id="jenisx" name="jenisx" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_jenis_mobil_tr where status = '1' order by nama   ";
@@ -1048,19 +1127,19 @@ else
 								</select>	
 							</div>							
 							<div style="width:100%;" class="input-group">
-									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Polisi :</b></span>
-									<select id="id_mobilx"  style="width: 80%;padding:4px">
-										<?php
-										$t1="select * from m_mobil_tr where status = '1' order by no_polisi  ";
-										$h1=mysqli_query($koneksi, $t1);       
-										while ($d1=mysqli_fetch_array($h1)){?>
-										<option value="<?php echo $d1['id_mobil'];?>" ><?php echo $d1['no_polisi'];?></option>
-										<?php }?>
-									</select>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Police :</b></span>
+								<select id="id_mobilx"  style="width: 80%;padding:4px">
+									<?php
+									$t1="select * from m_mobil_tr where status = '1' order by no_polisi  ";
+									$h1=mysqli_query($koneksi, $t1);       
+									while ($d1=mysqli_fetch_array($h1)){?>
+									<option value="<?php echo $d1['id_mobil'];?>" ><?php echo $d1['no_polisi'];?></option>
+									<?php }?>
+								</select>
 							</div>
 						
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Supir :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Driver :</b></span>
 								<select id="id_supirx"  style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_supir_tr where status = '1' order by nama_supir  ";
@@ -1073,12 +1152,12 @@ else
 							
 							<div  id="tampil_uj" style="display:none;">
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Biaya Kirim :</b></span>								
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Deliv. Cost :</b></span>								
 								<input type="text" id="biayax" value="0" style="text-align: right;width:22%;" 
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Uang Jalan :</b></span>								
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Road Fee :</b></span>								
 								<input type="text" id="ujx" value="0" style="text-align: right;width:22%;" 
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
 							</div>
@@ -1124,7 +1203,7 @@ else
 									style="text-align: left;width:200px" onkeypress="ListCust()" >
 									<button class="btn btn-block btn-primary" 
 									style="margin:0px;margin-left:-3px;margin-bottom:3px;border-radius:2px;padding:5px" 
-									onClick="javascript:ListPO()" ">
+									onClick="javascript:ListPO()">
 									<span class="glyphicon glyphicon-search"></span>
 									</button>
 									<button class="btn btn-block btn-danger" 
@@ -1164,7 +1243,7 @@ else
 									style="text-align: left;width:200px" onkeypress="ListCust()" >
 									<button class="btn btn-block btn-primary" 
 									style="margin:0px;margin-left:-3px;margin-bottom:3px;border-radius:2px;padding:5px" 
-									onClick="javascript:ListCust()" ">
+									onClick="javascript:ListCust()">
 									<span class="glyphicon glyphicon-search"></span>
 									</button>
 									<button class="btn btn-block btn-danger" 
@@ -1205,26 +1284,26 @@ else
 								<input type="hidden" id="id_detil"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
 							</div>						
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tanggal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
 								<input type="text"  id ="tanggal" style="text-align: center;width:22%" readonly  >
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. DO/PO :</b></span>
-								<input type="text" id="no_do" value="" style="text-transform: uppercase;text-align: left;width:80%;"   >	
+								<input type="text" id="no_do" value="" style="text-transform: uppercase;text-align: left;width:80%;">	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Penerima :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Receiver :</b></span>
 								<textarea id="penerima"
 								style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; 
-								border: 1px solid #4; padding: 5px;"  ></textarea>	
+								border: 1px solid #444; padding: 5px;"  ></textarea>	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Barang :</b></span>								
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Item Name :</b></span>								
 								<input type="text" id="barang" value="" style="text-transform: uppercase;text-align: left;width:80%;"   >	
 							</div>
 							
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Berat :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Weight :</b></span>
 								<input type="text" id="berat" value="0" style="text-align: right;width:22%;" 
 								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  > &nbsp;<b>KG</b>	
 							</div>
@@ -1242,21 +1321,21 @@ else
 								<input type="text"  id ="no_seal" style="text-transform: uppercase;text-align: center;width:22%"  >														
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Asal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
 								<input type="hidden" id="id_asal"   value=""  />
 								<input type="text" id="nama_asal" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tujuan :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
 								<input type="hidden" id="id_tujuan"   value=""  />
 								<input type="text" id="nama_tujuan" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Jenis :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
 								<input type="text" id="jenis_mobil" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
 							</div>							
 							<div style="width:100%;" class="input-group">
-									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Polisi :</b></span>
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Police :</b></span>
 									<select id="id_mobil"  style="width: 80%;padding:4px">
 										<?php
 										$t1="select * from m_mobil_tr where status = '1' order by no_polisi  ";
@@ -1268,7 +1347,7 @@ else
 							</div>
 						
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Supir :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Driver :</b></span>
 								<select id="id_supir"  style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_supir_tr where status = '1' order by nama_supir  ";
@@ -1281,12 +1360,12 @@ else
 							
 							<div  id="tampil_ujx" style="display:none;">
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Biaya Kirim :</b></span>								
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Deliv. Cost :</b></span>								
 								<input type="text" id="biaya" value="0" style="text-align: right;width:22%;" 
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Uang Jalan :</b></span>								
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Road Fee:</b></span>								
 								<input type="text" id="uj" value="0" style="text-align: right;width:22%;" 
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
 							</div>
@@ -1322,7 +1401,7 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Biaya Lainnya</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Other Cost</b>
 							</div>	
 							<div  class="input-group" style="background:none !important;">
 								<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background: none;">									
@@ -1358,11 +1437,11 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Biaya Lainnya</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Other Cost Data</b>
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Biaya :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Cost Name :</b></span>
 								<select id="id_cost_biaya" style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_cost_tr where status = '1' and id_cost <> '1' order by nama_cost  ";
@@ -1375,8 +1454,18 @@ else
 								<input type="hidden" id="mode_biaya_lain"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
 							</div>	
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Biaya :</b></span>
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Cost :</b></span>
 								<input type="text" id="biaya_lain" style="text-align: right;width:20%;" 
+								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  >
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>PPN :</b></span>
+								<input type="text" id="pph" style="text-align: right;width:20%;" 
+								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  >
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>WTAX :</b></span>
+								<input type="text" id="wtax" style="text-align: right;width:20%;" 
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  >
 							</div>
 							<div style="width:100%;" class="input-group">
@@ -1402,7 +1491,7 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;AP Lainnya</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Other AP</b>
 							</div>	
 							<div  class="input-group" style="background:none !important;">
 								<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background: none;">	
@@ -1437,11 +1526,11 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data AP Lainnya</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Other AP Data</b>
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Biaya :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Cost Name :</b></span>
 								<select id="id_cost_uj" style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_cost_tr where status = '1' and id_cost <> '1' order by nama_cost  ";
@@ -1482,7 +1571,7 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Pajak</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Tax Data</b>
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
@@ -1511,6 +1600,65 @@ else
 			</div>
 		</div>	
     </div>
+
+	<!-- ----------------- MODAL ATTACHMENT ----------------- -->
+	<div class="modal fade" id="DataAttc" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-body">
+					<div class="col-md-12" style="padding: 0;">
+						<div class="box box-success box-solid" style="padding: 5px; border: 1px solid #ccc;">
+							<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;">
+								<b><i class="fa fa-list"></i>&nbsp;Add Attachment</b>
+							</div>
+
+							<!-- <form id="form_attachment" enctype="multipart/form-data" style="margin-top: 2rem;">
+								<div class="form-group mt-3">
+									<label for="file_attachment"><b>File Attachment:</b></label>
+									<input type="file" class="form-control" id="file_attachment" name="file_attachment[]" multiple>
+									<input type="hidden" id="id_jo_attc" name="id_jo">
+								</div>
+
+								<div class="form-group mt-3 text-right">
+									<button type="button" class="btn btn-success" onclick="SaveAttc()">
+										<span class="fa fa-save"></span>&nbsp;<b>Save</b>
+									</button>
+									<button type="button" class="btn btn-danger" data-dismiss="modal">
+										<span class="fa fa-close"></span>&nbsp;<b>Cancel</b>
+									</button>
+								</div>
+							</form> -->
+							<form id="form_attachment" enctype="multipart/form-data" style="margin-top: 2rem;">
+								<input type="hidden" id="id_jo_attc" name="id_jo">
+								<div class="form-group mt-3">
+									<label for=""><b>File SO:</b></label>
+									<input type="file" class="form-control" id="file_so" name="file_so">
+								</div>
+								<div class="form-group mt-3">
+									<label for=""><b>File SJ:</b></label>
+									<input type="file" class="form-control" id="file_sj" name="file_sj">
+								</div>
+								<div class="form-group mt-3">
+									<label for=""><b>File Mutasi:</b></label>
+									<input type="file" class="form-control" id="file_mutasi" name="file_mutasi">
+								</div>
+
+								<div class="form-group mt-3 text-right">
+									<button type="button" class="btn btn-success" onclick="SaveAttc()">
+										<span class="fa fa-save"></span>&nbsp;<b>Save</b>
+									</button>
+									<button type="button" class="btn btn-danger" data-dismiss="modal">
+										<span class="fa fa-close"></span>&nbsp;<b>Cancel</b>
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>

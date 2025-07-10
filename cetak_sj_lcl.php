@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 require('pdf/code128.php');
 include "koneksi.php"; 
@@ -152,6 +153,7 @@ $pdf->setX(8);
 $pdf->Cell(34,20,"",1,0,'C');
 $pdf->Cell(34,20,"",1,1,'C');
 
+ob_end_clean();
 $pdf->Output();
 
 ?>

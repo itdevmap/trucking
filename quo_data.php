@@ -21,6 +21,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST")
 	
 	if($mode == 'Add' )
 	{
+
 		$ptgl = explode("-", $quo_date);
 		$tg = $ptgl[0];
 		$bl = $ptgl[1];
@@ -48,22 +49,19 @@ if($_SERVER['REQUEST_METHOD'] == "POST")
 		
 		$sql = "INSERT INTO  tr_quo (quo_date, quo_no, id_cust, ket, created, sales) values
 				('$quo_datex', '$quo_no', '$id_cust', '$ket', '$id_user', '$sales')";
-			$hasil= mysqli_query($koneksi, $sql);
+		$hasil= mysqli_query($koneksi, $sql);
 		
 		$sql = mysqli_query($koneksi, "select max(id_quo)as id from tr_quo ");			
 		$row = mysqli_fetch_array($sql);
 		$id_quo = $row['id'];
-		
+		// die($id_quo);
 	}else{
-		
 		$sql = "update tr_quo set 
 					id_cust = '$id_cust',
 					ket = '$ket',
 					sales = '$sales'
 					where id_quo = '$id_quo'	";
 		$hasil=mysqli_query($koneksi,$sql);
-	
-		
 	}
 	
 	$cat ="Data saved...";
@@ -131,6 +129,10 @@ if($mode == 'View')
     <link rel="stylesheet" href="css/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
 	<link rel="stylesheet" href="css/plugins/select2/select2.min.css">
 	<script src="css/plugins/jQuery/jQuery-2.1.4.min.js" type="text/javascript"></script>
+
+	<!-- ---------------------- LEAFLET ---------------------- -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 	
 	<style>
 		.datepicker{z-index:1151 !important;}
@@ -208,8 +210,10 @@ if($mode == 'View')
 			);
 			$("#DaftarCust").modal("hide");
 		}
+		
 		function checkvalue() {
 			var id_cust = document.getElementById('id_cust').value; 
+
 			if(id_cust == '') {
 				alert ('Customer harus diisi..');				
 				return false;
@@ -236,14 +240,13 @@ if($mode == 'View')
 			var id_tujuan = $("#id_tujuan").val();
 			var jenis_mobil = $("#jenis").val();
 			var id_cust = $("#id_cust").val();
-			//alert(id_cust);
+
 			$("#biaya_kirim").val('0');	
 			$.post("ajax/quo_crud.php", {
 				id_cust:id_cust, id_asal: id_asal, id_tujuan:id_tujuan, jenis_mobil:jenis_mobil, type:"Cek_Rate_Cust"
 				},
 				function (data, status) {
 					var data = JSON.parse(data);	
-					//alert(data.status);
 					if(data.status == 200)
 					{
 						CekRate_Umum();
@@ -252,14 +255,11 @@ if($mode == 'View')
 					{
 						$("#biaya_kirim").val(Rupiah(data.rate));
 					}
-					
-					
 				}
 			);
 		}
 		function CekRate_Umum()
 		{
-			//alert('ddd');
 			var id_asal = $("#id_asal").val();
 			var id_tujuan = $("#id_tujuan").val();
 			var jenis_mobil = $("#jenis").val();
@@ -271,10 +271,52 @@ if($mode == 'View')
 				function (data, status) {
 					var data = JSON.parse(data);					
 					$("#biaya_kirim").val(Rupiah(data.rate));
+					$("#km").val(Rupiah(data.km));
 					
 				}
 			);
 		}
+		// function AddData() {
+		// 	var id = $("#idx").val();
+		// 	var id_quo = $("#id_quo").val();
+		// 	var id_asal = $("#id_asal").val();
+		// 	var id_tujuan = $("#id_tujuan").val();
+		// 	var jenis = $("#jenis").val();
+		// 	var biaya_kirim = $("#biaya_kirim").val();
+		// 	var mode = $("#modex").val();
+
+		// 	var distance = $("#distance_result").val();
+		// 	var km = $("#km").val();
+
+		// 	if (distance > km) {
+		// 		alert("Jarak terlalu jauh dari ".km);
+		// 	}
+		// 	else if(jenis == '' || jenis == null)
+		// 	{
+		// 		alert ("Jenis harus diisi !..");				
+		// 	}
+		// 	else if(biaya_kirim <= 0)
+		// 	{
+		// 		alert ("Biaya Kirim harus diisi !..");				
+		// 	}
+		// 	else
+		// 	{
+		// 		$.post("ajax/quo_crud.php", {
+		// 		id:id,
+		// 		id_quo:id_quo,
+		// 		id_asal:id_asal,
+		// 		id_tujuan:id_tujuan,
+		// 		jenis:jenis,
+		// 		biaya_kirim:biaya_kirim,
+		// 		mode:mode,
+		// 		type : "Add_Detil"
+		// 		}, function (data, status) {
+		// 			alert(data);
+		// 			$("#Data").modal("hide");				
+		// 			ReadData();
+		// 		});
+		// 	}
+		// }	
 		function AddData() {
 			var id = $("#idx").val();
 			var id_quo = $("#id_quo").val();
@@ -283,34 +325,40 @@ if($mode == 'View')
 			var jenis = $("#jenis").val();
 			var biaya_kirim = $("#biaya_kirim").val();
 			var mode = $("#modex").val();
-			//alert(jenis);
-			if(jenis == '' || jenis == null)
-			{
-				alert ("Jenis harus diisi !..");				
+
+			var distance = parseFloat($("#distance_result").val()) || 0;
+			var km = parseFloat($("#km").val()) || 0;
+
+			if (distance > km) {
+				alert("Jarak terlalu jauh dari batas maksimal (" + km + " km)");
+				return;
 			}
-			else if(biaya_kirim <= 0)
-			{
-				alert ("Biaya Kirim harus diisi !..");				
+			else if (jenis === '' || jenis === null) {
+				alert("Jenis harus diisi!");
+				return;
 			}
-			else
-			{
+			else if (parseFloat(biaya_kirim) <= 0 || biaya_kirim === '') {
+				alert("Biaya Kirim harus diisi!");
+				return;
+			}
+			else {
 				$.post("ajax/quo_crud.php", {
-				id:id,
-				id_quo:id_quo,
-				id_asal:id_asal,
-				id_tujuan:id_tujuan,
-				jenis:jenis,
-				biaya_kirim:biaya_kirim,
-				mode:mode,
-				type : "Add_Detil"
+					id: id,
+					id_quo: id_quo,
+					id_asal: id_asal,
+					id_tujuan: id_tujuan,
+					jenis: jenis,
+					biaya_kirim: biaya_kirim,
+					mode: mode,
+					type: "Add_Detil"
 				}, function (data, status) {
 					alert(data);
-					$("#Data").modal("hide");				
+					$("#Data").modal("hide");
 					ReadData();
 				});
 			}
-			
-		}	
+		}
+
 		function GetData(id) {
 			$("#idx").val(id);	
 			$.post("ajax/quo_crud.php", {
@@ -340,7 +388,223 @@ if($mode == 'View')
 			}
 		}
 		
+		// ------------------- FUNCTION CHECK LOCATION -------------------
+		let origin_lat = null;
+		let origin_lon = null;
+		let dest_lat = null;
+		let dest_lon = null;
+
+		$(document).ready(function () {
+			$('#origin_address').on('keydown', function (event) {
+				if (event.key === "Enter") {
+					event.preventDefault(); // mencegah newline di textarea
+					const val = $('#origin_address').val().trim();
+					if (val.length > 5) {
+						console.log("Menjalankan origin_address() dengan:", val);
+						origin_address();
+					} else {
+						console.log("Input terlalu pendek:", val);
+					}
+				}
+			});
+			$('#destination_address').on('keydown', function (event) {
+				if (event.key === "Enter") {
+					event.preventDefault(); // mencegah newline di textarea
+					const val = $('#destination_address').val().trim();
+					if (val.length > 5) {
+						console.log("Menjalankan destination_address() dengan:", val);
+						destination_address();
+					} else {
+						console.log("Input terlalu pendek:", val);
+					}
+				}
+			});
+		});
 		
+		function origin_address() {
+			var origin_address = $("#origin_address").val();
+			$.post("ajax/geoapify.php", {
+				address: origin_address,
+				type: 'origin'
+			}, function (data) {
+				if (data.status !== "success") {
+					alert("Gagal mendapatkan lokasi: " + data.message);
+					console.warn("Error response dari geoapify:", data);
+
+					// Kosongkan koordinat dan sembunyikan map
+					origin_lat = null;
+					origin_lon = null;
+					$("#origin_lat").val('');
+					$("#origin_lon").val('');
+					$("#origin_map").hide(); // sembunyikan map
+					if (window.originMap) {
+						window.originMap.remove();
+						window.originMap = null;
+					}
+					return;
+				}
+
+				// Jika sukses, lanjut proses
+				origin_lat = data.lat;
+				origin_lon = data.lon;
+
+				$('#origin_map').css('display', 'block');
+
+				if (window.originMap) {
+					window.originMap.remove();
+				}
+
+				window.originMap = L.map('origin_map').setView([origin_lat, origin_lon], 15);
+				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '© OpenStreetMap contributors'
+				}).addTo(window.originMap);
+
+				let marker = L.marker([origin_lat, origin_lon], { draggable: true }).addTo(window.originMap)
+					.bindPopup("Klik di peta untuk pindahkan marker").openPopup();
+
+				marker.on('dragend', function (e) {
+					let pos = e.target.getLatLng();
+					updateLocation(pos.lat, pos.lng, marker);
+				});
+
+				window.originMap.on('click', function (e) {
+					let lat = e.latlng.lat;
+					let lon = e.latlng.lng;
+					marker.setLatLng([lat, lon]);
+					updateLocation(lat, lon, marker);
+				});
+
+				function updateLocation(lat, lon, markerRef) {
+					origin_lat = lat;
+					origin_lon = lon;
+
+					$("#origin_lat").val(lat.toFixed(6));
+					$("#origin_lon").val(lon.toFixed(6));
+
+					$.post("ajax/geoapify.php", {
+						lat: lat,
+						lon: lon
+					}, function (res) {
+						if (res.status === "success") {
+							let newAddress = res.formatted;
+							$("#origin_address").val(newAddress);
+							markerRef.bindPopup(`Lokasi baru:<br>${newAddress}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+						} else {
+							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
+						}
+					}, 'json');
+				}
+
+				if (origin_lat && origin_lon && typeof dest_lat !== 'undefined' && typeof dest_lon !== 'undefined') {
+					hitungJarakDanTampilkan();
+				}
+			}, 'json');
+		}
+
+		function destination_address() {
+			var destination_address = $("#destination_address").val();
+			$.post("ajax/geoapify.php", {
+				address: destination_address,
+				type: 'destination'
+			}, function (data) {
+				if (data.status !== "success") {
+					alert("Gagal mendapatkan lokasi tujuan: " + data.message);
+					console.warn("Response error:", data);
+
+					// Reset koordinat dan sembunyikan map
+					dest_lat = null;
+					dest_lon = null;
+					$("#destination_lat").val('');
+					$("#destination_lon").val('');
+					$("#destination_map").hide();
+					if (window.destinationMap) {
+						window.destinationMap.remove();
+						window.destinationMap = null;
+					}
+					return;
+				}
+
+				// Sukses mendapatkan koordinat
+				dest_lat = data.lat;
+				dest_lon = data.lon;
+
+				$('#destination_map').css('display', 'block');
+
+				if (window.destinationMap) {
+					window.destinationMap.remove();
+				}
+
+				window.destinationMap = L.map('destination_map').setView([dest_lat, dest_lon], 15);
+				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '© OpenStreetMap contributors'
+				}).addTo(window.destinationMap);
+
+				let marker = L.marker([dest_lat, dest_lon], { draggable: true }).addTo(window.destinationMap)
+					.bindPopup("Klik di peta untuk ubah titik tujuan").openPopup();
+
+				marker.on('dragend', function (e) {
+					let pos = e.target.getLatLng();
+					updateDestinationLocation(pos.lat, pos.lng, marker);
+				});
+
+				window.destinationMap.on('click', function (e) {
+					let lat = e.latlng.lat;
+					let lon = e.latlng.lng;
+					marker.setLatLng([lat, lon]);
+					updateDestinationLocation(lat, lon, marker);
+				});
+
+				function updateDestinationLocation(lat, lon, markerRef) {
+					dest_lat = lat;
+					dest_lon = lon;
+
+					$("#destination_lat").val(lat.toFixed(6));
+					$("#destination_lon").val(lon.toFixed(6));
+
+					$.post("ajax/geoapify.php", {
+						lat: lat,
+						lon: lon
+					}, function (res) {
+						if (res.status === "success") {
+							let newAddress = res.formatted;
+							$("#destination_address").val(newAddress);
+							markerRef.bindPopup(`Tujuan diperbarui:<br>${newAddress}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+						} else {
+							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
+						}
+					}, 'json');
+				}
+
+				if (origin_lat && origin_lon && dest_lat && dest_lon) {
+					hitungJarakDanTampilkan();
+				}
+			}, 'json');
+		}
+		function hitungJarakDanTampilkan() {
+			const jarak = hitungJarak(origin_lat, origin_lon, dest_lat, dest_lon);
+			$('#distance_result').val(jarak.toFixed(2));
+		}
+
+		function hitungJarak(lat1, lon1, lat2, lon2) {
+			const R = 6371; // radius bumi dalam KM
+			const dLat = toRad(lat2 - lat1);
+			const dLon = toRad(lon2 - lon1);
+
+			const rLat1 = toRad(lat1);
+			const rLat2 = toRad(lat2);
+
+			const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+				Math.cos(rLat1) * Math.cos(rLat2) *
+				Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+			const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+			const d = R * c;
+			return d;
+		}
+
+		function toRad(value) {
+			return value * Math.PI / 180;
+		}
     </script>
 	
   </head>
@@ -355,124 +619,126 @@ if($mode == 'View')
 		</aside>	
 		
 		<form method="post" name ="myform"  class="form-horizontal" onsubmit="return checkvalue(this)" > 
-		<div class="content-wrapper" style="min-height:750px">
-			<br>
-			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Quotation</b></font></h1></li>					
-			</ol>
-			<br>
-			<?php if($cat != '') {?>
-			<div class="callout callout-Danger" style="margin-bottom: 0!important;width:98%;color:#fff">
-				<i class="icon 	fa fa-info-circle" style="color:#000;font-size:16px"></i>&nbsp;&nbsp;<font color="#000"><?php echo "$cat"; ?></font>
-			</div>
-			<?php }?>
-			
-			<div class="col-md-6" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:180px">					
-					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;
-					text-align:left;padding:5px;margin-bottom:1px">							
-						<b><i class="fa fa-list"></i>&nbsp;Data Quotation</b>
-					</div>
-					<br>
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>#Quo No :</b></span>
-						<input type="text"  id ="quo_no" name="quo_no" value="<?php echo $quo_no; ?>" 
-						style="text-align: center;width:16%" readonly <?php echo $dis;?> >						
-						<input type="hidden"  id ="id_quo" name="id_quo" value="<?php echo $id_quo; ?>" >	
-						<input type="hidden"  id ="mode" name="mode" value="<?php echo $mode; ?>" >
-					</div>
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
-						<input type="text"  id ="quo_date" name="quo_date" value="<?php echo $quo_date; ?>" 
-						style="text-align: center;width:16%" readonly <?php echo $dis;?>  >
-					</div>				
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Customer :</b></span>
-						<input type="text"  id ="nama_cust" name="nama_cust" value="<?php echo $nama_cust;?>" style="text-align: left;width:70.5%" readonly  >
-						<button class="btn btn-block btn-primary" id="btn_custx"
-							style="padding:6px;margin-top:-3px;border-radius:2px;margin-left:-1px" type="button" 
-							onClick="javascript:TampilCust()" <?php echo $disx;?> >
-							<span class="glyphicon glyphicon-search"></span>
-						</button>
-						<input type="hidden" id="id_cust"  name="id_cust" value="<?php echo $id_cust;?>" 
-						style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />		
-					</div>
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Sales :</b></span>
-							<select id="sales" name="sales" style="width: 70%;padding:4px">
-								<?php
-								$t1="select * from m_sales_tr where status = '1' order by nama  ";
-								$h1=mysqli_query($koneksi, $t1);       
-								while ($d1=mysqli_fetch_array($h1)){?>
-								<option value="<?php echo $d1['nama'];?>" ><?php echo $d1['nama'];?></option>
-								<?php }?>
-								<option value="<?php echo $sales;?>" selected><?php echo $sales;?></option>
-							</select>
-						</div>		
-					<br>	
+			<div class="content-wrapper" style="min-height:750px">
+				<br>
+				<ol class="breadcrumb">
+					<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Quotation</b></font></h1></li>					
+				</ol>
+				<br>
+				<?php if($cat != '') {?>
+				<div class="callout callout-Danger" style="margin-bottom: 0!important;width:98%;color:#fff">
+					<i class="icon 	fa fa-info-circle" style="color:#000;font-size:16px"></i>&nbsp;&nbsp;<font color="#000"><?php echo "$cat"; ?></font>
 				</div>
-            </div>
-			<div class="col-md-6" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:180px">					
-					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;
-					text-align:left;padding:5px;margin-bottom:1px">							
-						<b><i class="fa fa-list"></i>&nbsp;Remarks</b>
-					</div>
-					<br>
-					<div style="width:100%;" class="input-group">
-						
-						<textarea name="ket" id="ket"
-						style="margin-left:10px;resize:none;width: 97%; height: 105px; font-size: 11px; line-height: 12px; 
-						border: 1px solid #4; padding: 5px;" <?php echo $dis;?> ><?php echo $ket; ?></textarea>
-					</div>
-					<br>	
-				</div>
-            </div>
-			<?php if($mode != 'Add'){?>	
-				<div class="col-md-12" >
-					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;min-height:95px">
-						<?php if($mode == 'Edit'){?>
-							<button class="btn btn-block btn-success" 
-								style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px" type="button" 
-								onClick="javascript:TampilData()"  <?php echo $dis;?> <?php echo $dis_copy;?> >
-								<span class="fa  fa-plus-square"></span>
-								<b>Add Data</b>
-							</button>
-						<?php }?>
-						<div class="table-responsive mailbox-messages" style="min-height:10px">									
-							<div class="tampil_data"></div>
-						</div>	
-					</div>
-				</div>
-			<?php }?>	
-			<?php
-				$link = "quo.php?id=$xy1";
-				$xy1="$id_jo";
-				$idx=base64_encode($xy1);
-			?>
-			<div class="col-md-12" >
-				<div style="width:98%;background:none;margin-left:0;margin-top:0px;border-top:0px;border-bottom:0px" class="input-group">
-					<?php if($mode != 'View'){?>
-				<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
 				<?php }?>
-				<button type="button" class="btn btn-danger" onclick="window.location.href='<?php echo $link; ?>'"><span class="fa fa-backward"></span>&nbsp;&nbsp;<b>Back</b></button>	
 				
+				<div class="col-md-6" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:180px">					
+						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;
+						text-align:left;padding:5px;margin-bottom:1px">							
+							<b><i class="fa fa-list"></i>&nbsp;Data Quotation</b>
+						</div>
+						<br>
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>#Quo No :</b></span>
+							<input type="text"  id ="quo_no" name="quo_no" value="<?php echo $quo_no; ?>" 
+							style="text-align: center;width:16%" readonly <?php echo $dis;?> >						
+							<input type="hidden"  id ="id_quo" name="id_quo" value="<?php echo $id_quo; ?>" >	
+							<input type="hidden"  id ="mode" name="mode" value="<?php echo $mode; ?>" >
+						</div>
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
+							<input type="text"  id ="quo_date" name="quo_date" value="<?php echo $quo_date; ?>" 
+							style="text-align: center;width:16%" readonly <?php echo $dis;?>  >
+						</div>				
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Customer :</b></span>
+							<input type="text"  id ="nama_cust" name="nama_cust" value="<?php echo $nama_cust;?>" style="text-align: left;width:70.5%" readonly  >
+							<button class="btn btn-block btn-primary" id="btn_custx"
+								style="padding:6px;margin-top:-3px;border-radius:2px;margin-left:-1px" type="button" 
+								onClick="javascript:TampilCust()" <?php echo $disx;?> >
+								<span class="glyphicon glyphicon-search"></span>
+							</button>
+							<input type="hidden" id="id_cust"  name="id_cust" value="<?php echo $id_cust;?>" 
+							style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />		
+						</div>
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Sales :</b></span>
+								<select id="sales" name="sales" style="width: 70%;padding:4px">
+									<?php
+									$t1="select * from m_sales_tr where status = '1' order by nama  ";
+									$h1=mysqli_query($koneksi, $t1);       
+									while ($d1=mysqli_fetch_array($h1)){?>
+									<option value="<?php echo $d1['nama'];?>" ><?php echo $d1['nama'];?></option>
+									<?php }?>
+									<option value="<?php echo $sales;?>" selected><?php echo $sales;?></option>
+								</select>
+							</div>		
+						<br>	
+					</div>
 				</div>
-			</div>
-			
-			<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
+				<div class="col-md-6" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:180px">					
+						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;
+						text-align:left;padding:5px;margin-bottom:1px">							
+							<b><i class="fa fa-list"></i>&nbsp;Remarks</b>
+						</div>
+						<br>
+						<div style="width:100%;" class="input-group">
+							
+							<textarea name="ket" id="ket"
+							style="margin-left:10px;resize:none;width: 97%; height: 105px; font-size: 11px; line-height: 12px; 
+							border: 1px solid #4; padding: 5px;" <?php echo $dis;?> ><?php echo $ket; ?></textarea>
+						</div>
+						<br>	
+					</div>
 				</div>
+				<?php if($mode != 'Add'){?>	
+					<div class="col-md-12" >
+						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;min-height:95px">
+							<?php if($mode == 'Edit'){?>
+								<button class="btn btn-block btn-success" 
+									style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px" type="button" 
+									onClick="javascript:TampilData()"  <?php echo $dis;?> <?php echo $dis_copy;?> >
+									<span class="fa  fa-plus-square"></span>
+									<b>Add Data</b>
+								</button>
+							<?php }?>
+							<div class="table-responsive mailbox-messages" style="min-height:10px">									
+								<div class="tampil_data"></div>
+							</div>	
+						</div>
+					</div>
+				<?php }?>	
+				<?php
+					$link = "quo.php?id=$xy1";
+					$xy1="$id_jo";
+					$idx=base64_encode($xy1);
+				?>
+				<div class="col-md-12" >
+					<div style="width:98%;background:none;margin-left:0;margin-top:0px;border-top:0px;border-bottom:0px" class="input-group">
+						<?php if($mode != 'View'){?>
+					<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save SO</b>&nbsp;&nbsp;</button>	
+					<?php }?>
+					<button type="button" class="btn btn-danger" onclick="window.location.href='<?php echo $link; ?>'"><span class="fa fa-backward"></span>&nbsp;&nbsp;<b>Back</b></button>	
+					
+					</div>
+				</div>
+				
 				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-		</div>		
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+			</div>		
 		</form>
 	</div>	
 	
+
+	<!-- MODAL NAMBAH SO  -->
 	<div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">
@@ -483,11 +749,9 @@ if($mode == 'View')
 								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Order</b>
 							</div>	
 							<br>
-						
-							
-							
+				
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Asal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
 								<select id="id_asal" name="id_asal" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_kota_tr where status = '1' order by nama_kota  ";
@@ -496,11 +760,20 @@ if($mode == 'View')
 									<option value="<?php echo $d1['id_kota'];?>" ><?php echo $d1['nama_kota'];?></option>
 									<?php }?>
 								</select>
-								<input type="hidden" id="modex"   value=""  />
-								<input type="hidden" id="idx"   value=""  />
+								<input type="hidden" id="modex" value=""/>
+								<input type="hidden" id="idx" value=""/>
 							</div>	
+
+							<!-- -------------- ORIGIN CHECK LOCATION -------------- -->
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tujuan :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b></b></span>
+								<textarea id="origin_address" class="form-textarea" rows="3" style="width:80%" placeholder="Push Enter To Search Origin"></textarea>
+								<div id="origin_map" style="height: 200px; width: 80%;display: none;"></div>
+								<br>
+							</div>
+
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
 								<select id="id_tujuan" name="id_tujuan" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_kota_tr where status = '1' order by nama_kota  ";
@@ -510,8 +783,22 @@ if($mode == 'View')
 									<?php }?>
 								</select>	
 							</div>
+							<!-- -------------- DESTINATION CHECK LOCATION -------------- -->
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Jenis :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b></b></span>
+								<textarea id="destination_address" class="form-textarea" rows="3" style="width:80%" placeholder="Push Enter To Search Destination"></textarea>
+								<div id="destination_map" style="height: 200px; width: 80%;display: none;"></div>
+								<input type="hidden" id="destination_lat" readonly placeholder="Latitude" />
+								<input type="hidden" id="destination_lon" readonly placeholder="Longitude" />
+								<br>
+							</div>
+
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Distance :</b></span>
+								<input type="text" id="distance_result" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
 								<select id="jenis" name="jenis" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_jenis_mobil_tr where status = '1' order by nama   ";
@@ -523,9 +810,14 @@ if($mode == 'View')
 							</div>
 							
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Biaya Kirim :</b></span>
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Shipping Cost :</b></span>
 								<input type="text" id="biaya_kirim" style="text-align: right;width:20%;" 
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  >
+								<!-- <input type="hidden" id="km" style="text-align: right;width:20%;"> -->
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>KM :</b></span>
+								<input type="number" id="km" style="text-align: right;width:20%;"  readonly>
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>

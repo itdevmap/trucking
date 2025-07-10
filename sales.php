@@ -227,7 +227,7 @@ else
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Sales :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Sales Name :</b></span>
 								<input type="text" id="nama"  value="" style="text-transform: uppercase;
 								text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
 								<input type="hidden" id="id"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	

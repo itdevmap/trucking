@@ -246,7 +246,7 @@ else
 					<div id="tabs5" >
 						<ul> 
 							<li id="current"><?php echo "<a href=$link1>"; ?><span><b>Data Quotation </b></span></a></li> 
-							<li ><?php echo "<a href=$link2>"; ?><span><b>Data Stock Barang</b></span></a></li>
+							<li ><?php echo "<a href=$link2>"; ?><span><b>Data Stock Item</b></span></a></li>
 						</ul>
 					</div>	
 				</div>					
@@ -259,7 +259,7 @@ else
 					</div>
 					<br>
 					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
 						<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
 						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
 						&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
@@ -280,7 +280,7 @@ else
 						<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">							
 							<option>Customer</option>
 							<option>Quo No</option>
-							<option>No Kontrak</option>
+							<option>No Contract</option>
 							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
@@ -291,7 +291,7 @@ else
 						<select size="1" id="field1"  onchange="ReadData(1)" name="field1" style="padding:4px;margin-right:2px;width: 85px">
 							<option>Customer</option>
 							<option>Quo No</option>
-							<option>No Kontrak</option>
+							<option>No Contract</option>
 							<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
 						</select>
 						<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
@@ -373,7 +373,7 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Barang</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Item Data</b>
 							</div>	
 							<br>	
 							<div style="width:100%;" class="input-group">
@@ -402,23 +402,23 @@ else
 								<input type="text" id="unit"  value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" />	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Panjang :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Length :</b></span>
 								<input type="text" id="panjang"  onkeypress="return isNumber(event)" value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" />	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Lebar :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Wide :</b></span>
 								<input type="text" id="lebar"  onkeypress="return isNumber(event)" value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" />	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tinggi :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Height :</b></span>
 								<input type="text" id="tinggi"  onkeypress="return isNumber(event)" value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" />	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Berat :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Weight :</b></span>
 								<input type="text" id="berat"  onkeypress="return isNumber(event)" value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" /> 	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Harga Dasar :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Base Cost :</b></span>
 								<input type="text" id="harga"  onkeypress="return isNumber(event)" onBlur ="this.value=Rupiah(this.value);" value="" style="text-align: right;width:20%;border:1px solid rgb(169, 169, 169)" />	
 							</div>
 							<div style="width:100%;" class="input-group">
@@ -457,7 +457,7 @@ else
 									style="text-align: left;width:200px" onkeypress="ListCust()" >
 									<button class="btn btn-block btn-primary" 
 									style="margin:0px;margin-left:-3px;margin-bottom:3px;border-radius:2px;padding:5px" 
-									onClick="javascript:ListCust()" ">
+									onClick="javascript:ListCust()">
 									<span class="glyphicon glyphicon-search"></span>
 									</button>
 									<button class="btn btn-block btn-danger" 

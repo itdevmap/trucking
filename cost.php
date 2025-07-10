@@ -157,7 +157,7 @@ else
 		<div class="content-wrapper" style="min-height:750px">
 			<br>
 			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Biaya</b></font></h1></li>					
+				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Cost Data</b></font></h1></li>					
 			</ol>
 			<br>
 			<div class="col-md-12" >
@@ -167,7 +167,7 @@ else
 					</div>
 					<br>					
 					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Find Biaya :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Find Cost :</b></span>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
 						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
@@ -244,7 +244,7 @@ else
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Biaya :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Cost Name :</b></span>
 								<input type="text" id="cost_name"  value="" style="text-transform: uppercase;
 								text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
 								<input type="hidden" id="id"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	

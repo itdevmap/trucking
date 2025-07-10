@@ -27,8 +27,8 @@ if ($_GET['type'] == "read")
 				<tr>	
 					<th rowspan="2" width="10%" style="text-align: center;">'.$tahun.'</th>		
 					<th colspan="'.$jml_sales.'" width="64%" style="text-align: center;">TOTAL REVENUE</th>	
-					<th rowspan="2" width="10%" style="text-align: center;">TOTAL PENDAPATAN</th>	
-					<th rowspan="2" width="10%" style="text-align: center;">TOTAL BIAYA</th>	
+					<th rowspan="2" width="10%" style="text-align: center;">TOTAL REVENUE</th>	
+					<th rowspan="2" width="10%" style="text-align: center;">TOTAL COST</th>	
 					<th rowspan="2" width="8%" style="text-align: center;">RATIO<br>(%)</th>		
 				</tr>';
 				$data .= '<tr>';
@@ -50,29 +50,29 @@ if ($_GET['type'] == "read")
 			$bln = $x;
 		}
 		if($bln == '01'){
-			$bulan = 'Januari';
+			$bulan = 'January';
 		}else if($bln == '02'){
-			$bulan = 'Februari';
+			$bulan = 'February';
 		}else if($bln == '03'){
-			$bulan = 'Maret';
+			$bulan = 'March';
 		}else if($bln == '04'){
 			$bulan = 'April';
 		}else if($bln == '05'){
-			$bulan = 'Mei';
+			$bulan = 'May';
 		}else if($bln == '06'){
-			$bulan = 'Juni';
+			$bulan = 'Juny';
 		}else if($bln == '07'){
-			$bulan = 'Juli';
+			$bulan = 'July';
 		}else if($bln == '08'){
-			$bulan = 'Agustus';
+			$bulan = 'August';
 		}else if($bln == '09'){
 			$bulan = 'September';
 		}else if($bln == '10'){
-			$bulan = 'Oktober';
+			$bulan = 'October';
 		}else if($bln == '11'){
 			$bulan = 'November';
 		}else if($bln == '12'){
-			$bulan = 'Desember';
+			$bulan = 'December';
 		}
 		$data .= '<tr>							
 			<td style="text-align:left">&nbsp;'.$bulan.'</td>';	
@@ -193,9 +193,9 @@ if ($_GET['type'] == "read")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="70%" style="text-align: center;">NO. POLISI</th>
-					<th rowspan="2" width="10%" style="text-align: center;">PENDAPATAN</th>
-					<th rowspan="2" width="10%" style="text-align: center;">BIAYA</th>
+					<th rowspan="2" width="70%" style="text-align: center;">NO. POLICE</th>
+					<th rowspan="2" width="10%" style="text-align: center;">REVENUE</th>
+					<th rowspan="2" width="10%" style="text-align: center;">COST</th>
 					<th rowspan="2" width="7%" style="text-align: center;">MARGIN</th>
 				</tr>
 			</thead>';		
@@ -204,7 +204,7 @@ if ($_GET['type'] == "read")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -268,7 +268,7 @@ if ($_GET['type'] == "read")
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
 					<th rowspan="2" width="19%" style="text-align: center;">CUSTOMER</th>
-					<th colspan="12" width="72%" style="text-align: center;">BULAN</th>
+					<th colspan="12" width="72%" style="text-align: center;">MONTH</th>
 					<th rowspan="2" width="6%" style="text-align: center;">TOTAL</th>
 				</tr>
 				<tr>				
@@ -276,14 +276,14 @@ if ($_GET['type'] == "read")
 					<th width="6%" style="text-align: center;">FEB</th>
 					<th width="6%" style="text-align: center;">MAR</th>
 					<th width="6%" style="text-align: center;">APR</th>
-					<th width="6%" style="text-align: center;">MEI</th>
+					<th width="6%" style="text-align: center;">MAY</th>
 					<th width="6%" style="text-align: center;">JUN</th>
 					<th width="6%" style="text-align: center;">JUL</th>
 					<th width="6%" style="text-align: center;">AUG</th>
 					<th width="6%" style="text-align: center;">SEP</th>
-					<th width="6%" style="text-align: center;">OKT</th>
+					<th width="6%" style="text-align: center;">OCT</th>
 					<th width="6%" style="text-align: center;">NOV</th>
-					<th width="6%" style="text-align: center;">DES</th>
+					<th width="6%" style="text-align: center;">DEC</th>
 				</tr>
 			</thead>';		
 	
@@ -294,7 +294,7 @@ if ($_GET['type'] == "read")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -374,7 +374,7 @@ if ($_GET['type'] == "read")
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
 					<th rowspan="2" width="19%" style="text-align: center;">CUSTOMER</th>
-					<th colspan="12" width="72%" style="text-align: center;">BULAN</th>
+					<th colspan="12" width="72%" style="text-align: center;">MONTH</th>
 					<th rowspan="2" width="6%" style="text-align: center;">TOTAL</th>
 				</tr>
 				<tr>				
@@ -382,14 +382,14 @@ if ($_GET['type'] == "read")
 					<th width="6%" style="text-align: center;">FEB</th>
 					<th width="6%" style="text-align: center;">MAR</th>
 					<th width="6%" style="text-align: center;">APR</th>
-					<th width="6%" style="text-align: center;">MEI</th>
+					<th width="6%" style="text-align: center;">MAY</th>
 					<th width="6%" style="text-align: center;">JUN</th>
 					<th width="6%" style="text-align: center;">JUL</th>
 					<th width="6%" style="text-align: center;">AUG</th>
 					<th width="6%" style="text-align: center;">SEP</th>
-					<th width="6%" style="text-align: center;">OKT</th>
+					<th width="6%" style="text-align: center;">OCT</th>
 					<th width="6%" style="text-align: center;">NOV</th>
-					<th width="6%" style="text-align: center;">DES</th>
+					<th width="6%" style="text-align: center;">DEC</th>
 				</tr>
 			</thead>';		
 	
@@ -400,7 +400,7 @@ if ($_GET['type'] == "read")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -479,7 +479,7 @@ if ($_GET['type'] == "read")
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
 					<th rowspan="2" width="19%" style="text-align: center;">CUSTOMER</th>
-					<th colspan="12" width="72%" style="text-align: center;">BULAN</th>
+					<th colspan="12" width="72%" style="text-align: center;">MONTH</th>
 					<th rowspan="2" width="6%" style="text-align: center;">TOTAL</th>
 				</tr>
 				<tr>				
@@ -487,14 +487,14 @@ if ($_GET['type'] == "read")
 					<th width="6%" style="text-align: center;">FEB</th>
 					<th width="6%" style="text-align: center;">MAR</th>
 					<th width="6%" style="text-align: center;">APR</th>
-					<th width="6%" style="text-align: center;">MEI</th>
+					<th width="6%" style="text-align: center;">MAY</th>
 					<th width="6%" style="text-align: center;">JUN</th>
 					<th width="6%" style="text-align: center;">JUL</th>
 					<th width="6%" style="text-align: center;">AUG</th>
 					<th width="6%" style="text-align: center;">SEP</th>
-					<th width="6%" style="text-align: center;">OKT</th>
+					<th width="6%" style="text-align: center;">OCT</th>
 					<th width="6%" style="text-align: center;">NOV</th>
-					<th width="6%" style="text-align: center;">DES</th>
+					<th width="6%" style="text-align: center;">DEC</th>
 				</tr>
 			</thead>';		
 	
@@ -505,7 +505,7 @@ if ($_GET['type'] == "read")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -584,8 +584,8 @@ if ($_GET['type'] == "read")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="10%" style="text-align: center;">NO. POLISI</th>
-					<th colspan="12" width="72%" style="text-align: center;">JUMLAH SPK</th>
+					<th rowspan="2" width="10%" style="text-align: center;">NO. POLICE</th>
+					<th colspan="12" width="72%" style="text-align: center;">SPK QUANTITY</th>
 					<th rowspan="2" width="6%" style="text-align: center;">TOTAL</th>
 				</tr>
 				<tr>				
@@ -593,14 +593,14 @@ if ($_GET['type'] == "read")
 					<th width="6%" style="text-align: center;">FEB</th>
 					<th width="6%" style="text-align: center;">MAR</th>
 					<th width="6%" style="text-align: center;">APR</th>
-					<th width="6%" style="text-align: center;">MEI</th>
+					<th width="6%" style="text-align: center;">MAY</th>
 					<th width="6%" style="text-align: center;">JUN</th>
 					<th width="6%" style="text-align: center;">JUL</th>
 					<th width="6%" style="text-align: center;">AUG</th>
 					<th width="6%" style="text-align: center;">SEP</th>
-					<th width="6%" style="text-align: center;">OKT</th>
+					<th width="6%" style="text-align: center;">OCT</th>
 					<th width="6%" style="text-align: center;">NOV</th>
-					<th width="6%" style="text-align: center;">DES</th>
+					<th width="6%" style="text-align: center;">DEC</th>
 				</tr>
 			</thead>';		
 	
@@ -608,7 +608,7 @@ if ($_GET['type'] == "read")
 			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {

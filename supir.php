@@ -382,7 +382,7 @@ else
 		<div class="content-wrapper" style="min-height:750px">
 			<br>
 			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Supir</b></font></h1></li>					
+				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Driver Data</b></font></h1></li>					
 			</ol>
 			<br>
 			<div class="col-md-12" >
@@ -392,7 +392,7 @@ else
 					</div>
 					<br>		
 					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Find Supir :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Find Driver :</b></span>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
 						style="text-align: left;margin-left:-5px;width:200px" onkeypress="ReadData(1)" >
 						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >						
@@ -463,11 +463,11 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Supir</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Driver Data</b>
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Name :</b></span>
 								<input type="text"  id ="nama" name="nama" value=""
 								style="text-transform: uppercase;text-align: left;width:80%"  >	
 								<input type="hidden" id="id"   value=""  />	
@@ -482,21 +482,21 @@ else
 								style="text-transform: uppercase;text-align: left;width:80%" >
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;"><b>Tempat Tgl Lahir :</b></span>
+								<span class="input-group-addon" style="text-align:right;"><b>Date place of birth :</b></span>
 								<input type="text"  id ="tempat_lahir" name="tempat_lahir" value="" 
 								style="text-transform: uppercase;text-align: left;width:57.3%" >&nbsp;,
 								<input type="text"  id ="tanggal_lahir" name="tanggal_lahir" value="" 
 								style="text-align: center;width:20%"   >
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Jenis Kelamin :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Gender :</b></span>
 								<select id="kelamin" name="kelamin" style="width: 80%;height:26px">
-									<option >Laki-laki</option>
-									<option >Perempuan</option>
+									<option >Male</option>
+									<option >Female</option>
 								</select>						
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Agama :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Religion :</b></span>
 								<select id="agama" name="agama" style="width: 80%;height:26px" >
 									<?php
 									$tampil1="select * from m_agama order by id  ";
@@ -507,19 +507,19 @@ else
 								</select>						
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Status Perkawinan :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Marital Status :</b></span>
 								<select id="perkawinan" name="perkawinan" style="width: 80%;height:26px" >
-									<option >Nikah</option>
-									<option >Belum Nikah</option>
-									<option >Duda</option>
-									<option >Janda</option>
+									<option >Marry</option>
+									<option >Not married</option>
+									<option >Widower (Duda)</option>
+									<option >Widow (Janda)</option>
 								</select>						
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;"><b>Alamat :</b></span>
+								<span class="input-group-addon" style="text-align:right;"><b>Address :</b></span>
 								<textarea name="alamat" id="alamat"
 								style="resize:none;width: 80%; height: 58px; font-size: 11px; line-height: 12px; 
-								border: 1px solid #4; padding: 5px;"  ></textarea>
+								border: 1px solid #444; padding: 5px;"  ></textarea>
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;"><b>No. Telp :</b></span>
@@ -532,20 +532,20 @@ else
 								style="text-transform: uppercase;text-align: left;width:80%"  >
 							</div>	
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Jenis SIM :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type of SIM :</b></span>
 								<select id="jenis_sim" name="jenis_sim" style="width: 80%;height:26px">
 									<option >A</option>
 									<option >BI</option>
 									<option >BII</option>
 									<option >C</option>
 									<option >D</option>
-									<option >A Umum</option>
-									<option >BI Umum</option>
-									<option >BII Umum</option>
+									<option >A General</option>
+									<option >BI General</option>
+									<option >BII General</option>
 								</select>						
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;"><b>Masa Berlaku SIM :</b></span>
+								<span class="input-group-addon" style="text-align:right;"><b>Validity period of SIM :</b></span>
 								<input type="text"  id ="masa_berlaku" name="masa_berlaku" value="" 
 								style="text-align: center;width:20%"   >
 							</div>
@@ -589,7 +589,7 @@ else
 								<div class="file-tab panel-body">
 									<div>
 										<button type="button" class="btn btn-default btn-file">
-											<span>Pilih Photo</span>
+											<span>Select Photo</span>
 											<input type="file" name="image" id ="uploadImage" >											
 										</button>	
 										<button type="button" class="btn btn-default">Remove</button>		
@@ -599,7 +599,7 @@ else
 							</div>							
 							<div style="width:100%" class="input-group">
 								<span class="input-group-addon" style="text-align:left;background:none;min-width:150px">
-									<button type="submit" class="btn btn-success" >&nbsp;&nbsp;Simpan&nbsp;&nbsp;</button>	
+									<button type="submit" class="btn btn-success" >&nbsp;&nbsp;Save&nbsp;&nbsp;</button>	
 									<button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>	
 								</span>												
 							</div>	
@@ -624,7 +624,7 @@ else
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Name :</b></span>
 								<input type="text"  id ="nama3" name="nama" value="<?echo $nama; ?>"
 								style="text-transform: uppercase;text-align: left;width:80%" disabled >	
 								<input type="hidden" id="id3"  name="id3" value=""   />	
@@ -634,7 +634,7 @@ else
 								<input type='file' name='ktp' style="height:26px;padding:4px;width:80%;font-family:tahoma;font-size:11px" id='file' class='form-control' ><br>
 							</div>	
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Kartu Keluarga :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Family card (KK):</b></span>
 								<input type='file' name='kk' style="height:26px;padding:4px;width:80%;font-family:tahoma;font-size:11px" id='file' class='form-control' ><br>
 							</div>	
 							<div style="width:100%;" class="input-group">

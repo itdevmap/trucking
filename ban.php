@@ -416,7 +416,7 @@ else
 		<div class="content-wrapper" style="min-height:750px">
 			<br>
 			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Monitoring Ban</b></font></h1></li>					
+				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Tire Monitoring Data</b></font></h1></li>					
 			</ol>
 			<br>
 			
@@ -428,7 +428,7 @@ else
 					</div>
 					<br>
 					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
 						<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
 						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
 						&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
@@ -439,9 +439,9 @@ else
 						<span class="input-group-addon" style="text-align:right;"><b>Filter By</b></span>
 						<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">
 							<option>No Seri</option>
-							<option>Jenis</option>
-							<option>Merk</option>
-							<option>No Polisi</option>
+							<option>Type</option>
+							<option>Brand</option>
+							<option>No Police</option>
 							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
@@ -475,13 +475,13 @@ else
 								style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = ""
 								onClick="javascript:Download()">
 								<span class="fa fa-file-text"></span>
-								<b>Download Rekap</b>
+								<b>Download Recap</b>
 							</button>	
 							<button class="btn btn-block btn-warning" 
 								style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = ""
 								onClick="javascript:DownloadDetil()">
 								<span class="fa fa-file-text"></span>
-								<b>Download Detil</b>
+								<b>Download Detail</b>
 							</button>	
 						</span>
 						<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
@@ -527,32 +527,32 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Ban Baru</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;New Tire Data</b>
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tanggal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
 								<input type="text" id="tanggal"  value="" style="padding:4px;text-align: center;width:98px;border:1px solid rgb(169, 169, 169);background:#eee"  />
 							</div>							
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Seri Ban :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Tire Series:</b></span>
 								<input type="text" id="no_seri"  value="" style="text-transform: uppercase;
 								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Jenis Ban :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tire Type :</b></span>
 								<select id="jenis_ban"  style="width: 80%;padding:4px">
 									<option value="ORI" >ORI</option>
 									<option value="VULL" >VULL</option>
 								</select>	
 							</div>	
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Merk Ban :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tire Brand :</b></span>
 								<input type="text" id="merk_ban"  value="" style="text-transform: uppercase;
 								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />		
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ketebalan Ban :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tire Thickness :</b></span>
 								<input type="text" id="ketebalan_ban"  value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)" />	
 							</div>	
 							<div style="width:100%;" class="input-group">
@@ -560,7 +560,7 @@ else
 								<input type="text" id="km_ban"  value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" />	
 							</div>							
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Polisi :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Police :</b></span>
 								<select id="id_mobil"  style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_mobil_tr where status = '1' order by no_polisi  ";
@@ -573,7 +573,7 @@ else
 								<input type="hidden" id="mode"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
 							</div>		
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Posisi Ban :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tire Position :</b></span>
 								<input type="text" id="posisi_ban"  value="" style="text-transform: uppercase;
 								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
 							</div>
@@ -601,7 +601,7 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Rotasi</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Rotation Data</b>
 							</div>	
 							<div  class="input-group" style="background:none !important;">
 								<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background: none;">									
@@ -634,21 +634,21 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Rotasi Ban</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Tire Rotation Data</b>
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tanggal :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
 								<input type="text" id="tanggal_rotasi"  value="" style="padding:4px;text-align: center;width:85px;border:1px solid rgb(169, 169, 169);background:#eee"  />
 								<input type="hidden" id="id_ban"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Seri Ban :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Tire Series :</b></span>
 								<input type="text" id="no_seri_rotasi"  value="" style="text-transform: uppercase;
 								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" readonly />	
 							</div>	
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Polisi :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Police :</b></span>
 								<select id="id_mobil_rotasi"  style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_mobil_tr where status = '1' order by no_polisi  ";
@@ -659,18 +659,18 @@ else
 								</select>	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Jenis Pekerjaan :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type of work :</b></span>
 								<input type="text" id="jenis_pekerjaan"  value="" style="text-transform: uppercase;
 								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
 							</div>	
 											
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Posisi :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Position :</b></span>
 								<input type="text" id="posisi_rotasi"  value="" style="text-transform: uppercase;
 								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ketebalan Ban :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tire Thickness :</b></span>
 								<input type="text" id="ketebalan_rotasi"  value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)" />	
 							</div>
 							<div style="width:100%;" class="input-group">
@@ -678,7 +678,7 @@ else
 								<input type="text" id="km_rotasi"  value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" />	
 							</div>	
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Keterangan :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Information :</b></span>
 								<input type="text" id="ket"  value="" style="text-transform: uppercase;
 								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />		
 							</div>

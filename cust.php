@@ -403,7 +403,7 @@ else
 								<span class="input-group-addon" style="text-align:right;"><b>Address :</b></span>
 								<textarea name="alamat" id="alamat"
 								style="resize:none;width: 80%; height: 84px; font-size: 11px; line-height: 12px; 
-								border: 1px solid #4; padding: 5px;" ></textarea>
+								border: 1px solid #444; padding: 5px;" ></textarea>
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Phone :</b></span>
@@ -510,7 +510,7 @@ else
 								</select>		
 							</div>	
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Jenis Mobil :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Car Type :</b></span>
 								<select size="1" id="jenis_mobil"  style="padding:4px;margin-right:2px;width:75%">
 									<?php 
 									$t1="select * from m_jenis_mobil_tr where status = '1'  order by nama";

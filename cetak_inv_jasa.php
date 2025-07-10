@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 require('pdf/code128.php');
 include "koneksi.php"; 
@@ -175,6 +176,7 @@ $pdf->Cell(10,4,"KETERANGAN:",0,1,'L');
 $pdf->setX(5);
 $pdf->MultiCell(100,3,"$ketx",0,1,'L');
 	
+ob_end_clean();
 $pdf->Output();
 
 ?>

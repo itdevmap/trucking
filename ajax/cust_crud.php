@@ -49,7 +49,7 @@ if ($_GET['type'] == "read")
 	$SQL = "select * from m_cust_tr where nama_cust LIKE '%$search_name%'  order by nama_cust LIMIT $offset, $jmlperhalaman";	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -205,7 +205,7 @@ if ($_GET['type'] == "read")
 	$id = $_POST['id'];	
     $query = "select * from m_cust_tr where id_cust  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -317,7 +317,7 @@ else if($_GET['type'] == "List_Rate")
 		}
 		if (!$hasil) {
 	        			
-			//exit(mysqli_error());
+			//exit(mysqli_error($koneksi));
 			echo "Rate has found...!";
 	    }
 		else
@@ -330,7 +330,7 @@ else if($_GET['type'] == "List_Rate")
 	$id = $_POST['id'];	
     $query = "select * from m_cust_rate_tr where id_rate  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysql_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -349,7 +349,7 @@ else if($_GET['type'] == "List_Rate")
 	$id = $_POST['id']; 
     $query = "DELETE FROM m_cust_rate_tr WHERE id_rate = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }	
 
 	
@@ -371,7 +371,7 @@ else if($_GET['type'] == "List_Rate")
 	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -420,7 +420,7 @@ else if($_GET['type'] == "List_Rate")
 	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -453,7 +453,7 @@ else if($_GET['type'] == "List_Rate")
 		t_ware_quo left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
 		where t_ware_quo.id_quo  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {

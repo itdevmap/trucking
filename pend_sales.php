@@ -1,41 +1,41 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	include "lib.php";
 
-$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='29' ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+	$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='29' ");
+	$rq=mysqli_fetch_array($pq);	
+	$m_edit = $rq['m_edit'];
+	$m_add = $rq['m_add'];
+	$m_del = $rq['m_del'];
+	$m_view = $rq['m_view'];
+	$m_exe = $rq['m_exe'];
 
-if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
- header('location:logout.php'); 
-}
+	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
+	header('location:logout.php'); 
+	}
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{	
-	$hal = $_POST['hal'];
-	$field = $_POST['field'];
-	$tahun = $_POST['tahun'];
-	$paging = $_POST['paging'];
-}
-else
-{	
-	$paging='25';
-	$hal='1';
-	$tahun = date('Y');
-}
+	if($_SERVER['REQUEST_METHOD'] == "POST")
+	{	
+		$hal = $_POST['hal'];
+		$field = $_POST['field'];
+		$tahun = $_POST['tahun'];
+		$paging = $_POST['paging'];
+	}
+	else
+	{	
+		$paging='25';
+		$hal='1';
+		$tahun = date('Y');
+	}
 
 ?>
 
 
 <html>
   <head>
-     <meta charset="utf-8">
+	<meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title><?php echo $aplikasi; ?></title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -105,7 +105,7 @@ else
 		<div class="content-wrapper" style="min-height:750px">
 			<br>
 			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Pendapatan Sales</b></font></h1></li>					
+				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Sales Revenue</b></font></h1></li>					
 			</ol>
 			<br>
 			<div class="col-md-12" >
@@ -115,7 +115,7 @@ else
 					</div>
 					<br>					
 					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tahun :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Year :</b></span>
 						<input type="text"  id ="tahun" name="tahun" value="<?php echo $tahun; ?>" 
 						style="text-align: center;margin-left:-5px;width:50px" onchange="ReadData(1)" onkeypress="return isNumber(event)" >
 						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >						

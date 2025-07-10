@@ -138,7 +138,7 @@ else
 		<div class="content-wrapper" style="min-height:750px">
 			<br>
 			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Kota</b></font></h1></li>					
+				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>City Data</b></font></h1></li>					
 			</ol>
 			<br>
 			<div class="col-md-12" >
@@ -148,7 +148,7 @@ else
 					</div>
 					<br>					
 					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Find Kota :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Find City :</b></span>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
 						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
@@ -221,11 +221,11 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Kota</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;City Data</b>
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Kota :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>City Name :</b></span>
 								<input type="text" id="nama"  value="" style="text-transform: uppercase;
 								text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
 								<input type="hidden" id="id"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	

@@ -200,7 +200,7 @@ else
 					</div>
 					<br>					
 					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Cari ID user :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Find ID user :</b></span>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
 						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >

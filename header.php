@@ -24,8 +24,8 @@
                 <ul class="dropdown-menu">
                                  
                   <li class="user-footer">
-					<a href="gantipassword.php" class="btn btn-block btn-success" style="width:100%">Change Password</a>
-					<a href="logout.php" class="btn btn-block btn-danger" style="width:100%">Sign out</a>                   
+                  <a href="gantipassword.php" class="btn btn-block btn-success" style="width:100%">Change Password</a>
+                  <a href="logout.php" class="btn btn-block btn-danger" style="width:100%">Sign out</a>                   
                   </li>
                 </ul>
             </li>

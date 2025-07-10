@@ -105,7 +105,7 @@ else
 		<div class="content-wrapper" style="min-height:750px">
 			<br>
 			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Pendapatan Warehouse</b></font></h1></li>					
+				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Warehouse Revenue</b></font></h1></li>					
 			</ol>
 			<br>
 			<div class="col-md-12" >
@@ -115,7 +115,7 @@ else
 					</div>
 					<br>					
 					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tahun :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Year :</b></span>
 						<input type="text"  id ="tahun" name="tahun" value="<?php echo $tahun; ?>" 
 						style="text-align: center;margin-left:-5px;width:50px" onchange="ReadData(1)" onkeypress="return isNumber(event)" >
 						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >						

@@ -1,32 +1,32 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-//include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	//include "lib.php";
 
-$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='19' ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+	$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='19' ");
+	$rq=mysqli_fetch_array($pq);	
+	$m_edit = $rq['m_edit'];
+	$m_add = $rq['m_add'];
+	$m_del = $rq['m_del'];
+	$m_view = $rq['m_view'];
+	$m_exe = $rq['m_exe'];
 
-if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
- header('location:logout.php'); 
-}
+	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
+	header('location:logout.php'); 
+	}
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{	
-	$hal = $_POST['hal'];
-	$search_name = $_POST['search_name'];
-	$paging = $_POST['paging'];
-}
-else
-{	
-	$paging='25';
-	$hal='1';
-}
+	if($_SERVER['REQUEST_METHOD'] == "POST")
+	{	
+		$hal = $_POST['hal'];
+		$search_name = $_POST['search_name'];
+		$paging = $_POST['paging'];
+	}
+	else
+	{	
+		$paging='25';
+		$hal='1';
+	}
 
 ?>
 
@@ -140,7 +140,7 @@ else
 		<div class="content-wrapper" style="min-height:750px">
 			<br>
 			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Jenis Mobil</b></font></h1></li>					
+				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Car Type Data</b></font></h1></li>					
 			</ol>
 			<br>
 			<div class="col-md-12" >
@@ -150,7 +150,7 @@ else
 					</div>
 					<br>					
 					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Find Jenis Mobil :</b></span>
+						<span class="input-group-addon" style="text-align:right;"><b>Find Car Type :</b></span>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
 						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
@@ -223,11 +223,11 @@ else
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Jenis Mobil</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Car Type Data</b>
 							</div>	
 							<br>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Jenis Mobil/Feet :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Car/Feet type :</b></span>
 								<input type="text" id="nama"  value="" style="text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
 								<input type="hidden" id="id"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
 								<input type="hidden" id="mode"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	

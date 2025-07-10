@@ -1,40 +1,37 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-//include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	//include "lib.php";
 
-$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'   ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+	$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'   ");
+	$rq=mysqli_fetch_array($pq);	
+	$m_edit = $rq['m_edit'];
+	$m_add = $rq['m_add'];
+	$m_del = $rq['m_del'];
+	$m_view = $rq['m_view'];
+	$m_exe = $rq['m_exe'];
 
-if(!isset($_SESSION['id_user'])   ){
- header("location:logout.php"); 
-}
+	if(!isset($_SESSION['id_user'])   ){
+	header("location:logout.php"); 
+	}
 
-if($_GET['action']=='cari')
-{	
-	$tahun = $_POST[tahun];
-	$bulan = $_POST[bulan];
-	$hal = $_POST[hal];
-}
-else
-{
-	$tahun= date('Y');
-	$bulan= date('m');
-	$hal = '1';
-}
-
-
-//$pq = mysql_query("select sum(tagihan_idr) as t_idr, sum(tagihan_usd) as t_usd, sum(bayar_idr) as b_idr, sum(bayar_usd) as b_usd 
- //                  from t_jo_bill where status = '0'  ");
-				   
+	if($_GET['action']=='cari')
+	{	
+		$tahun = $_POST[tahun];
+		$bulan = $_POST[bulan];
+		$hal = $_POST[hal];
+	}
+	else
+	{
+		$tahun= date('Y');
+		$bulan= date('m');
+		$hal = '1';
+	}
 
 
+	//$pq = mysql_query("select sum(tagihan_idr) as t_idr, sum(tagihan_usd) as t_usd, sum(bayar_idr) as b_idr, sum(bayar_usd) as b_usd 
+	//                  from t_jo_bill where status = '0'  ");
 
 ?>
 
@@ -63,11 +60,6 @@ else
 	<style>
 		.datepicker{z-index:1151 !important;}
 	</style>
-	
-	
-	
-	
-	
 	 
   </head>
   <body class="hold-transition skin-blue sidebar-mini sidebar-collapse" onload="initMap()">
@@ -79,8 +71,6 @@ else
 		<aside class="main-sidebar">
 			<?php include "menu.php" ; ?>	
 		</aside>	
-		
-		
 		
 		<div class="content-wrapper" style="min-height:300px;background-image: url('img/main.jpg');background-size: cover;">
 			

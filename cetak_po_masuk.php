@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 require('pdf/code128.php');
 include "koneksi.php"; 
@@ -118,7 +119,7 @@ while ($d1=mysqli_fetch_array($h1))
 {
 	$n++;
 	$vol = $d1['masuk'] * $d1['vol'];
-	$volx = number_format($vol,2);
+	$volx = number_format($vol,5);
 	$berat = $d1['masuk'] * $d1['berat'];
 	$beratx = number_format($berat,2);
 	$qty = number_format($d1['masuk'],0);
@@ -163,7 +164,7 @@ while ($d1=mysqli_fetch_array($h1))
 	$y=$y+$tinggi;
 }
 
-$t_vol = number_format($t_vol,2);
+$t_vol = number_format($t_vol,5);
 $t_berat = number_format($t_berat,2);
 $t_qty = number_format($t_qty,0);
 
@@ -204,6 +205,7 @@ $pdf->Cell(30,15,"",1,0,'C');
 $pdf->Cell(30,15,"",1,0,'C');		
 $pdf->Cell(30,15,"",1,1,'C');	
 
+ob_end_clean();
 $pdf->Output();
 
 ?>
