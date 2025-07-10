@@ -10,6 +10,7 @@ if(!isset($_SESSION['id_user'])  ){
 
 if($_SERVER['REQUEST_METHOD'] == "POST")
 {		
+	
 	$mode = $_POST['mode'];
 	$id_quo = $_POST['id_quo'];	
 	$quo_date = $_POST['quo_date'];	
@@ -54,7 +55,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST")
 		$sql = mysqli_query($koneksi, "select max(id_quo)as id from tr_quo ");			
 		$row = mysqli_fetch_array($sql);
 		$id_quo = $row['id'];
-		// die($id_quo);
+
 	}else{
 		$sql = "update tr_quo set 
 					id_cust = '$id_cust',
@@ -222,7 +223,6 @@ if($mode == 'View')
 			}	
 		}
 		
-		
 		function TampilData() 
 		{
 			
@@ -234,6 +234,7 @@ if($mode == 'View')
 			CekRate();
 			$('#Data').modal('show');
 		}
+
 		function CekRate()
 		{
 			var id_asal = $("#id_asal").val();
@@ -258,65 +259,59 @@ if($mode == 'View')
 				}
 			);
 		}
-		function CekRate_Umum()
-		{
+
+		// function CekRate_Umum()
+		// {
+		// 	var id_asal = $("#id_asal").val();
+		// 	var id_tujuan = $("#id_tujuan").val();
+		// 	var jenis_mobil = $("#jenis").val();
+			
+		// 	$("#biaya_kirim").val('');	
+		// 	$.post("ajax/quo_crud.php", {
+		// 		id_asal: id_asal, id_tujuan:id_tujuan, jenis_mobil:jenis_mobil, type:"Cek_Rate"
+		// 		},
+		// 		function (data, status) {
+		// 			var data = JSON.parse(data);					
+		// 			$("#biaya_kirim").val(Rupiah(data.rate));
+		// 			$("#km").val(Rupiah(data.km));
+					
+		// 		}
+		// 	);
+		// }
+		function CekRate_Umum() {
 			var id_asal = $("#id_asal").val();
 			var id_tujuan = $("#id_tujuan").val();
 			var jenis_mobil = $("#jenis").val();
-			
-			$("#biaya_kirim").val('');	
+
+			// kosongkan nilai awal
+			$("#biaya_kirim").val('');
+			$("#km").val('0');
+
 			$.post("ajax/quo_crud.php", {
-				id_asal: id_asal, id_tujuan:id_tujuan, jenis_mobil:jenis_mobil, type:"Cek_Rate"
-				},
-				function (data, status) {
-					var data = JSON.parse(data);					
-					$("#biaya_kirim").val(Rupiah(data.rate));
-					$("#km").val(Rupiah(data.km));
-					
+				id_asal: id_asal,
+				id_tujuan: id_tujuan,
+				jenis_mobil: jenis_mobil,
+				type: "Cek_Rate"
+			}, function (data, status) {
+				try {
+					var data = JSON.parse(data);
+
+					if (data.status == 404 || !data.km || data.km == 0) {
+						// Tidak ditemukan, pastikan tetap 0
+						$("#biaya_kirim").val('0');
+						$("#km").val('0');
+					} else {
+						$("#biaya_kirim").val(Rupiah(data.rate));
+						$("#km").val(Rupiah(data.km));
+					}
+				} catch (e) {
+					console.error("Gagal parsing JSON:", data);
+					$("#biaya_kirim").val('0');
+					$("#km").val('0');
 				}
-			);
+			});
 		}
-		// function AddData() {
-		// 	var id = $("#idx").val();
-		// 	var id_quo = $("#id_quo").val();
-		// 	var id_asal = $("#id_asal").val();
-		// 	var id_tujuan = $("#id_tujuan").val();
-		// 	var jenis = $("#jenis").val();
-		// 	var biaya_kirim = $("#biaya_kirim").val();
-		// 	var mode = $("#modex").val();
 
-		// 	var distance = $("#distance_result").val();
-		// 	var km = $("#km").val();
-
-		// 	if (distance > km) {
-		// 		alert("Jarak terlalu jauh dari ".km);
-		// 	}
-		// 	else if(jenis == '' || jenis == null)
-		// 	{
-		// 		alert ("Jenis harus diisi !..");				
-		// 	}
-		// 	else if(biaya_kirim <= 0)
-		// 	{
-		// 		alert ("Biaya Kirim harus diisi !..");				
-		// 	}
-		// 	else
-		// 	{
-		// 		$.post("ajax/quo_crud.php", {
-		// 		id:id,
-		// 		id_quo:id_quo,
-		// 		id_asal:id_asal,
-		// 		id_tujuan:id_tujuan,
-		// 		jenis:jenis,
-		// 		biaya_kirim:biaya_kirim,
-		// 		mode:mode,
-		// 		type : "Add_Detil"
-		// 		}, function (data, status) {
-		// 			alert(data);
-		// 			$("#Data").modal("hide");				
-		// 			ReadData();
-		// 		});
-		// 	}
-		// }	
 		function AddData() {
 			var id = $("#idx").val();
 			var id_quo = $("#id_quo").val();
@@ -326,55 +321,61 @@ if($mode == 'View')
 			var biaya_kirim = $("#biaya_kirim").val();
 			var mode = $("#modex").val();
 
-			var distance = parseFloat($("#distance_result").val()) || 0;
-			var km = parseFloat($("#km").val()) || 0;
+			var distance = $("#distance_result").val();
+			var km = $("#km").val();
 
 			if (distance > km) {
-				alert("Jarak terlalu jauh dari batas maksimal (" + km + " km)");
-				return;
+				alert("Jarak tidak boleh melewati " + km + "KM");
 			}
-			else if (jenis === '' || jenis === null) {
-				alert("Jenis harus diisi!");
-				return;
+			else if(jenis == '' || jenis == null)
+			{
+				alert ("Jenis harus diisi !..");				
 			}
-			else if (parseFloat(biaya_kirim) <= 0 || biaya_kirim === '') {
-				alert("Biaya Kirim harus diisi!");
-				return;
+			else if(biaya_kirim <= 0)
+			{
+				alert ("Biaya Kirim harus diisi !..");				
 			}
-			else {
+			else
+			{
 				$.post("ajax/quo_crud.php", {
-					id: id,
-					id_quo: id_quo,
-					id_asal: id_asal,
-					id_tujuan: id_tujuan,
-					jenis: jenis,
-					biaya_kirim: biaya_kirim,
-					mode: mode,
-					type: "Add_Detil"
+				id:id,
+				id_quo:id_quo,
+				id_asal:id_asal,
+				id_tujuan:id_tujuan,
+				jenis:jenis,
+				biaya_kirim:biaya_kirim,
+				mode:mode,
+				type : "Add_Detil"
 				}, function (data, status) {
 					alert(data);
-					$("#Data").modal("hide");
+					$("#Data").modal("hide");				
 					ReadData();
 				});
 			}
-		}
+		}	
 
 		function GetData(id) {
-			$("#idx").val(id);	
+			$("#idx").val(id);
 			$.post("ajax/quo_crud.php", {
-					id: id, type:"Detil_Data"
+					id: id, type: "Detil_Data"
 				},
 				function (data, status) {
 					var data = JSON.parse(data);
+
 					$("#id_asal").val(data.id_asal);
 					$("#id_tujuan").val(data.id_tujuan);
 					$("#jenis").val(data.jenis_mobil);
 					$("#biaya_kirim").val(Rupiah(data.harga));
-					$("#modex").val('Edit');							
+					$("#modex").val('Edit');
+					setTimeout(function () {
+						CekRate();
+					}, 100);
 				}
 			);
 			$("#Data").modal("show");
 		}
+
+
 		function DelDetil(id) {
 			var conf = confirm("Are you sure to Delete ?");
 			if (conf == true) {
@@ -395,32 +396,58 @@ if($mode == 'View')
 		let dest_lon = null;
 
 		$(document).ready(function () {
+			let lastOriginValue = '';
+			let lastDestinationValue = '';
+
+			// =========================
+			// ORIGIN ADDRESS HANDLER
+			// =========================
 			$('#origin_address').on('keydown', function (event) {
 				if (event.key === "Enter") {
-					event.preventDefault(); // mencegah newline di textarea
-					const val = $('#origin_address').val().trim();
-					if (val.length > 5) {
-						console.log("Menjalankan origin_address() dengan:", val);
+					event.preventDefault();
+					const val = $(this).val().trim();
+					if (val.length > 5 && val !== lastOriginValue) {
+						lastOriginValue = val;
+						console.log("Menjalankan origin_address() via ENTER:", val);
 						origin_address();
-					} else {
-						console.log("Input terlalu pendek:", val);
 					}
 				}
 			});
+
+			$('#origin_address').on('blur', function () {
+				const val = $(this).val().trim();
+				if (val.length > 5 && val !== lastOriginValue) {
+					lastOriginValue = val;
+					console.log("Menjalankan origin_address() via BLUR:", val);
+					origin_address();
+				}
+			});
+
+			// =============================
+			// DESTINATION ADDRESS HANDLER
+			// =============================
 			$('#destination_address').on('keydown', function (event) {
 				if (event.key === "Enter") {
-					event.preventDefault(); // mencegah newline di textarea
-					const val = $('#destination_address').val().trim();
-					if (val.length > 5) {
-						console.log("Menjalankan destination_address() dengan:", val);
+					event.preventDefault();
+					const val = $(this).val().trim();
+					if (val.length > 5 && val !== lastDestinationValue) {
+						lastDestinationValue = val;
+						console.log("Menjalankan destination_address() via ENTER:", val);
 						destination_address();
-					} else {
-						console.log("Input terlalu pendek:", val);
 					}
+				}
+			});
+
+			$('#destination_address').on('blur', function () {
+				const val = $(this).val().trim();
+				if (val.length > 5 && val !== lastDestinationValue) {
+					lastDestinationValue = val;
+					console.log("Menjalankan destination_address() via BLUR:", val);
+					destination_address();
 				}
 			});
 		});
-		
+
 		function origin_address() {
 			var origin_address = $("#origin_address").val();
 			$.post("ajax/geoapify.php", {
@@ -772,6 +799,7 @@ if($mode == 'View')
 								<br>
 							</div>
 
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
 								<select id="id_tujuan" name="id_tujuan" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
@@ -783,6 +811,7 @@ if($mode == 'View')
 									<?php }?>
 								</select>	
 							</div>
+
 							<!-- -------------- DESTINATION CHECK LOCATION -------------- -->
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b></b></span>
@@ -794,8 +823,12 @@ if($mode == 'View')
 							</div>
 
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Distance :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Distance/KM :</b></span>
 								<input type="text" id="distance_result" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Maks Distance KM :</b></span>
+								<input type="number" id="km" style="text-align: right;width:20%;"  readonly>
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
@@ -813,12 +846,8 @@ if($mode == 'View')
 								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Shipping Cost :</b></span>
 								<input type="text" id="biaya_kirim" style="text-align: right;width:20%;" 
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  >
-								<!-- <input type="hidden" id="km" style="text-align: right;width:20%;"> -->
 							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>KM :</b></span>
-								<input type="number" id="km" style="text-align: right;width:20%;"  readonly>
-							</div>
+							
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
 								<button type="button" class="btn btn-success"  onclick="AddData()">

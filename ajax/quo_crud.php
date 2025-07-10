@@ -445,12 +445,16 @@
 		
 	}else if ($_POST['type'] == "Detil_Data"){
 		$id = $_POST['id'];	
-		$query = "select tr_quo_data.*, m_kota_tr.nama_kota as asal, m_kota1.nama_kota as tujuan, tr_quo.id_cust
-			from 
-			tr_quo_data left join m_kota_tr on tr_quo_data.id_asal = m_kota_tr.id_kota
-			left join m_kota_tr as m_kota1 on tr_quo_data.id_tujuan = m_kota1.id_kota
-			left join tr_quo on tr_quo_data.id_quo = tr_quo.id_quo
+		$query = "select tr_quo_data.*, 
+				m_kota_tr.nama_kota as asal, 
+				m_kota1.nama_kota as tujuan, 
+				tr_quo.id_cust
+			FROM tr_quo_data 
+				left join m_kota_tr on tr_quo_data.id_asal = m_kota_tr.id_kota
+				left join m_kota_tr as m_kota1 on tr_quo_data.id_tujuan = m_kota1.id_kota
+				left join tr_quo on tr_quo_data.id_quo = tr_quo.id_quo
 			where tr_quo_data.id_detil  = '$id'";
+
 		if (!$result = mysqli_query($koneksi, $query)) {
 			exit(mysqli_error($koneksi));
 		}
@@ -466,7 +470,6 @@
 			$response['message'] = "Data not found!";
 		}
 		echo json_encode($response);
-		
 	}else if ($_POST['type'] == "Add_Detil"){		
 		if($_POST['mode'] != '' )
 		{	
@@ -485,6 +488,7 @@
 			{			
 				$sql = "INSERT INTO  tr_quo_data (id_quo, id_asal, id_tujuan, jenis_mobil, harga) values
 						('$id_quo', '$id_asal', '$id_tujuan', '$jenis', '$biaya_kirim')";
+
 				$hasil= mysqli_query($koneksi, $sql);
 			}
 			else
@@ -529,13 +533,13 @@
 		}
 		echo json_encode($response);	
 		
-	}else if ($_POST['type'] == "Cek_Rate"){
+	}
+	else if ($_POST['type'] == "Cek_Rate"){
+		// die("TEST");
 		$id_asal = $_POST['id_asal'];	
 		$id_tujuan = $_POST['id_tujuan'];	
 		$jenis_mobil = $_POST['jenis_mobil'];	
 		$query = "select * from m_rate_tr where id_asal  = '$id_asal' and id_tujuan = '$id_tujuan' and jenis_mobil = '$jenis_mobil' ";
-
-		// die($query);
 
 		if (!$result = mysqli_query($koneksi, $query)) {
 			exit(mysqli_error($koneksi));
@@ -551,7 +555,9 @@
 			echo "Data not found!";
 		}
 		echo json_encode($response);	
-	}else if ($_POST['type'] == "AddOrder"){		
+	}
+
+	else if ($_POST['type'] == "AddOrder"){		
 		if($_POST['id_detil'] != '' )
 		{	
 			$id_detil = $_POST['id_detil'];
