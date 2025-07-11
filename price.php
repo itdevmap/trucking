@@ -57,6 +57,10 @@ else
 	<link rel="stylesheet" href="css/plugins/select2/select2.min.css">
 	<script src="css/plugins/jQuery/jQuery-2.1.4.min.js" type="text/javascript"></script>
 	
+	<!-- ---------------------- LEAFLET ---------------------- -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 	<style>
 		.datepicker{z-index:1151 !important;}
 	</style>
@@ -108,15 +112,29 @@ else
 				},
 				function (data, status) {
 					var data = JSON.parse(data);
+					// alert(data.origin_address);
 					$("#id_asal").val(data.id_asal);
 					$("#id_tujuan").val(data.id_tujuan);
+					$("#origin_address").val(data.origin_address);
+					$("#origin_lon").val(data.origin_lon);
+					$("#origin_lat").val(data.origin_lat);
+					$("#destination_address").val(data.destination_address);
+					$("#destination_lon").val(data.destination_lon);
+					$("#destination_lat").val(data.destination_lat);
+					$("#distance_result").val(data.km);
+					$("#price_type").val(data.price_type && data.price_type !== "" ? data.price_type : "high");
+
 					$("#jenis_mobil").val(data.jenis_mobil);
+
+					
 					$("#km").val(data.km);
 					$("#rate").val(Desimal(data.rate));
 					$("#uj").val(Desimal(data.uj));
 					$("#ritase").val(Desimal(data.ritase));
 					$("#stat").val(data.status);
 					$("#mode").val('Edit');
+					origin_address();
+					destination_address();
 				}
 			);
 			$("#Data").modal("show");
@@ -128,19 +146,37 @@ else
 				var id = $("#id").val();
 				var id_asal = $("#id_asal").val();
 				var id_tujuan = $("#id_tujuan").val();
+				var origin_address = $("#origin_address").val();
+				var origin_lat = $("#origin_lat").val();
+				var origin_lon = $("#origin_lon").val();
+
+				var destination_address = $("#destination_address").val();
+				var destination_lat = $("#destination_lat").val();
+				var destination_lon = $("#destination_lon").val();
+
 				var rate = $("#rate").val();
 				var jenis_mobil = $("#jenis_mobil").val();
-				var km = $("#km").val();
+				var km = $("#distance_result").val();
 				var uj = $("#uj").val();
 				var ritase = $("#ritase").val();
 				var stat = $("#stat").val();
 				var mode = $("#mode").val();
 				var hal = $("#hal").val();
 				var price_type = $("#price_type").val();
+
 				$.post("ajax/price_crud.php", {
 					id:id,
 					id_asal:id_asal,
 					id_tujuan:id_tujuan,
+
+					origin_address:origin_address,
+					origin_lat:origin_lat,
+					origin_lon:origin_lon,
+
+					destination_address:destination_address,
+					destination_lat:destination_lat,
+					destination_lon:destination_lon,
+
 					jenis_mobil:jenis_mobil,
 					km:km,
 					rate:rate,
@@ -171,6 +207,264 @@ else
 			$('#Data').modal('show');
 		}
 
+		// ------------------- FUNCTION CHECK LOCATION -------------------
+		let origin_lat = null;
+		let origin_lon = null;
+		let dest_lat = null;
+		let dest_lon = null;
+
+		$(document).ready(function () {
+			let lastOriginValue = '';
+			let lastDestinationValue = '';
+
+			// =========================
+			// ORIGIN ADDRESS HANDLER
+			// =========================
+			$('#origin_address').on('keydown', function (event) {
+				if (event.key === "Enter") {
+					event.preventDefault();
+					const val = $(this).val().trim();
+					if (val.length > 5 && val !== lastOriginValue) {
+						lastOriginValue = val;
+						console.log("Menjalankan origin_address() via ENTER:", val);
+						origin_address();
+					}
+				}
+			});
+
+			$('#origin_address').on('blur', function () {
+				const val = $(this).val().trim();
+				if (val.length > 5 && val !== lastOriginValue) {
+					lastOriginValue = val;
+					console.log("Menjalankan origin_address() via BLUR:", val);
+					origin_address();
+				}
+			});
+
+			// =============================
+			// DESTINATION ADDRESS HANDLER
+			// =============================
+			$('#destination_address').on('keydown', function (event) {
+				if (event.key === "Enter") {
+					event.preventDefault();
+					const val = $(this).val().trim();
+					if (val.length > 5 && val !== lastDestinationValue) {
+						lastDestinationValue = val;
+						console.log("Menjalankan destination_address() via ENTER:", val);
+						destination_address();
+					}
+				}
+			});
+
+			$('#destination_address').on('blur', function () {
+				const val = $(this).val().trim();
+				if (val.length > 5 && val !== lastDestinationValue) {
+					lastDestinationValue = val;
+					console.log("Menjalankan destination_address() via BLUR:", val);
+					destination_address();
+				}
+			});
+		});
+
+		function origin_address() {
+			const origin_address = $("#origin_address").val();
+
+			$.post("ajax/geoapify.php", {
+				address: origin_address,
+				type: 'origin'
+			}, function (data) {
+				console.log("Data dari server (origin):", data);
+
+				if (data.status !== "success") {
+					alert("Gagal mendapatkan lokasi: " + data.message);
+					console.warn("Error response dari geoapify:", data);
+
+					origin_lat = null;
+					origin_lon = null;
+					$("#origin_lat").val('');
+					$("#origin_lon").val('');
+					$("#origin_map").hide();
+
+					if (window.originMap) {
+						window.originMap.remove();
+						window.originMap = null;
+					}
+					return;
+				}
+
+				origin_lat = data.lat;
+				origin_lon = data.lon;
+
+				// ✅ Tampilkan ke input lat/lon
+				$("#origin_lat").val(origin_lat.toFixed(6));
+				$("#origin_lon").val(origin_lon.toFixed(6));
+
+				$('#origin_map').css('display', 'block');
+
+				if (window.originMap) {
+					window.originMap.remove();
+				}
+
+				window.originMap = L.map('origin_map').setView([origin_lat, origin_lon], 15);
+				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '© OpenStreetMap contributors'
+				}).addTo(window.originMap);
+
+				let marker = L.marker([origin_lat, origin_lon], { draggable: true }).addTo(window.originMap)
+					.bindPopup("Klik di peta untuk pindahkan marker").openPopup();
+
+				marker.on('dragend', function (e) {
+					let pos = e.target.getLatLng();
+					updateLocation(pos.lat, pos.lng, marker);
+				});
+
+				window.originMap.on('click', function (e) {
+					let lat = e.latlng.lat;
+					let lon = e.latlng.lng;
+					marker.setLatLng([lat, lon]);
+					updateLocation(lat, lon, marker);
+				});
+
+				function updateLocation(lat, lon, markerRef) {
+					console.log("updateLocation fired", lat, lon);
+					origin_lat = lat;
+					origin_lon = lon;
+
+					$("#origin_lat").val(lat.toFixed(6));
+					$("#origin_lon").val(lon.toFixed(6));
+
+					$.post("ajax/geoapify.php", {
+						lat: lat,
+						lon: lon
+					}, function (res) {
+						if (res.status === "success") {
+							let newAddress = res.formatted;
+							$("#origin_address").val(newAddress);
+							markerRef.bindPopup(`Lokasi baru:<br>${newAddress}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+						} else {
+							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
+						}
+					}, 'json');
+				}
+
+				if (origin_lat && origin_lon && typeof dest_lat !== 'undefined' && typeof dest_lon !== 'undefined') {
+					hitungJarakDanTampilkan();
+				}
+			}, 'json');
+		}
+
+		function destination_address() {
+			const destination_address = $("#destination_address").val();
+
+			$.post("ajax/geoapify.php", {
+				address: destination_address,
+				type: 'destination'
+			}, function (data) {
+				console.log("Data dari server (destination):", data);
+
+				if (data.status !== "success") {
+					alert("Gagal mendapatkan lokasi tujuan: " + data.message);
+					console.warn("Response error:", data);
+
+					dest_lat = null;
+					dest_lon = null;
+					$("#destination_lat").val('');
+					$("#destination_lon").val('');
+					$("#destination_map").hide();
+
+					if (window.destinationMap) {
+						window.destinationMap.remove();
+						window.destinationMap = null;
+					}
+					return;
+				}
+
+				dest_lat = data.lat;
+				dest_lon = data.lon;
+
+				$("#destination_lat").val(dest_lat.toFixed(6));
+				$("#destination_lon").val(dest_lon.toFixed(6));
+
+				$('#destination_map').css('display', 'block');
+
+				if (window.destinationMap) {
+					window.destinationMap.remove();
+				}
+
+				window.destinationMap = L.map('destination_map').setView([dest_lat, dest_lon], 15);
+				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '© OpenStreetMap contributors'
+				}).addTo(window.destinationMap);
+
+				let marker = L.marker([dest_lat, dest_lon], { draggable: true }).addTo(window.destinationMap)
+					.bindPopup("Klik di peta untuk ubah titik tujuan").openPopup();
+
+				marker.on('dragend', function (e) {
+					let pos = e.target.getLatLng();
+					updateDestinationLocation(pos.lat, pos.lng, marker);
+				});
+
+				window.destinationMap.on('click', function (e) {
+					let lat = e.latlng.lat;
+					let lon = e.latlng.lng;
+					marker.setLatLng([lat, lon]);
+					updateDestinationLocation(lat, lon, marker);
+				});
+
+				function updateDestinationLocation(lat, lon, markerRef) {
+					console.log("updateDestinationLocation fired", lat, lon);
+					dest_lat = lat;
+					dest_lon = lon;
+
+					$("#destination_lat").val(lat.toFixed(6));
+					$("#destination_lon").val(lon.toFixed(6));
+
+					$.post("ajax/geoapify.php", {
+						lat: lat,
+						lon: lon
+					}, function (res) {
+						if (res.status === "success") {
+							let newAddress = res.formatted;
+							$("#destination_address").val(newAddress);
+							markerRef.bindPopup(`Tujuan diperbarui:<br>${newAddress}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+						} else {
+							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
+						}
+					}, 'json');
+				}
+
+				if (origin_lat && origin_lon && dest_lat && dest_lon) {
+					hitungJarakDanTampilkan();
+				}
+			}, 'json');
+		}
+
+		function hitungJarakDanTampilkan() {
+			const jarak = hitungJarak(origin_lat, origin_lon, dest_lat, dest_lon);
+			$('#distance_result').val(jarak.toFixed(2));
+		}
+
+		function hitungJarak(lat1, lon1, lat2, lon2) {
+			const R = 6371; // radius bumi dalam KM
+			const dLat = toRad(lat2 - lat1);
+			const dLon = toRad(lon2 - lon1);
+
+			const rLat1 = toRad(lat1);
+			const rLat2 = toRad(lat2);
+
+			const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+				Math.cos(rLat1) * Math.cos(rLat2) *
+				Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+			const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+			const d = R * c;
+			return d;
+		}
+
+		function toRad(value) {
+			return value * Math.PI / 180;
+		}
+
     </script>
 	
   </head>
@@ -185,7 +479,7 @@ else
 		</aside>	
 		
 		<form method="post" name ="myform"  class="form-horizontal" > 
-			<div class="content-wrapper" style="min-height:750px">
+			<div class="content-wrapper" style="min-height:800px">
 				<br>
 				<ol class="breadcrumb">
 					<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Price List</b></font></h1></li>					
@@ -295,9 +589,10 @@ else
 								<span class="fa fa-close"></span></button>	
 							</div>
 							<br>
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
-								<select size="1" id="id_asal"  style="padding:4px;margin-right:2px;width:75%">
+								<select size="1" id="id_asal"  style="padding:4px;margin-right:2px;width:80%">
 									<?php 
 									$t1="select * from m_kota_tr where status = '1'  order by nama_kota";
 									$h1=mysqli_query($koneksi, $t1);       
@@ -309,10 +604,19 @@ else
 								<input type="hidden" id="id"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
 								<input type="hidden" id="mode"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
 							</div>	
+							<!-- -------------- ORIGIN CHECK LOCATION -------------- -->
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b></b></span>
+								<textarea id="origin_address" class="form-textarea" rows="3" style="width:80%" placeholder="Push Enter To Search Origin"></textarea>
+								<div id="origin_map" style="height: 200px; width: 80%;display: none;"></div>
+								<input type="text" id="origin_lat" style="width:40%" readonly placeholder="Latitude" />
+								<input type="text" id="origin_lon" style="width:40%" readonly placeholder="Longitude" />
+								<br>
+							</div>
 
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
-								<select size="1" id="id_tujuan"  style="padding:4px;margin-right:2px;width:75%">
+								<select size="1" id="id_tujuan"  style="padding:4px;margin-right:2px;width:80%">
 									<?php 
 									$t1="select * from m_kota_tr where status = '1'  order by nama_kota";
 									$h1=mysqli_query($koneksi, $t1);       
@@ -322,11 +626,19 @@ else
 									<?php }?>
 								</select>		
 							</div>	
-							
+							<!-- -------------- DESTINATION CHECK LOCATION -------------- -->
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b></b></span>
+								<textarea id="destination_address" class="form-textarea" rows="3" style="width:80%" placeholder="Push Enter To Search Destination"></textarea>
+								<div id="destination_map" style="height: 200px; width: 80%;display: none;"></div>
+								<input type="text" id="destination_lat" style="width:40%" readonly placeholder="Latitude" />
+								<input type="text" id="destination_lon" style="width:40%" readonly placeholder="Longitude" />
+								<br>
+							</div>
 
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Container Type :</b></span>
-								<select size="1" id="jenis_mobil"  style="padding:4px;margin-right:2px;width:75%">
+								<select size="1" id="jenis_mobil"  style="padding:4px;margin-right:2px;width:80%">
 									<?php 
 									$t1="select * from m_jenis_mobil_tr where status = '1'  order by nama";
 									$h1=mysqli_query($koneksi, $t1);       
@@ -336,40 +648,41 @@ else
 									<?php }?>
 								</select>		
 							</div>		
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;;min-width:150px"><b>Distance/KM :</b></span>
-								<input type="text" id="km" value="" style="text-align: right;width:30%;" 
-								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Distance/KM :</b></span>
+								<input type="text" id="distance_result" value="" style="text-transform: uppercase;text-align: left;width:80%;" readonly>
 							</div>
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;;min-width:150px"><b>Price :</b></span>
-								<input type="text" id="rate" value="" style="text-align: right;width:30%;" 
+								<input type="text" id="rate" value="" style="text-align: right;width:40%;" 
 								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Road Fee :</b></span>
-								<input type="text" id="uj" value="" style="text-align: right;width:30%;" 
+								<input type="text" id="uj" value="" style="text-align: right;width:40%;" 
 								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ritase :</b></span>
-								<input type="text" id="ritase" value="" style="text-align: right;width:30%;" 
+								<input type="text" id="ritase" value="" style="text-align: right;width:40%;" 
 								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
 							</div>
 							<div style="width:100%;" class="input-group mb-3">
 								<span class="input-group-addon" style="text-align:right; background:none; min-width:150px;">
 									<b>Price Type :</b>
 								</span>
-								<select id="price_type" class="form-select" style="width:30%;">
+								<select id="price_type" class="form-select" style="width:40%;">
 									<option value="low">Low</option>
 									<option value="middle">Middle</option>
-									<option value="high">High</option>
+									<option value="high" selected>High</option>
 								</select>
 							</div>
 
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Status :</b></span>
-								<select id="stat"  style="width: 30%;">
+								<select id="stat"  style="width: 40%;">
 									<option value="1" >Active</option>
 									<option value="0" >In Active</option>
 								</select>						

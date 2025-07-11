@@ -483,12 +483,26 @@
 			$biaya_kirim = str_replace(",","", $biaya_kirim);
 			$penerima = addslashes(trim(strtoupper($_POST['penerima'])));
 			$no_cont = addslashes(trim(strtoupper($_POST['no_cont'])));
+
+			$origin_address = $_POST['origin_address'];
+			$origin_lat = $_POST['origin_lat'];
+			$origin_lon = $_POST['origin_lon'];
+
+			$destination_address = $_POST['destination_address'];
+			$destination_lat = $_POST['destination_lat'];
+			$destination_lon = $_POST['destination_lon'];
+
+			$distance = $_POST['distance'];
+			$km = $_POST['km'];
+			$price_type = $_POST['price_type'];
 			
 			if($mode == 'Add')
 			{			
-				$sql = "INSERT INTO  tr_quo_data (id_quo, id_asal, id_tujuan, jenis_mobil, harga) values
-						('$id_quo', '$id_asal', '$id_tujuan', '$jenis', '$biaya_kirim')";
-
+				$sql = "INSERT INTO  tr_quo_data 
+				(id_quo, id_asal, id_tujuan, jenis_mobil, harga, origin_address,origin_lon,origin_lat, destination_address,destination_lon,destination_lat, distance, price_type ) 
+				values
+				('$id_quo', '$id_asal', '$id_tujuan', '$jenis', '$biaya_kirim', '$origin_address','$origin_lon','$origin_lat','$destination_address','$destination_lon','$destination_lat', '$distance', '$price_type')";
+				// die($sql);
 				$hasil= mysqli_query($koneksi, $sql);
 			}
 			else
@@ -539,7 +553,8 @@
 		$id_asal = $_POST['id_asal'];	
 		$id_tujuan = $_POST['id_tujuan'];	
 		$jenis_mobil = $_POST['jenis_mobil'];	
-		$query = "select * from m_rate_tr where id_asal  = '$id_asal' and id_tujuan = '$id_tujuan' and jenis_mobil = '$jenis_mobil' ";
+		$price_type = !empty($_POST['price_type']) ? $_POST['price_type'] : 'high';
+		$query = "select * from m_rate_tr where id_asal  = '$id_asal' and id_tujuan = '$id_tujuan' and jenis_mobil = '$jenis_mobil' AND price_type = '$price_type'";
 
 		if (!$result = mysqli_query($koneksi, $query)) {
 			exit(mysqli_error($koneksi));

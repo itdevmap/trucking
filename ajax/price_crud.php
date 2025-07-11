@@ -201,16 +201,64 @@ else if ($_POST['type'] == "Add_Data"){
 		$stat = $_POST['stat'];
 		$mode = $_POST['mode'];
 		$price_type = $_POST['price_type'];
+
+		$origin_address = $_POST['origin_address'];
+		$origin_lat = $_POST['origin_lat'];
+		$origin_lon = $_POST['origin_lon'];
+
+		$destination_address = $_POST['destination_address'];
+		$destination_lat = $_POST['destination_lat'];
+		$destination_lon = $_POST['destination_lon'];
 		
 		$rate = str_replace(",","", $rate);
 		$uj = str_replace(",","", $uj);
 		$ritase = str_replace(",","", $ritase);
 		
-		if($mode == 'Add')
-		{			
-			$sql = "INSERT INTO m_rate_tr (id_asal, id_tujuan, jenis_mobil, km, rate, uj, ritase, price_type,  status, created) values ('$id_asal','$id_tujuan','$jenis_mobil', '$km', '$rate', '$uj', '$ritase','$price_type', '1', '$id_user')";
-			// die($sql);
-			$hasil=mysqli_query($koneksi, $sql);
+		if ($mode == 'Add') {
+
+			// 1. Cek duplikasi data
+			$cek_sql = "
+				SELECT id_rate FROM m_rate_tr 
+				WHERE id_asal = '$id_asal' 
+				AND id_tujuan = '$id_tujuan' 
+				AND jenis_mobil = '$jenis_mobil' 
+				AND price_type = '$price_type'
+				LIMIT 1
+			";
+
+			$cek = mysqli_query($koneksi, $cek_sql);
+
+			if (!$cek) {
+				echo "QUERY_FAILED: " . mysqli_error($koneksi);
+				exit;
+			}
+
+			// 2. Jika data ditemukan, tolak insert
+			if (mysqli_num_rows($cek) > 0) {
+				echo "DATA_FOUND";
+				exit;
+			}
+
+			// 3. Lanjut insert karena belum ada
+			$sql = "INSERT INTO m_rate_tr (
+				id_asal, id_tujuan, jenis_mobil, origin_address, origin_lon, origin_lat, 
+				destination_address, destination_lon, destination_lat, km, rate, uj, ritase, 
+				price_type, status, created
+			) VALUES (
+				'$id_asal', '$id_tujuan', '$jenis_mobil', '$origin_address', '$origin_lon', '$origin_lat',
+				'$destination_address', '$destination_lon', '$destination_lat', '$km', '$rate', '$uj',
+				'$ritase', '$price_type', '1', '$id_user'
+			)";
+
+			$hasil = mysqli_query($koneksi, $sql);
+
+			if ($hasil) {
+				echo "INSERT_SUCCESS";
+			} else {
+				echo "INSERT_FAILED: " . mysqli_error($koneksi);
+			}
+
+			exit;
 		}
 		else
 		{
@@ -218,6 +266,12 @@ else if ($_POST['type'] == "Add_Data"){
 					id_asal = '$id_asal',
 					id_tujuan = '$id_tujuan',
 					jenis_mobil = '$jenis_mobil',
+					origin_address = '$origin_address',
+					origin_lon = '$origin_lon',
+					origin_lat = '$origin_lat',
+					destination_address = '$destination_address',
+					destination_lon = '$destination_lon',
+					destination_lat = '$destination_lat',
 					km = '$km',
 					rate = '$rate',
 					uj = '$uj',

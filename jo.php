@@ -818,51 +818,147 @@
 		}	
 
 		// ------------------- FUNCTION ADD ATTACHMENT -------------------
+		// function AddAttc(id_jo) {
+		// 	document.getElementById('id_jo_attc').value = id_jo;
+		// 	$('#DataAttc').modal('show');
+		// }
 		function AddAttc(id_jo) {
-			document.getElementById('id_jo_attc').value = id_jo;
+			$('#id_jo_attc').val(id_jo);
+			$('.view_so').text('-'); 
+			$('.view_sj').text('-'); 
+			$('.view_mutasi').text('-');
+
 			$('#DataAttc').modal('show');
-		}
-
-		function SaveAttc() {
-			const fileSo     = document.getElementById('file_so').files[0];
-			const fileSj     = document.getElementById('file_sj').files[0];
-			const fileMutasi = document.getElementById('file_mutasi').files[0];
-			const idJo       = document.getElementById('id_jo_attc').value;
-
-			if (!fileSo && !fileSj && !fileMutasi) {
-				alert("Minimal satu file harus dipilih.");
-				return;
-			}
-			if (!idJo) {
-				alert("ID JO wajib diisi.");
-				return;
-			}
-
-			const formData = new FormData();
-			formData.append("id_jo", idJo);
-			if (fileSo)     formData.append("file_so", fileSo);
-			if (fileSj)     formData.append("file_sj", fileSj);
-			if (fileMutasi) formData.append("file_mutasi", fileMutasi);
 
 			$.ajax({
-				url: "upload_attachment.php",
-				type: "POST",
-				data: formData,
-				processData: false,
-				contentType: false,
-				success: function (response) {
-					alert("✅ Sukses:\n" + response);
-					$('#DataAttc').modal('hide');
-					// Reset input
-					document.getElementById('file_so').value = '';
-					document.getElementById('file_sj').value = '';
-					document.getElementById('file_mutasi').value = '';
+				url: 'ajax/get_attachment_by_idjo.php',
+				method: 'POST',
+				data: { id_jo: id_jo },
+				dataType: 'json',
+				success: function (res) {
+					if (res.status === 200) {
+						res.data.forEach(function(file) {
+							if (file.includes('foto_so_')) {
+								$('.view_so').text(file);
+							} else if (file.includes('surat_jalan_')) {
+								$('.view_sj').text(file);
+							} else if (file.includes('mutasi_rekening_')) {
+								$('.view_mutasi').text(file);
+							}
+						});
+					} else {
+						console.warn(res.msg || 'No attachment found');
+					}
 				},
-				error: function (xhr, status, error) {
-					alert("Gagal upload:\n" + error);
+				error: function (xhr, err) {
+					console.error("AJAX error:", err);
 				}
 			});
 		}
+
+
+		// function SaveAttc() {
+		// 	const fileSo     = document.getElementById('file_so').files[0];
+		// 	const fileSj     = document.getElementById('file_sj').files[0];
+		// 	const fileMutasi = document.getElementById('file_mutasi').files[0];
+		// 	const idJo       = document.getElementById('id_jo_attc').value;
+
+		// 	if (!fileSo && !fileSj && !fileMutasi) {
+		// 		alert("Minimal satu file harus dipilih.");
+		// 		return;
+		// 	}
+		// 	if (!idJo) {
+		// 		alert("ID JO wajib diisi.");
+		// 		return;
+		// 	}
+
+		// 	const formData = new FormData();
+		// 	formData.append("id_jo", idJo);
+		// 	if (fileSo)     formData.append("file_so", fileSo);
+		// 	if (fileSj)     formData.append("file_sj", fileSj);
+		// 	if (fileMutasi) formData.append("file_mutasi", fileMutasi);
+
+		// 	$.ajax({
+		// 		url: "upload_attachment.php",
+		// 		type: "POST",
+		// 		data: formData,
+		// 		processData: false,
+		// 		contentType: false,
+		// 		success: function (response) {
+		// 			$('#DataAttc').modal('hide');
+		// 			// Reset input
+		// 			document.getElementById('file_so').value = '';
+		// 			document.getElementById('file_sj').value = '';
+		// 			document.getElementById('file_mutasi').value = '';
+		// 		},
+		// 		error: function (xhr, status, error) {
+		// 			alert("Gagal upload:\n" + error);
+		// 		}
+		// 	});
+		// }
+		// function SaveAttc() {
+		// 	var formData = new FormData(document.getElementById('form_attachment'));
+
+		// 	$.ajax({
+		// 		url: 'upload_attachment.php',
+		// 		type: 'POST',
+		// 		data: formData,
+		// 		contentType: false,
+		// 		processData: false,
+		// 		success: function (res) {
+		// 			try {
+		// 				const result = JSON.parse(res);
+
+		// 				if (result.status === 1) {
+		// 					if (result.data.file_so) {
+		// 						$('.view_so').text(result.data.file_so);
+		// 					}
+		// 					if (result.data.file_sj) {
+		// 						$('.view_sj').text(result.data.file_sj);
+		// 					}
+		// 					if (result.data.file_mutasi) {
+		// 						$('.view_mutasi').text(result.data.file_mutasi);
+		// 					}
+
+		// 					alert(result.message);
+		// 					$('#DataAttc').modal('hide');
+		// 				} else {
+		// 					alert(result.message || "Upload gagal.");
+		// 				}
+		// 			} catch (e) {
+		// 				console.error("Gagal parsing JSON:", res);
+		// 				alert("Respon server tidak valid.");
+		// 			}
+		// 		},
+		// 		error: function () {
+		// 			alert("Gagal menghubungi server.");
+		// 		}
+		// 	});
+		// }
+		function SaveAttc() {
+			var formData = new FormData(document.getElementById('form_attachment'));
+
+			$.ajax({
+				url: 'upload_attachment.php',
+				type: 'POST',
+				data: formData,
+				contentType: false,
+				processData: false,
+				success: function (res) {
+					if (res.includes("✅")) {
+						alert("Upload berhasil!");
+						$('#DataAttc').modal('hide');
+					} else {
+						alert("Gagal upload: " + res);
+					}
+				},
+				error: function (xhr, status, error) {
+					console.error("AJAX Error:", status, error);
+					alert("Gagal menghubungi server.");
+				}
+			});
+		}
+
 
 	</script>	
 	
@@ -1612,36 +1708,22 @@
 							<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;">
 								<b><i class="fa fa-list"></i>&nbsp;Add Attachment</b>
 							</div>
-
-							<!-- <form id="form_attachment" enctype="multipart/form-data" style="margin-top: 2rem;">
-								<div class="form-group mt-3">
-									<label for="file_attachment"><b>File Attachment:</b></label>
-									<input type="file" class="form-control" id="file_attachment" name="file_attachment[]" multiple>
-									<input type="hidden" id="id_jo_attc" name="id_jo">
-								</div>
-
-								<div class="form-group mt-3 text-right">
-									<button type="button" class="btn btn-success" onclick="SaveAttc()">
-										<span class="fa fa-save"></span>&nbsp;<b>Save</b>
-									</button>
-									<button type="button" class="btn btn-danger" data-dismiss="modal">
-										<span class="fa fa-close"></span>&nbsp;<b>Cancel</b>
-									</button>
-								</div>
-							</form> -->
 							<form id="form_attachment" enctype="multipart/form-data" style="margin-top: 2rem;">
 								<input type="hidden" id="id_jo_attc" name="id_jo">
 								<div class="form-group mt-3">
 									<label for=""><b>File SO:</b></label>
 									<input type="file" class="form-control" id="file_so" name="file_so">
+									<p class=""><b>Berhasil Upload Berkas : </b><span class="view_so"></span></p>
 								</div>
 								<div class="form-group mt-3">
 									<label for=""><b>File SJ:</b></label>
 									<input type="file" class="form-control" id="file_sj" name="file_sj">
+									<p class=""><b>Berhasil Upload Berkas : </b><span class="view_sj"></span></p>
 								</div>
 								<div class="form-group mt-3">
 									<label for=""><b>File Mutasi:</b></label>
 									<input type="file" class="form-control" id="file_mutasi" name="file_mutasi">
+									<p class=""><b>Berhasil Upload Berkas : </b><span class="view_mutasi"></span></p>
 								</div>
 
 								<div class="form-group mt-3 text-right">

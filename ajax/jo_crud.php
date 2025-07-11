@@ -335,22 +335,12 @@ if ($_GET['type'] == "Read")
 							onClick="window.open('.$link.') ">
 							<span class="fa fa-print"></span>
 						</button></td>';	
-
-				// $data .= '<td>
-				// 		<button class="btn btn-block btn-default"  title="Add Attachment"
-				// 			style="margin:-3px;border-radius:0px" type="button" 
-				// 			onClick="javascript:AddAttc('.$row['id_jo'].')"  >
-				// 			<span class="fa fa-file" ></span>
-				// 		</button></td>';
-
 				$data .= '<td>
 						<button class="btn btn-block btn-default" title="Add Attachment"
 							style="margin:-3px;border-radius:0px" type="button"
 							onClick="AddAttc(' . $row['id_jo'] . ')">
 							<span class="fa fa-file"></span>
 						</button></td>';
-
-
 				$data .='</tr>';
     		$number++;
     	}		

@@ -260,28 +260,11 @@ if($mode == 'View')
 			);
 		}
 
-		// function CekRate_Umum()
-		// {
-		// 	var id_asal = $("#id_asal").val();
-		// 	var id_tujuan = $("#id_tujuan").val();
-		// 	var jenis_mobil = $("#jenis").val();
-			
-		// 	$("#biaya_kirim").val('');	
-		// 	$.post("ajax/quo_crud.php", {
-		// 		id_asal: id_asal, id_tujuan:id_tujuan, jenis_mobil:jenis_mobil, type:"Cek_Rate"
-		// 		},
-		// 		function (data, status) {
-		// 			var data = JSON.parse(data);					
-		// 			$("#biaya_kirim").val(Rupiah(data.rate));
-		// 			$("#km").val(Rupiah(data.km));
-					
-		// 		}
-		// 	);
-		// }
 		function CekRate_Umum() {
 			var id_asal = $("#id_asal").val();
 			var id_tujuan = $("#id_tujuan").val();
 			var jenis_mobil = $("#jenis").val();
+			var price_type = $("#price_type").val();
 
 			// kosongkan nilai awal
 			$("#biaya_kirim").val('');
@@ -291,6 +274,7 @@ if($mode == 'View')
 				id_asal: id_asal,
 				id_tujuan: id_tujuan,
 				jenis_mobil: jenis_mobil,
+				price_type: price_type,
 				type: "Cek_Rate"
 			}, function (data, status) {
 				try {
@@ -302,7 +286,7 @@ if($mode == 'View')
 						$("#km").val('0');
 					} else {
 						$("#biaya_kirim").val(Rupiah(data.rate));
-						$("#km").val(Rupiah(data.km));
+						$("#km").val(data.km);
 					}
 				} catch (e) {
 					console.error("Gagal parsing JSON:", data);
@@ -321,10 +305,19 @@ if($mode == 'View')
 			var biaya_kirim = $("#biaya_kirim").val();
 			var mode = $("#modex").val();
 
+			var origin_address = $("#origin_address").val();
+			var origin_lat = $("#origin_lat").val();
+			var origin_lon = $("#origin_lon").val();
+
+			var destination_address = $("#destination_address").val();
+			var destination_lat = $("#destination_lat").val();
+			var destination_lon = $("#destination_lon").val();
+
 			var distance = $("#distance_result").val();
 			var km = $("#km").val();
-
-			if (distance >= 0) {
+			var price_type = $("#price_type").val();
+			
+			if (distance <= 0) {
 				alert("Distance tidak boleh kosong");
 			}
 			else if (distance > km) {
@@ -346,8 +339,19 @@ if($mode == 'View')
 				id_asal:id_asal,
 				id_tujuan:id_tujuan,
 				jenis:jenis,
+
+				origin_address:origin_address,
+				origin_lat:origin_lat,
+				origin_lon:origin_lon,
+
+				destination_address:destination_address,
+				destination_lat:destination_lat,
+				destination_lon:destination_lon,
+				
+				distance:distance,
 				biaya_kirim:biaya_kirim,
 				mode:mode,
+				price_type:price_type,
 				type : "Add_Detil"
 				}, function (data, status) {
 					alert(data);
@@ -369,10 +373,23 @@ if($mode == 'View')
 					$("#id_tujuan").val(data.id_tujuan);
 					$("#jenis").val(data.jenis_mobil);
 					$("#biaya_kirim").val(Rupiah(data.harga));
+
+					$("#origin_address").val(data.origin_address);
+					$("#origin_lon").val(data.origin_lon);
+					$("#origin_lat").val(data.origin_lat);
+					$("#destination_address").val(data.destination_address);
+					$("#destination_lon").val(data.destination_lon);
+					$("#destination_lat").val(data.destination_lat);
+
+					$("#distance_result").val(data.km);
+					$("#price_type").val(data.price_type && data.price_type !== "" ? data.price_type : "high");
+
 					$("#modex").val('Edit');
-					setTimeout(function () {
+					// setTimeout(function () {
 						CekRate();
-					}, 100);
+						origin_address();
+						destination_address();
+					// }, 100);
 				}
 			);
 			$("#Data").modal("show");
@@ -452,21 +469,24 @@ if($mode == 'View')
 		});
 
 		function origin_address() {
-			var origin_address = $("#origin_address").val();
+			const origin_address = $("#origin_address").val();
+
 			$.post("ajax/geoapify.php", {
 				address: origin_address,
 				type: 'origin'
 			}, function (data) {
+				console.log("Data dari server (origin):", data);
+
 				if (data.status !== "success") {
 					alert("Gagal mendapatkan lokasi: " + data.message);
 					console.warn("Error response dari geoapify:", data);
 
-					// Kosongkan koordinat dan sembunyikan map
 					origin_lat = null;
 					origin_lon = null;
 					$("#origin_lat").val('');
 					$("#origin_lon").val('');
-					$("#origin_map").hide(); // sembunyikan map
+					$("#origin_map").hide();
+
 					if (window.originMap) {
 						window.originMap.remove();
 						window.originMap = null;
@@ -474,9 +494,12 @@ if($mode == 'View')
 					return;
 				}
 
-				// Jika sukses, lanjut proses
 				origin_lat = data.lat;
 				origin_lon = data.lon;
+
+				// ✅ Tampilkan ke input lat/lon
+				$("#origin_lat").val(origin_lat.toFixed(6));
+				$("#origin_lon").val(origin_lon.toFixed(6));
 
 				$('#origin_map').css('display', 'block');
 
@@ -505,6 +528,7 @@ if($mode == 'View')
 				});
 
 				function updateLocation(lat, lon, markerRef) {
+					console.log("updateLocation fired", lat, lon);
 					origin_lat = lat;
 					origin_lon = lon;
 
@@ -532,21 +556,24 @@ if($mode == 'View')
 		}
 
 		function destination_address() {
-			var destination_address = $("#destination_address").val();
+			const destination_address = $("#destination_address").val();
+
 			$.post("ajax/geoapify.php", {
 				address: destination_address,
 				type: 'destination'
 			}, function (data) {
+				console.log("Data dari server (destination):", data);
+
 				if (data.status !== "success") {
 					alert("Gagal mendapatkan lokasi tujuan: " + data.message);
 					console.warn("Response error:", data);
 
-					// Reset koordinat dan sembunyikan map
 					dest_lat = null;
 					dest_lon = null;
 					$("#destination_lat").val('');
 					$("#destination_lon").val('');
 					$("#destination_map").hide();
+
 					if (window.destinationMap) {
 						window.destinationMap.remove();
 						window.destinationMap = null;
@@ -554,9 +581,11 @@ if($mode == 'View')
 					return;
 				}
 
-				// Sukses mendapatkan koordinat
 				dest_lat = data.lat;
 				dest_lon = data.lon;
+
+				$("#destination_lat").val(dest_lat.toFixed(6));
+				$("#destination_lon").val(dest_lon.toFixed(6));
 
 				$('#destination_map').css('display', 'block');
 
@@ -585,6 +614,7 @@ if($mode == 'View')
 				});
 
 				function updateDestinationLocation(lat, lon, markerRef) {
+					console.log("updateDestinationLocation fired", lat, lon);
 					dest_lat = lat;
 					dest_lon = lon;
 
@@ -610,6 +640,7 @@ if($mode == 'View')
 				}
 			}, 'json');
 		}
+
 		function hitungJarakDanTampilkan() {
 			const jarak = hitungJarak(origin_lat, origin_lon, dest_lat, dest_lon);
 			$('#distance_result').val(jarak.toFixed(2));
@@ -799,6 +830,8 @@ if($mode == 'View')
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b></b></span>
 								<textarea id="origin_address" class="form-textarea" rows="3" style="width:80%" placeholder="Push Enter To Search Origin"></textarea>
 								<div id="origin_map" style="height: 200px; width: 80%;display: none;"></div>
+								<input type="text" id="origin_lat" style="width:40%" readonly placeholder="Latitude" />
+								<input type="text" id="origin_lon" style="width:40%" readonly placeholder="Longitude" />
 								<br>
 							</div>
 
@@ -820,13 +853,13 @@ if($mode == 'View')
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b></b></span>
 								<textarea id="destination_address" class="form-textarea" rows="3" style="width:80%" placeholder="Push Enter To Search Destination"></textarea>
 								<div id="destination_map" style="height: 200px; width: 80%;display: none;"></div>
-								<input type="hidden" id="destination_lat" readonly placeholder="Latitude" />
-								<input type="hidden" id="destination_lon" readonly placeholder="Longitude" />
+								<input type="text" id="destination_lat" style="width:40%" readonly placeholder="Latitude" />
+								<input type="text" id="destination_lon" style="width:40%" readonly placeholder="Longitude" />
 								<br>
 							</div>
 
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Container Type :</b></span>
 								<select id="jenis" name="jenis" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
 									<?php
 									$t1="select * from m_jenis_mobil_tr where status = '1' order by nama   ";
@@ -836,21 +869,31 @@ if($mode == 'View')
 									<?php }?>
 								</select>	
 							</div>
+							<div style="width:100%;" class="input-group mb-3">
+								<span class="input-group-addon" style="text-align:right; background:none; min-width:150px;">
+									<b>Price Type :</b>
+								</span>
+								<select id="price_type" class="form-select" style="width:40%;" onchange="CekRate()" >
+									<option value="low">Low</option>
+									<option value="middle">Middle</option>
+									<option value="high" selected>High</option>
+								</select>
+							</div>
 
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Distance/KM :</b></span>
-								<input type="text" id="distance_result" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
+								<input type="text" id="distance_result" value="" style="text-transform: uppercase;text-align: right;width:40%;"  readonly >
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Maks Distance KM :</b></span>
-								<input type="number" id="km" style="text-align: right;width:20%;"  readonly>
+								<input type="text" id="km" style="text-align: right;width:40%;" readonly>
+								
 							</div>
-							
 							
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Shipping Cost :</b></span>
-								<input type="text" id="biaya_kirim" style="text-align: right;width:20%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  >
+								<input type="text" id="biaya_kirim" style="text-align: right;width:40%;" 
+								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>
 							</div>
 							
 							<div style="width:100%;" class="input-group">
