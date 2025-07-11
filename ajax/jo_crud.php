@@ -584,7 +584,7 @@ if ($_GET['type'] == "Read")
 }else if ($_POST['type'] == "Add_Order"){		
 	if($_POST['id_cust'] != '' )
 	{
-		
+		die();
 		$id_cust = $_POST['id_cust'];
 		$id_detil_bc = $_POST['id_detil_bc'];
 		$id_cont = $_POST['id_cont'];

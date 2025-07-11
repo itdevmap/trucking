@@ -1027,7 +1027,8 @@
 								<input type="text"  id ="no_sjx" style="text-align: center;width:22%" readonly  >
 								<input type="hidden" id="id_sjx"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
 								&nbsp;
-								<input type="checkbox"  id="cek_ptl" style="margin-bottom:0px;" value="1"  onclick='CekPTL(this);'  > &nbsp;<b>PTL</b>
+								<!-- <input type="checkbox" id="cek_ptl" style="margin-bottom:0px;" value="1"  onclick='CekPTL(this);'  > &nbsp;<b>PTL</b> -->
+								<input type="hidden" id="cek_ptl" style="margin-bottom:0px;" value="1"  onclick='CekPTL(this);'  ></b>
 								<input type="hidden" id="jenis_po"   style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
 							</div>	
 

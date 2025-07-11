@@ -136,6 +136,7 @@ else
 				var stat = $("#stat").val();
 				var mode = $("#mode").val();
 				var hal = $("#hal").val();
+				var price_type = $("#price_type").val();
 				$.post("ajax/price_crud.php", {
 					id:id,
 					id_asal:id_asal,
@@ -148,6 +149,7 @@ else
 					stat:stat,
 					mode:mode,
 					stat:stat,
+					price_type:price_type,
 					type : "Add_Data"
 					}, function (data, status) {
 					alert(data);
@@ -323,7 +325,7 @@ else
 							
 
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Container Type :</b></span>
 								<select size="1" id="jenis_mobil"  style="padding:4px;margin-right:2px;width:75%">
 									<?php 
 									$t1="select * from m_jenis_mobil_tr where status = '1'  order by nama";
@@ -354,6 +356,17 @@ else
 								<input type="text" id="ritase" value="" style="text-align: right;width:30%;" 
 								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
 							</div>
+							<div style="width:100%;" class="input-group mb-3">
+								<span class="input-group-addon" style="text-align:right; background:none; min-width:150px;">
+									<b>Price Type :</b>
+								</span>
+								<select id="price_type" class="form-select" style="width:30%;">
+									<option value="low">Low</option>
+									<option value="middle">Middle</option>
+									<option value="high">High</option>
+								</select>
+							</div>
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Status :</b></span>
 								<select id="stat"  style="width: 30%;">

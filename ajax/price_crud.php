@@ -56,6 +56,7 @@ if ($_GET['type'] == "Read")
 					<th rowspan="2" width="7%" style="text-align: center;">PRICE</th>
 					<th rowspan="2" width="7%" style="text-align: center;">ROAD FEE</th>
 					<th rowspan="2" width="7%" style="text-align: center;">RITASE</th>
+					<th rowspan="2" width="7%" style="text-align: center;">PRICE TYPE</th>
 					<th rowspan="2" width="10%" style="text-align: center;">CREATED</th>
 					<th rowspan="2" width="7%" style="text-align: center;">STATUS</th>
 					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>	
@@ -98,6 +99,7 @@ if ($_GET['type'] == "Read")
 				<td style="text-align:right">'.$rate.'</td>
 				<td style="text-align:right">'.$uj.'</td>
 				<td style="text-align:right">'.$ritase.'</td>
+				<td style="text-align:center">'.$row['price_type'].'</td>
 				<td style="text-align:center">'.$row['created'].'</td>';					
 				if($row['status'] =='0'){
 				$data .= '<td style="text-align:center">
@@ -198,6 +200,7 @@ else if ($_POST['type'] == "Add_Data"){
 		$ritase = $_POST['ritase'];
 		$stat = $_POST['stat'];
 		$mode = $_POST['mode'];
+		$price_type = $_POST['price_type'];
 		
 		$rate = str_replace(",","", $rate);
 		$uj = str_replace(",","", $uj);
@@ -205,7 +208,8 @@ else if ($_POST['type'] == "Add_Data"){
 		
 		if($mode == 'Add')
 		{			
-			$sql = "INSERT INTO m_rate_tr (id_asal, id_tujuan, jenis_mobil, km, rate, uj,ritase,  status, created) values ('$id_asal','$id_tujuan','$jenis_mobil', '$km', '$rate', '$uj', '$ritase', '1', '$id_user')";
+			$sql = "INSERT INTO m_rate_tr (id_asal, id_tujuan, jenis_mobil, km, rate, uj, ritase, price_type,  status, created) values ('$id_asal','$id_tujuan','$jenis_mobil', '$km', '$rate', '$uj', '$ritase','$price_type', '1', '$id_user')";
+			// die($sql);
 			$hasil=mysqli_query($koneksi, $sql);
 		}
 		else
@@ -218,6 +222,7 @@ else if ($_POST['type'] == "Add_Data"){
 					rate = '$rate',
 					uj = '$uj',
 					ritase = '$ritase',
+					price_type = '$price_type',
 					status = '$stat',
 					created = '$id_user'
 					where id_rate = '$id'	";
@@ -231,7 +236,6 @@ else if ($_POST['type'] == "Add_Data"){
 			echo "Data saved!";
 		}
 	}	
-	
 }else if ($_POST['type'] == "Detil_Data"){
 	$id = $_POST['id'];	
     $query = "select * from m_rate_tr where id_rate  = '$id'";
@@ -524,5 +528,4 @@ else if ($_POST['type'] == "Add_Data"){
     echo json_encode($response);
 	
 }
-
 ?>

@@ -324,7 +324,10 @@ if($mode == 'View')
 			var distance = $("#distance_result").val();
 			var km = $("#km").val();
 
-			if (distance > km) {
+			if (distance >= 0) {
+				alert("Distance tidak boleh kosong");
+			}
+			else if (distance > km) {
 				alert("Jarak tidak boleh melewati " + km + "KM");
 			}
 			else if(jenis == '' || jenis == null)
@@ -744,7 +747,7 @@ if($mode == 'View')
 				<div class="col-md-12" >
 					<div style="width:98%;background:none;margin-left:0;margin-top:0px;border-top:0px;border-bottom:0px" class="input-group">
 						<?php if($mode != 'View'){?>
-					<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save SO</b>&nbsp;&nbsp;</button>	
+					<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save Quotation</b>&nbsp;&nbsp;</button>	
 					<?php }?>
 					<button type="button" class="btn btn-danger" onclick="window.location.href='<?php echo $link; ?>'"><span class="fa fa-backward"></span>&nbsp;&nbsp;<b>Back</b></button>	
 					
@@ -823,14 +826,6 @@ if($mode == 'View')
 							</div>
 
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Distance/KM :</b></span>
-								<input type="text" id="distance_result" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Maks Distance KM :</b></span>
-								<input type="number" id="km" style="text-align: right;width:20%;"  readonly>
-							</div>
-							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
 								<select id="jenis" name="jenis" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
 									<?php
@@ -841,6 +836,16 @@ if($mode == 'View')
 									<?php }?>
 								</select>	
 							</div>
+
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Distance/KM :</b></span>
+								<input type="text" id="distance_result" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Maks Distance KM :</b></span>
+								<input type="number" id="km" style="text-align: right;width:20%;"  readonly>
+							</div>
+							
 							
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Shipping Cost :</b></span>
