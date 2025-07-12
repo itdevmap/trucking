@@ -111,11 +111,9 @@ if($field == 'Customer')
 			left join m_lokasi_ware on t_ware_data_detil.id_lokasi = m_lokasi_ware.id_lokasi
 			where t_ware_data.tanggal between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' and t_ware_data.jenis = '0' 
 			and t_ware_data.status = '$stat'
-			order  by t_ware_data.tanggal desc ";
+		order  by t_ware_data.tanggal desc ";
 	}
 	
-	
-
 	$h1=mysqli_query($koneksi, $t1);       
 	while ($d1=mysqli_fetch_array($h1))
 	{
