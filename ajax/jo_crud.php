@@ -45,15 +45,15 @@ if ($_GET['type'] == "Read")
 		$f = 'tr_jo.no_do';		
 	}else if($field == 'Customer'){
 		$f = 'm_cust_tr.nama_cust';		
-	}else if($field == 'Asal'){
+	}else if($field == 'Origin'){
 		$f = 'm_kota_tr.nama_kota';
-	}else if($field == 'Tujuan'){
+	}else if($field == 'Destination'){
 		$f = 'm_kota1.nama_kota';	
 	}else if($field == 'No Cont'){
 		$f = 'tr_jo.no_cont';	
-	}else if($field == 'Supir'){
+	}else if($field == 'Driver'){
 		$f = 'm_supir_tr.nama_supir';		
-	}else if($field == 'No Polisi'){
+	}else if($field == 'No Police'){
 		$f = 'm_mobil_tr.no_polisi';			
 	}else{
 		$f = 't_jo_tr.no_jo';
@@ -68,15 +68,15 @@ if ($_GET['type'] == "Read")
 		$f1 = 'tr_jo.no_do';		
 	}else if($field1 == 'Customer'){
 		$f1 = 'm_cust_tr.nama_cust';		
-	}else if($field1 == 'Asal'){
+	}else if($field1 == 'Origin'){
 		$f1 = 'm_kota_tr.nama_kota';
-	}else if($field1 == 'Tujuan'){
+	}else if($field1 == 'Destination'){
 		$f1 = 'm_kota1.nama_kota';	
 	}else if($field1 == 'No Cont'){
 		$f1 = 'tr_jo.no_cont';	
-	}else if($field1 == 'Supir'){
+	}else if($field1 == 'Driver'){
 		$f1 = 'm_supir_tr.nama_supir';		
-	}else if($field1 == 'No Polisi'){
+	}else if($field1 == 'No Police'){
 		$f1 = 'm_mobil_tr.no_polisi';			
 	}else{
 		$f1 = 't_jo_tr.no_jo';

@@ -123,7 +123,8 @@ if ($_GET['type'] == "Read")
 			$tanggal = ConverTgl($row['quo_date']);
 			$sewa = number_format($row['harga_sewa'],0);
 			$handling = number_format($row['harga_handling'],0);
-			$cbm = number_format($row['max_cbm'],2);
+			// $cbm = number_format($row['max_cbm'],8);
+			$cbm = rtrim(rtrim(number_format($row['max_cbm'], 8, '.', ''), '0'), '.');
 			if($row['status'] == '0')
 			{
 				$label = 'danger';
@@ -306,9 +307,6 @@ else if ($_GET['type'] == "Read_Barang")
 		$f1 = 't_ware.nama';	
 	}
 	
-	
-	
-	
 	$data = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">
 				<tr>					
@@ -362,7 +360,8 @@ else if ($_GET['type'] == "Read_Barang")
     	{	
 			$posisi++;				
 			$berat = number_format($row['berat'],2);
-			$vol = number_format($row['vol'],2);
+			// $vol = number_format($row['vol'],8);
+			$vol = rtrim(rtrim(number_format($row['vol'], 8, '.', ''), '0'), '.');
 			$panjang = number_format($row['panjang'],2);
 			$lebar = number_format($row['lebar'],2);	
 			$tinggi = number_format($row['tinggi'],2);
@@ -540,10 +539,15 @@ else if ($_GET['type'] == "Read_Barang")
     	{	
 			$posisi++;	
 			$berat = number_format($row['berat'],2);
-			$vol = number_format($row['vol'],5);
-			$panjang = number_format($row['panjang'],2);
-			$lebar = number_format($row['lebar'],2);	
-			$tinggi = number_format($row['tinggi'],2);
+			// $vol = number_format($row['vol'],8);
+			$vol = rtrim(rtrim(number_format($row['vol'], 8, '.', ''), '0'), '.');
+			
+			// $panjang = number_format($row['panjang'],2);
+			$panjang = rtrim(rtrim(number_format($row['panjang'], 8, '.', ''), '0'), '.');
+			// $lebar = number_format($row['lebar'],2);
+			$lebar = rtrim(rtrim(number_format($row['lebar'], 8, '.', ''), '0'), '.');
+			// $tinggi = number_format($row['tinggi'],2);
+			$tinggi = rtrim(rtrim(number_format($row['tinggi'], 8, '.', ''), '0'), '.');
 			
 			$data .= '<tr>						
 				<td style="text-align:center">'.$posisi.'.</td>			
@@ -696,7 +700,6 @@ else if ($_GET['type'] == "Read_Barang")
 		$mode = $_POST['mode'];
 		
 		$vol = str_replace(",","", $vol);
-		// die($vol );
 		$berat = str_replace(",","", $berat);
 		
 		if($mode == 'Add')
@@ -1973,7 +1976,7 @@ else if($_GET['type'] == "Read_Out_Data")
 			
 			
 			$vol = $row['keluar'] * $row['vol'];
-			$volx = number_format($vol,2);
+			$volx = number_format($vol,8);
 			
 			if($aging > $row['aging_sewa'])
 			{
@@ -1986,7 +1989,7 @@ else if($_GET['type'] == "Read_Out_Data")
 			
 		
 			$jumlah = $harga * $vol;
-			$jumlahx = number_format($jumlah,0);
+			$jumlahx = number_format($jumlah,8);
 			$total = $total + $jumlah;
 		
 				
@@ -2190,8 +2193,6 @@ else if ($_POST['type'] == "Del_Data_Out")
 				$data .='</tr>';
     		$number++;
     	}		
-		
-		
     }
     else
     {
@@ -2289,8 +2290,8 @@ else if($_GET['type'] == "Read_Jasa_Biaya")
 	$y=50;
 	
 	$SQL = "select  t_ware_jasa_biaya.*, m_cost_tr.nama_cost
-			from 
-			 t_ware_jasa_biaya inner join t_ware_quo_biaya on t_ware_jasa_biaya.id_biaya = t_ware_quo_biaya.id_detil
+			from t_ware_jasa_biaya 
+			inner join t_ware_quo_biaya on t_ware_jasa_biaya.id_biaya = t_ware_quo_biaya.id_detil
 			left join m_cost_tr on t_ware_quo_biaya.id_biaya = m_cost_tr.id_cost
 			where t_ware_jasa_biaya.id_data = '$id_data'  order by  t_ware_jasa_biaya.id_detil";
 	$query = mysqli_query($koneksi, $SQL);	
@@ -2308,14 +2309,17 @@ else if($_GET['type'] == "Read_Jasa_Biaya")
 			$jumlahx = number_format($jumlah,0);
 			$total = $total + $jumlah;
 		
-				
 			$data .= '<tr>						
 				<td style="text-align:center">'.$posisi.'.</td>
 				<td style="text-align:left">'.$row['nama_cost'].'</td>
 				<td style="text-align:left">'.$row['rem'].'</td>
-				<td style="text-align:center">'.$row['qty'].' '.$row['unit'].'</td>
+				<td style="text-align:center">'. 
+					rtrim(rtrim(number_format($row['qty'], 8, '.', ''), '0'), '.') . 
+					' <br> '.$row['unit']. 
+				'</td>
 				<td style="text-align:right">'.$hargax.'</td>
 				<td style="text-align:right">'.$jumlahx.'</td>';
+
 				
 				if($mode == 'Edit'){
 					
@@ -2374,7 +2378,9 @@ else if ($_POST['type'] == "Add_Jasa_Biaya")
 		$rem = addslashes(trim($_POST['rem']));
 		$mode = $_POST['mode'];
 		$harga = str_replace(",","", $harga);
-		
+
+		// echo $qty;
+		// die();
 		if($mode == 'Add')
 		{
 			$sql = "INSERT INTO  t_ware_jasa_biaya (id_data, id_biaya, qty, harga,  rem, unit)	 
@@ -2408,9 +2414,6 @@ else if ($_POST['type'] == "Add_Jasa_Biaya")
 			echo "Data saved!";
 		}
 	}	
-	
-	
-	
 }
 else if ($_POST['type'] == "Detil_Data_Jasa")
 {
@@ -2424,11 +2427,12 @@ else if ($_POST['type'] == "Detil_Data_Jasa")
         exit(mysqli_error($koneksi));
     }
     $response = array();
-    if(mysqli_num_rows($result) > 0) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            $response = $row;
-        }
-    }
+	if(mysqli_num_rows($result) > 0) {
+		while ($row = mysqli_fetch_assoc($result)) {
+			$row['qty'] = rtrim(rtrim(number_format($row['qty'], 8, '.', ''), '0'), '.');
+			$response = $row;
+		}
+	}
     else
     {
         $response['status'] = 200;
@@ -2926,7 +2930,8 @@ else if($_GET['type'] == "Read_Sewa_Data")
 			
 			$max_cbm = $row['max_cbm'];
 			$harga_sewa = $row['harga_sewa'];
-			$max_cbmx = number_format($row['max_cbm'],2);
+			// $max_cbmx = number_format($row['max_cbm'],8); 
+			$max_cbmx = rtrim(rtrim(number_format($row['max_cbm'], 8, '.', ''), '0'), '.');
 			$harga_sewax = number_format($row['harga_sewa'],0);
 			
 			if($aging > $row['aging_sewa'])
@@ -2937,7 +2942,8 @@ else if($_GET['type'] == "Read_Sewa_Data")
 			}
 			
 			$cbm = $sisa * $row['vol'];	
-			$cbmx = number_format($cbm,2);
+			// $cbmx = number_format($cbm,8);
+			$cbmx = rtrim(rtrim(number_format($cbm, 8, '.', ''), '0'), '.');
 			$total = $total + $cbm;
 			$data .= '<tr>						
 			<td style="text-align:center">'.$posisi.'.</td>
@@ -2954,7 +2960,8 @@ else if($_GET['type'] == "Read_Sewa_Data")
 			
     		$number++;
     	}
-		$totalx = number_format($total,2);
+		// $totalx = number_format($total,8);
+		$totalx = rtrim(rtrim(number_format($total, 8, '.', ''), '0'), '.');
 		$data .= '<tr><td colspan="5"></td>';
 		$data .= '<td style="text-align:right;background:#eee;color:#000"><b>Total CBM :</b></td>	
 				  <td style="text-align:right;background:#008d4c;color:#fff"><b>'.$totalx.'</b></td>';

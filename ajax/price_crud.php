@@ -49,8 +49,10 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="28%" style="text-align: center;">ORIGIN</th>
-					<th rowspan="2" width="28%" style="text-align: center;">DESTINATION</th>
+					<th rowspan="2" width="10%" style="text-align: center;">ORIGIN</th>
+					<th rowspan="2" width="18%" style="text-align: center;">ORIGIN ADDRESS</th>
+					<th rowspan="2" width="10%" style="text-align: center;">DESTINATION</th>
+					<th rowspan="2" width="18%" style="text-align: center;">DESTINATION ADDRESS</th>
 					<th rowspan="2" width="13%" style="text-align: center;">TYPE</th>
 					<th rowspan="2" width="13%" style="text-align: center;">KM</th>
 					<th rowspan="2" width="7%" style="text-align: center;">PRICE</th>
@@ -93,7 +95,9 @@ if ($_GET['type'] == "Read")
 				$data .= '<tr>							
 				<td style="text-align:center">'.$posisi.'.</td>	
 				<td style="text-align:center">'.$row['asal'].'</td>
+				<td style="text-align:center">'.$row['origin_address'].'</td>
 				<td style="text-align:center">'.$row['tujuan'].'</td>
+				<td style="text-align:center">'.$row['destination_address'].'</td>
 				<td style="text-align:center">'.$row['jenis_mobil'].'</td>
 				<td style="text-align:center">'.($row['km'] ?? '-').'</td>
 				<td style="text-align:right">'.$rate.'</td>

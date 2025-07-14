@@ -32,11 +32,11 @@
 			$f = 'tr_quo.quo_no';	
 		}else if($field == 'Customer'){
 			$f = 'm_cust_tr.nama_cust';	
-		}else if($field == 'Asal'){
+		}else if($field == 'Origin'){
 			$f = 'm_kota_tr.nama_kota';
-		}else if($field == 'Tujuan'){
+		}else if($field == 'Destination'){
 			$f = 'm_kota1.nama_kota';	
-		}else if($field == 'Jenis'){
+		}else if($field == 'Type'){
 			$f = 'tr_quo_data.jenis_mobil';	
 		}else{
 			$f = 't_jo_tr.no_jo';
@@ -47,11 +47,11 @@
 			$f1 = 'tr_quo.quo_no';	
 		}else if($field1 == 'Customer'){
 			$f1 = 'm_cust_tr.nama_cust';	
-		}else if($field1 == 'Asal'){
+		}else if($field1 == 'Origin'){
 			$f1 = 'm_kota_tr.nama_kota';
-		}else if($field1 == 'Tujuan'){
+		}else if($field1 == 'Destination'){
 			$f1 = 'm_kota1.nama_kota';	
-		}else if($field1 == 'Jenis'){
+		}else if($field1 == 'Type'){
 			$f1 = 'tr_quo_data.jenis_mobil';	
 		}else{
 			$f1 = 't_jo_tr.no_jo';
