@@ -658,10 +658,10 @@
 			// values
 			// 	('$id_cust','$id_detil', '$no_sj', '$tanggalx', '$no_do', '$penerima', '$barang', '$berat', '$vol', '$no_cont', '$no_seal',
 			// 	'$id_asal', '$id_tujuan', '$jenis_mobil', '$id_mobil', '$id_supir', '$biaya', '$uj', '$ritase', '$ket', '$id_user')";
-			$sql = "INSERT INTO  tr_jo (project_code, id_cust, id_detil_quo, no_jo, tgl_jo, no_do, penerima, barang, berat, vol, no_cont, no_seal, id_asal, id_tujuan, jenis_mobil, id_mobil, id_supir, biaya_kirim, ritase, ket, created) 
+			$sql = "INSERT INTO  tr_jo (project_code, id_cust, id_detil_quo, no_jo, tgl_jo, no_do, penerima, barang, berat, vol, no_cont, no_seal, id_asal, id_tujuan, jenis_mobil, id_mobil, id_supir, biaya_kirim, uj, ritase, ket, created) 
 			values
 				('$project_code','$id_cust','$id_detil', '$no_sj', '$tanggalx', '$no_do', '$penerima', '$barang', '$berat', '$vol', '$no_cont', '$no_seal',
-				'$id_asal', '$id_tujuan', '$jenis_mobil', '$id_mobil', '$id_supir', '$biaya', '$ritase', '$ket', '$id_user')";
+				'$id_asal', '$id_tujuan', '$jenis_mobil', '$id_mobil', '$id_supir', '$biaya', '$uj', '$ritase', '$ket', '$id_user')";
 
 			// die($sql);
 			$hasil= mysqli_query($koneksi, $sql);

@@ -731,8 +731,10 @@ if ($_GET['type'] == "Read")
 			$year = substr($th,2,2);
 			$no_sj = "SJ-$year$noUrut";
 			
-			$sql = "INSERT INTO  tr_jo (id_detil_quo, no_jo, tgl_jo, no_do, penerima, barang, berat, vol, no_cont, no_seal,
-					id_asal, id_tujuan, jenis_mobil, id_mobil, id_supir, biaya_kirim, uj, ritase, ket, created) values
+			$sql = "INSERT INTO  tr_jo 
+					(id_detil_quo, no_jo, tgl_jo, no_do, penerima, barang, berat, vol, 	no_cont, no_seal,
+					id_asal, id_tujuan, jenis_mobil, id_mobil, id_supir, biaya_kirim, uj, ritase, ket, created) 
+					values
 						('$id_detil', '$no_sj', '$tanggalx', '$no_do', '$penerima', '$barang', '$berat', '$vol', '$no_cont', '$no_seal',
 					'$id_asal', '$id_tujuan', '$jenis_mobil', '$id_mobil', '$id_supir', '$biaya', '$uj', '$ritase', '$ket', '$id_user')";
 			$hasil= mysqli_query($koneksi, $sql);
@@ -750,8 +752,8 @@ if ($_GET['type'] == "Read")
 						id_supir = '$id_supir',
 						ket = '$ket'
 						where id_jo = '$id_jo' 	";
+			// die($sql);
 			$hasil= mysqli_query($koneksi, $sql);
-			
 		}
 		
 			
