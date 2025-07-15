@@ -26,23 +26,23 @@ if ($_GET['type'] == "Read")
 	$field1 = $_GET['field1'];
 	$cari1 = trim($_GET['cari1']);
 	
-	if($field == 'No Polisi')
+	if($field == 'No Police')
 	{
 		$f = 'm_mobil_tr.no_polisi';	
 	}else if($field == 'No SPK'){
 		$f = 't_spk.no_spk';	
-	}else if($field == 'Jenis Pekerjaan'){
+	}else if($field == 'Type'){
 		$f = 't_spk.jenis';
 	}else{
 		$f = 't_spk.ket';	
 	}
 	
-	if($field1 == 'No Polisi')
+	if($field1 == 'No Police')
 	{
 		$f1 = 'm_mobil_tr.no_polisi';	
 	}else if($field1 == 'No SPK'){
 		$f1 = 't_spk.no_spk';	
-	}else if($field1 == 'Jenis Pekerjaan'){
+	}else if($field1 == 'Type'){
 		$f1 = 't_spk.jenis';
 	}else{
 		$f1 = 't_spk.ket';	

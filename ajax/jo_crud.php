@@ -104,7 +104,7 @@ if ($_GET['type'] == "Read")
 				<tr>
 					<th width="5%" style="text-align: center;">DELIVERY<br>COST</th>
 					<th width="6%" style="text-align: center;">OTHER<br>COST</th>
-					<th width="5%" style="text-align: center;">ROAD<br>FEE</th>
+					<th width="5%" style="text-align: center;">TRAVEL<br>EXPENSE</th>
 					<th width="5%" style="text-align: center;">RITASE</th>
 					<th width="6%" style="text-align: center;">OTHER</th>
 					<th width="2%" style="text-align: center;">EDIT</th>
@@ -538,7 +538,8 @@ if ($_GET['type'] == "Read")
 
 		// Inisialisasi cURL
 		// $ch = curl_init('http://127.0.0.1:8000/api/planning-borong-driver/store');
-		$ch = curl_init('http://192.168.1.221:8118/api/planning-borong-driver/store');
+		// $ch = curl_init('http://192.168.1.221:8118/api/planning-borong-driver/store');
+		$ch = curl_init('https://cmanco.mitraadipersada.com/api/planning-borong-driver/store');
 
 		// Set opsi cURL
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

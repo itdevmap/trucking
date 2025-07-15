@@ -502,7 +502,6 @@
 				(id_quo, id_asal, id_tujuan, jenis_mobil, harga, origin_address,origin_lon,origin_lat, destination_address,destination_lon,destination_lat, distance, price_type ) 
 				values
 				('$id_quo', '$id_asal', '$id_tujuan', '$jenis', '$biaya_kirim', '$origin_address','$origin_lon','$origin_lat','$destination_address','$destination_lon','$destination_lat', '$distance', '$price_type')";
-				// die($sql);
 				$hasil= mysqli_query($koneksi, $sql);
 			}
 			else
@@ -511,6 +510,13 @@
 						id_asal = '$id_asal',
 						id_tujuan = '$id_tujuan',
 						jenis_mobil = '$jenis',
+						origin_address = '$origin_address',
+						origin_lon = '$origin_lon',
+						origin_lat = '$origin_lat',
+						destination_address = '$destination_address',
+						destination_lon = '$destination_lon',
+						destination_lat = '$destination_lat',
+						distance = '$distance',
 						harga = '$biaya_kirim'
 						where id_detil = '$id'	";
 				$hasil=mysqli_query($koneksi,$sql);

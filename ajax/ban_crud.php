@@ -24,19 +24,18 @@ if ($_GET['type'] == "Read")
 	$tgl2x = ConverTglSql($tgl2);	
 	$field = $_GET['field'];
 	
-	if($field == 'No Polisi')
+	if($field == 'No Police')
 	{
 		$f = 'm_mobil_tr.no_polisi';	
 	}else if($field == 'No Seri'){
 		$f = 't_ban.no_seri';		
-	}else if($field == 'Jenis'){
+	}else if($field == 'Type'){
 		$f = 't_ban.jenis_ban';	
-	}else if($field == 'Merk'){
+	}else if($field == 'Brand'){
 		$f = 't_ban.merk_ban';		
 	}else{
 		$f = 't_ban.no_seri';	
 	}
-	
 	
 	$data = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">
@@ -224,8 +223,6 @@ if ($_GET['type'] == "Read")
 				
     echo $data;
 
-
-	
 }else if ($_POST['type'] == "Del_Ban"){
 	$id = $_POST['id']; 	
 	

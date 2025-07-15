@@ -438,11 +438,11 @@ else
 					<div style="width:100%" class="input-group">
 						<span class="input-group-addon" style="text-align:right;"><b>Filter By</b></span>
 						<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">
-							<option>No Seri</option>
+							<option >No Seri</option>
 							<option>Type</option>
 							<option>Brand</option>
 							<option>No Police</option>
-							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
+							<option value="<?php echo $field; ?>" selected hidden><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >

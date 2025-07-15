@@ -1254,7 +1254,7 @@
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Road Fee :</b></span>								
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Travel Expense :</b></span>								
 								<input type="text" id="ujx" value="0" style="text-align: right;width:22%;" 
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
 							</div>
@@ -1462,7 +1462,7 @@
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Road Fee:</b></span>								
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Travel Expense:</b></span>								
 								<input type="text" id="uj" value="0" style="text-align: right;width:22%;" 
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
 							</div>

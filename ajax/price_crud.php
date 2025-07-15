@@ -22,23 +22,23 @@ if ($_GET['type'] == "Read")
 	$hal = $_GET['hal'];
 	$paging = $_GET['paging'];
 	
-	if($field1 == 'Asal')
+	if($field1 == 'Origin')
 	{
 		$f1 = 'm_kota_tr.nama_kota';
-	}else if($field1 == 'Tujuan'){
+	}else if($field1 == 'Destination'){
 		$f1 = 'm_kota_tr1.nama_kota';		
-	}else if($field1 == 'Jenis'){
+	}else if($field1 == 'Type'){
 		$f1 = 'm_rate_tr.jenis_mobil';	
 	}else{
 		$f1 = 'm_rate_tr.jenis_mobil';	
 	}
 	
-	if($field2 == 'Asal')
+	if($field2 == 'Origin')
 	{
 		$f2 = 'm_kota_tr.nama_kota';
-	}else if($field2 == 'Tujuan'){
+	}else if($field2 == 'Destination'){
 		$f2 = 'm_kota_tr1.nama_kota';		
-	}else if($field2 == 'Jenis'){
+	}else if($field2 == 'Type'){
 		$f2 = 'm_rate_tr.jenis_mobil';	
 	}else{
 		$f2 = 'm_rate_tr.jenis_mobil';	

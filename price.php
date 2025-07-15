@@ -495,10 +495,10 @@ else
 						<div style="width:100%" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"><b>Filter By :</b></span>
 							<select size="1" id="field1"  name="field1" style="padding:4px;margin-right:2px;width: 85px">
-								<option>Origin</option>
+								<option selected>Origin</option>
 								<option>Destination</option>
 								<option>Type</option>
-								<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
+								<option value="<?php echo $field1; ?>"hidden><?php echo $field1; ?></option>
 							</select>
 							<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
 							style="text-align: left;width:200px" onkeypress="ReadData(1)" >
@@ -506,10 +506,10 @@ else
 						<div style="width:100%" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"></span>
 							<select size="1" id="field2"  name="field2" style="padding:4px;margin-right:2px;width: 85px">
-								<option>Origin</option>
+								<option selected>Origin</option>
 								<option>Destination</option>
 								<option>Type</option>
-								<option value="<?php echo $field2; ?>" selected><?php echo $field2; ?></option>
+								<option value="<?php echo $field2; ?>" hidden><?php echo $field2; ?></option>
 							</select>
 							<input type="text"  id ="search_name2" name="search_name2" value="<?php echo $search_name2; ?>" 
 							style="text-align: left;width:200px" onkeypress="ReadData(1)" >

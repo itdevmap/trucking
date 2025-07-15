@@ -313,54 +313,56 @@ if($mode == 'View')
 			var destination_lat = $("#destination_lat").val();
 			var destination_lon = $("#destination_lon").val();
 
-			var distance = $("#distance_result").val();
-			var km = $("#km").val();
+			// ✅ Ubah string input ke angka dengan parseFloat
+			var distance = parseFloat($("#distance_result").val());
+			var km = parseFloat($("#km").val());
 			var price_type = $("#price_type").val();
-			
-			if (distance <= 0) {
-				alert("Distance tidak boleh kosong");
+
+			// ✅ Validasi angka dan urutan logis
+			if (isNaN(distance) || distance <= 0) {
+				alert("Distance tidak boleh kosong atau nol.");
+			}
+			else if (isNaN(km)) {
+				alert("Nilai maksimum KM tidak valid.");
 			}
 			else if (distance > km) {
-				alert("Jarak tidak boleh melewati " + km + "KM");
+				alert("Jarak tidak boleh melewati " + km + " KM");
 			}
-			else if(jenis == '' || jenis == null)
-			{
-				alert ("Jenis harus diisi !..");				
+			else if (jenis === '' || jenis == null) {
+				alert("Jenis harus diisi!");
 			}
-			else if(biaya_kirim <= 0)
-			{
-				alert ("Biaya Kirim harus diisi !..");				
+			else if (biaya_kirim <= 0 || biaya_kirim === '') {
+				alert("Biaya Kirim harus diisi!");
 			}
-			else
-			{
+			else {
 				$.post("ajax/quo_crud.php", {
-				id:id,
-				id_quo:id_quo,
-				id_asal:id_asal,
-				id_tujuan:id_tujuan,
-				jenis:jenis,
+					id: id,
+					id_quo: id_quo,
+					id_asal: id_asal,
+					id_tujuan: id_tujuan,
+					jenis: jenis,
 
-				origin_address:origin_address,
-				origin_lat:origin_lat,
-				origin_lon:origin_lon,
+					origin_address: origin_address,
+					origin_lat: origin_lat,
+					origin_lon: origin_lon,
 
-				destination_address:destination_address,
-				destination_lat:destination_lat,
-				destination_lon:destination_lon,
-				
-				distance:distance,
-				biaya_kirim:biaya_kirim,
-				mode:mode,
-				price_type:price_type,
-				type : "Add_Detil"
+					destination_address: destination_address,
+					destination_lat: destination_lat,
+					destination_lon: destination_lon,
+
+					distance: distance,
+					biaya_kirim: biaya_kirim,
+					mode: mode,
+					price_type: price_type,
+					type: "Add_Detil"
 				}, function (data, status) {
 					alert(data);
-					$("#Data").modal("hide");				
+					$("#Data").modal("hide");
 					ReadData();
 				});
 			}
-		}	
-
+		}
+	
 		function GetData(id) {
 			$("#idx").val(id);
 			$.post("ajax/quo_crud.php", {
@@ -546,6 +548,10 @@ if($mode == 'View')
 						} else {
 							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
 						}
+
+						if (origin_lat && origin_lon && dest_lat && dest_lon) {
+							hitungJarakDanTampilkan();
+						}
 					}, 'json');
 				}
 
@@ -632,6 +638,11 @@ if($mode == 'View')
 						} else {
 							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
 						}
+
+						if (origin_lat && origin_lon && dest_lat && dest_lon) {
+							hitungJarakDanTampilkan();
+						}
+
 					}, 'json');
 				}
 
