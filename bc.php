@@ -551,7 +551,7 @@ else
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Alamat Pengambilan :</b></span>
 								<textarea name="alamat_ambil" id="alamat_ambil"
 								style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; 
-								border: 1px solid #4; padding: 5px;" ></textarea>
+								border: 1px solid #444; padding: 5px;" ></textarea>
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Tujuan :</b></span>
@@ -656,13 +656,13 @@ else
 							</div>	
 							<?php if($m_add == '1'){?>
 							<button class="btn btn-block btn-success" 
-								style="margin-left:1px; margin-bottom:2px;padding-top;-2px;padding:0px;padding-right:5px;padding-left:3px;padding-bottom:-2px" type="button" 
+								style="margin-left:1px; margin-bottom:2px;padding-top:-2px;padding:0px;padding-right:5px;padding-left:3px;padding-bottom:-2px" type="button" 
 								onClick="javascript:GetDoc()"   >
 								<span class="fa  fa-plus-square"></span>
 								<b>Add Doc</b>
 							</button>
 							<?php }?>
-							<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:-1px; margin-bottom:2px;padding-top;-2px;padding:0px;padding-right:5px;padding-left:3px;padding-bottom:-2px">
+							<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:-1px; margin-bottom:2px;padding-top:-2px;padding:0px;padding-right:5px;padding-left:3px;padding-bottom:-2px">
 								<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Close</b></button>	
 							<div class="table-responsive mailbox-messages" >									
 								<div class="tampil_doc"></div>

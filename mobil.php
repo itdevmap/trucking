@@ -388,7 +388,7 @@ else
 							<option>No. Police</option>
 							<option>Brand</option>
 							<option>Year</option>
-							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
+							<option value="<?php echo $field; ?>" selected hidden><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
 						style="text-align: left;margin-left:0px;width:200px" onkeypress="ReadData(1)" >

@@ -63,14 +63,14 @@ if ($_GET['type'] == "Read")
 	$jmlperhalaman = $paging;
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 
-	if($field == 'No. Polisi')
+	if($field == 'No. Police')
 	{
 		$f = 'm_mobil_tr.no_polisi';
-	}else if($field == 'Merk'){
+	}else if($field == 'Brand'){
 		$f = 'm_mobil_tr.merk';
-	}else if($field == 'Tahun'){
+	}else if($field == 'Year'){
 		$f = 'm_mobil_tr.tahun_buat';
-	}else if($field == 'Supir'){
+	}else if($field == 'Driver'){
 		$f = 'm_supir.nama_supir';	
 	}else{
 		$f = 'm_mobil_tr.no_polisi';

@@ -359,19 +359,29 @@
 				);
 			}
 		}
+
 		function Confirm(id) {
 			var hal = $("#hal").val();
 			var conf = confirm("Are you sure to Closed ?");
 			if (conf == true) {
 				$.post("ajax/jo_crud.php", {
-						id: id,type:"Executed"
+						id: id,
+						type: "Executed"
 					},
 					function (data, status) {
-						ReadData(hal);
+						if (data.includes("GAGAL")) {
+							alert(data);
+						} else {
+							alert("Berhasil");
+							ReadData(hal);
+						}
 					}
-				);
+				).fail(function(xhr, status, error) {
+					alert("Request gagal: " + error);
+				});
 			}
 		}
+
 		
 		function ListBiaya_Lain(id, stat) {
 			$("#id_jo").val(id);
@@ -856,85 +866,6 @@
 			});
 		}
 
-
-		// function SaveAttc() {
-		// 	const fileSo     = document.getElementById('file_so').files[0];
-		// 	const fileSj     = document.getElementById('file_sj').files[0];
-		// 	const fileMutasi = document.getElementById('file_mutasi').files[0];
-		// 	const idJo       = document.getElementById('id_jo_attc').value;
-
-		// 	if (!fileSo && !fileSj && !fileMutasi) {
-		// 		alert("Minimal satu file harus dipilih.");
-		// 		return;
-		// 	}
-		// 	if (!idJo) {
-		// 		alert("ID JO wajib diisi.");
-		// 		return;
-		// 	}
-
-		// 	const formData = new FormData();
-		// 	formData.append("id_jo", idJo);
-		// 	if (fileSo)     formData.append("file_so", fileSo);
-		// 	if (fileSj)     formData.append("file_sj", fileSj);
-		// 	if (fileMutasi) formData.append("file_mutasi", fileMutasi);
-
-		// 	$.ajax({
-		// 		url: "upload_attachment.php",
-		// 		type: "POST",
-		// 		data: formData,
-		// 		processData: false,
-		// 		contentType: false,
-		// 		success: function (response) {
-		// 			$('#DataAttc').modal('hide');
-		// 			// Reset input
-		// 			document.getElementById('file_so').value = '';
-		// 			document.getElementById('file_sj').value = '';
-		// 			document.getElementById('file_mutasi').value = '';
-		// 		},
-		// 		error: function (xhr, status, error) {
-		// 			alert("Gagal upload:\n" + error);
-		// 		}
-		// 	});
-		// }
-		// function SaveAttc() {
-		// 	var formData = new FormData(document.getElementById('form_attachment'));
-
-		// 	$.ajax({
-		// 		url: 'upload_attachment.php',
-		// 		type: 'POST',
-		// 		data: formData,
-		// 		contentType: false,
-		// 		processData: false,
-		// 		success: function (res) {
-		// 			try {
-		// 				const result = JSON.parse(res);
-
-		// 				if (result.status === 1) {
-		// 					if (result.data.file_so) {
-		// 						$('.view_so').text(result.data.file_so);
-		// 					}
-		// 					if (result.data.file_sj) {
-		// 						$('.view_sj').text(result.data.file_sj);
-		// 					}
-		// 					if (result.data.file_mutasi) {
-		// 						$('.view_mutasi').text(result.data.file_mutasi);
-		// 					}
-
-		// 					alert(result.message);
-		// 					$('#DataAttc').modal('hide');
-		// 				} else {
-		// 					alert(result.message || "Upload gagal.");
-		// 				}
-		// 			} catch (e) {
-		// 				console.error("Gagal parsing JSON:", res);
-		// 				alert("Respon server tidak valid.");
-		// 			}
-		// 		},
-		// 		error: function () {
-		// 			alert("Gagal menghubungi server.");
-		// 		}
-		// 	});
-		// }
 		function SaveAttc() {
 			var formData = new FormData(document.getElementById('form_attachment'));
 
@@ -1019,7 +950,7 @@
 							<option>No Cont</option>
 							<option>No Police</option>
 							<option>Driver</option>
-							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
+							<option value="<?php echo $field; ?>" selected hidden><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
@@ -1036,7 +967,7 @@
 							<option>No Cont</option>
 							<option>No Police</option>
 							<option>Driver</option>
-							<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
+							<option value="<?php echo $field1; ?>" selected hidden><?php echo $field1; ?></option>
 						</select>
 						<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >

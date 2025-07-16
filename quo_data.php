@@ -228,7 +228,7 @@ if($mode == 'View')
 			
 			$("#id_asal").val('141');
 			$("#penerima").val('');
-			$("#biaya_kirim").val('');
+			// $("#biaya_kirim").val('');
 			$("#jenis").val('');
 			$("#modex").val('Add');
 			CekRate();
@@ -242,7 +242,7 @@ if($mode == 'View')
 			var jenis_mobil = $("#jenis").val();
 			var id_cust = $("#id_cust").val();
 
-			$("#biaya_kirim").val('0');	
+			// $("#biaya_kirim").val('0');	
 			$.post("ajax/quo_crud.php", {
 				id_cust:id_cust, id_asal: id_asal, id_tujuan:id_tujuan, jenis_mobil:jenis_mobil, type:"Cek_Rate_Cust"
 				},
@@ -254,7 +254,7 @@ if($mode == 'View')
 					}
 					else
 					{
-						$("#biaya_kirim").val(Rupiah(data.rate));
+						// $("#biaya_kirim").val(Rupiah(data.rate));
 					}
 				}
 			);
@@ -266,8 +266,7 @@ if($mode == 'View')
 			var jenis_mobil = $("#jenis").val();
 			var price_type = $("#price_type").val();
 
-			// kosongkan nilai awal
-			$("#biaya_kirim").val('');
+			// $("#biaya_kirim").val('');
 			$("#km").val('0');
 
 			$.post("ajax/quo_crud.php", {
@@ -281,16 +280,19 @@ if($mode == 'View')
 					var data = JSON.parse(data);
 
 					if (data.status == 404 || !data.km || data.km == 0) {
-						// Tidak ditemukan, pastikan tetap 0
-						$("#biaya_kirim").val('0');
 						$("#km").val('0');
+						
+						$("#max_price").val('0');
+						$("#min_price").val('0');
+
 					} else {
-						$("#biaya_kirim").val(Rupiah(data.rate));
 						$("#km").val(data.km);
+						$("#max_price").val(data.max_price);
+						$("#min_price").val(data.min_price);
+
 					}
 				} catch (e) {
 					console.error("Gagal parsing JSON:", data);
-					$("#biaya_kirim").val('0');
 					$("#km").val('0');
 				}
 			});
@@ -302,7 +304,7 @@ if($mode == 'View')
 			var id_asal = $("#id_asal").val();
 			var id_tujuan = $("#id_tujuan").val();
 			var jenis = $("#jenis").val();
-			var biaya_kirim = $("#biaya_kirim").val();
+			// var biaya_kirim = $("#biaya_kirim").val();
 			var mode = $("#modex").val();
 
 			var origin_address = $("#origin_address").val();
@@ -313,13 +315,21 @@ if($mode == 'View')
 			var destination_lat = $("#destination_lat").val();
 			var destination_lon = $("#destination_lon").val();
 
-			// ✅ Ubah string input ke angka dengan parseFloat
 			var distance = parseFloat($("#distance_result").val());
 			var km = parseFloat($("#km").val());
 			var price_type = $("#price_type").val();
 
-			// ✅ Validasi angka dan urutan logis
-			if (isNaN(distance) || distance <= 0) {
+			var max_price = parseFloat($("#max_price").val());
+			var min_price = parseFloat($("#min_price").val());
+
+			// Hilangkan koma dari biaya_kirim dulu
+			var biaya_kirim_raw = $("#biaya_kirim").val().replace(/,/g, '');
+			var biaya_kirim = parseFloat(biaya_kirim_raw);
+
+			if (biaya_kirim > max_price || biaya_kirim < min_price) {
+				alert("Biaya Kirim tidak boleh lebih dari " + max_price + " dan kurang dari " + min_price);
+			}
+			else if (isNaN(distance) || distance <= 0) {
 				alert("Distance tidak boleh kosong atau nol.");
 			}
 			else if (isNaN(km)) {
@@ -382,21 +392,18 @@ if($mode == 'View')
 					$("#destination_address").val(data.destination_address);
 					$("#destination_lon").val(data.destination_lon);
 					$("#destination_lat").val(data.destination_lat);
-
+					
 					$("#distance_result").val(data.km);
 					$("#price_type").val(data.price_type && data.price_type !== "" ? data.price_type : "high");
-
 					$("#modex").val('Edit');
-					// setTimeout(function () {
-						CekRate();
-						origin_address();
-						destination_address();
-					// }, 100);
+					
+					CekRate();
+					origin_address();
+					destination_address();
 				}
 			);
 			$("#Data").modal("show");
 		}
-
 
 		function DelDetil(id) {
 			var conf = confirm("Are you sure to Delete ?");
@@ -421,50 +428,40 @@ if($mode == 'View')
 			let lastOriginValue = '';
 			let lastDestinationValue = '';
 
-			// =========================
-			// ORIGIN ADDRESS HANDLER
-			// =========================
+			// ORIGIN ADDRESS
 			$('#origin_address').on('keydown', function (event) {
 				if (event.key === "Enter") {
 					event.preventDefault();
 					const val = $(this).val().trim();
 					if (val.length > 5 && val !== lastOriginValue) {
 						lastOriginValue = val;
-						console.log("Menjalankan origin_address() via ENTER:", val);
 						origin_address();
 					}
 				}
 			});
-
 			$('#origin_address').on('blur', function () {
 				const val = $(this).val().trim();
 				if (val.length > 5 && val !== lastOriginValue) {
 					lastOriginValue = val;
-					console.log("Menjalankan origin_address() via BLUR:", val);
 					origin_address();
 				}
 			});
 
-			// =============================
-			// DESTINATION ADDRESS HANDLER
-			// =============================
+			// DESTINATION ADDRESS
 			$('#destination_address').on('keydown', function (event) {
 				if (event.key === "Enter") {
 					event.preventDefault();
 					const val = $(this).val().trim();
 					if (val.length > 5 && val !== lastDestinationValue) {
 						lastDestinationValue = val;
-						console.log("Menjalankan destination_address() via ENTER:", val);
 						destination_address();
 					}
 				}
 			});
-
 			$('#destination_address').on('blur', function () {
 				const val = $(this).val().trim();
 				if (val.length > 5 && val !== lastDestinationValue) {
 					lastDestinationValue = val;
-					console.log("Menjalankan destination_address() via BLUR:", val);
 					destination_address();
 				}
 			});
@@ -477,63 +474,63 @@ if($mode == 'View')
 				address: origin_address,
 				type: 'origin'
 			}, function (data) {
-				console.log("Data dari server (origin):", data);
-
 				if (data.status !== "success") {
 					alert("Gagal mendapatkan lokasi: " + data.message);
-					console.warn("Error response dari geoapify:", data);
-
 					origin_lat = null;
 					origin_lon = null;
 					$("#origin_lat").val('');
 					$("#origin_lon").val('');
 					$("#origin_map").hide();
-
-					if (window.originMap) {
-						window.originMap.remove();
-						window.originMap = null;
-					}
+					if (window.originMap) window.originMap.remove();
 					return;
 				}
 
 				origin_lat = data.lat;
 				origin_lon = data.lon;
-
-				// ✅ Tampilkan ke input lat/lon
 				$("#origin_lat").val(origin_lat.toFixed(6));
 				$("#origin_lon").val(origin_lon.toFixed(6));
+				$('#origin_map').show();
 
-				$('#origin_map').css('display', 'block');
-
-				if (window.originMap) {
-					window.originMap.remove();
-				}
+				if (window.originMap) window.originMap.remove();
 
 				window.originMap = L.map('origin_map').setView([origin_lat, origin_lon], 15);
 				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 					attribution: '© OpenStreetMap contributors'
 				}).addTo(window.originMap);
 
+				let originInitialLat = origin_lat;
+				let originInitialLon = origin_lon;
+
 				let marker = L.marker([origin_lat, origin_lon], { draggable: true }).addTo(window.originMap)
 					.bindPopup("Klik di peta untuk pindahkan marker").openPopup();
 
 				marker.on('dragend', function (e) {
 					let pos = e.target.getLatLng();
-					updateLocation(pos.lat, pos.lng, marker);
+					let jarak = hitungJarak(originInitialLat, originInitialLon, pos.lat, pos.lng);
+					if (jarak > 1) {
+						alert("Marker asal tidak boleh dipindah lebih dari 1KM.");
+						marker.setLatLng([originInitialLat, originInitialLon]);
+						marker.openPopup();
+					} else {
+						updateLocation(pos.lat, pos.lng, marker);
+					}
 				});
 
 				window.originMap.on('click', function (e) {
-					let lat = e.latlng.lat;
-					let lon = e.latlng.lng;
-					marker.setLatLng([lat, lon]);
-					updateLocation(lat, lon, marker);
+					let jarak = hitungJarak(originInitialLat, originInitialLon, e.latlng.lat, e.latlng.lng);
+					if (jarak > 1) {
+						alert("Marker asal tidak boleh dipindah lebih dari 1KM.");
+						marker.setLatLng([originInitialLat, originInitialLon]);
+						marker.openPopup();
+					} else {
+						marker.setLatLng([e.latlng.lat, e.latlng.lng]);
+						updateLocation(e.latlng.lat, e.latlng.lng, marker);
+					}
 				});
 
 				function updateLocation(lat, lon, markerRef) {
-					console.log("updateLocation fired", lat, lon);
 					origin_lat = lat;
 					origin_lon = lon;
-
 					$("#origin_lat").val(lat.toFixed(6));
 					$("#origin_lon").val(lon.toFixed(6));
 
@@ -542,22 +539,16 @@ if($mode == 'View')
 						lon: lon
 					}, function (res) {
 						if (res.status === "success") {
-							let newAddress = res.formatted;
-							$("#origin_address").val(newAddress);
-							markerRef.bindPopup(`Lokasi baru:<br>${newAddress}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+							$("#origin_address").val(res.formatted);
+							markerRef.bindPopup(`Lokasi baru:<br>${res.formatted}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
 						} else {
 							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
 						}
-
-						if (origin_lat && origin_lon && dest_lat && dest_lon) {
-							hitungJarakDanTampilkan();
-						}
+						if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
 					}, 'json');
 				}
 
-				if (origin_lat && origin_lon && typeof dest_lat !== 'undefined' && typeof dest_lon !== 'undefined') {
-					hitungJarakDanTampilkan();
-				}
+				if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
 			}, 'json');
 		}
 
@@ -568,62 +559,63 @@ if($mode == 'View')
 				address: destination_address,
 				type: 'destination'
 			}, function (data) {
-				console.log("Data dari server (destination):", data);
-
 				if (data.status !== "success") {
 					alert("Gagal mendapatkan lokasi tujuan: " + data.message);
-					console.warn("Response error:", data);
-
 					dest_lat = null;
 					dest_lon = null;
 					$("#destination_lat").val('');
 					$("#destination_lon").val('');
 					$("#destination_map").hide();
-
-					if (window.destinationMap) {
-						window.destinationMap.remove();
-						window.destinationMap = null;
-					}
+					if (window.destinationMap) window.destinationMap.remove();
 					return;
 				}
 
 				dest_lat = data.lat;
 				dest_lon = data.lon;
-
 				$("#destination_lat").val(dest_lat.toFixed(6));
 				$("#destination_lon").val(dest_lon.toFixed(6));
+				$('#destination_map').show();
 
-				$('#destination_map').css('display', 'block');
-
-				if (window.destinationMap) {
-					window.destinationMap.remove();
-				}
+				if (window.destinationMap) window.destinationMap.remove();
 
 				window.destinationMap = L.map('destination_map').setView([dest_lat, dest_lon], 15);
 				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 					attribution: '© OpenStreetMap contributors'
 				}).addTo(window.destinationMap);
 
+				let destInitialLat = dest_lat;
+				let destInitialLon = dest_lon;
+
 				let marker = L.marker([dest_lat, dest_lon], { draggable: true }).addTo(window.destinationMap)
 					.bindPopup("Klik di peta untuk ubah titik tujuan").openPopup();
 
 				marker.on('dragend', function (e) {
 					let pos = e.target.getLatLng();
-					updateDestinationLocation(pos.lat, pos.lng, marker);
+					let jarak = hitungJarak(destInitialLat, destInitialLon, pos.lat, pos.lng);
+					if (jarak > 1) {
+						alert("Marker tujuan tidak boleh dipindah lebih dari 1KM.");
+						marker.setLatLng([destInitialLat, destInitialLon]);
+						marker.openPopup();
+					} else {
+						updateDestinationLocation(pos.lat, pos.lng, marker);
+					}
 				});
 
 				window.destinationMap.on('click', function (e) {
-					let lat = e.latlng.lat;
-					let lon = e.latlng.lng;
-					marker.setLatLng([lat, lon]);
-					updateDestinationLocation(lat, lon, marker);
+					let jarak = hitungJarak(destInitialLat, destInitialLon, e.latlng.lat, e.latlng.lng);
+					if (jarak > 1) {
+						alert("Marker tujuan tidak boleh dipindah lebih dari 1KM.");
+						marker.setLatLng([destInitialLat, destInitialLon]);
+						marker.openPopup();
+					} else {
+						marker.setLatLng([e.latlng.lat, e.latlng.lng]);
+						updateDestinationLocation(e.latlng.lat, e.latlng.lng, marker);
+					}
 				});
 
 				function updateDestinationLocation(lat, lon, markerRef) {
-					console.log("updateDestinationLocation fired", lat, lon);
 					dest_lat = lat;
 					dest_lon = lon;
-
 					$("#destination_lat").val(lat.toFixed(6));
 					$("#destination_lon").val(lon.toFixed(6));
 
@@ -632,23 +624,16 @@ if($mode == 'View')
 						lon: lon
 					}, function (res) {
 						if (res.status === "success") {
-							let newAddress = res.formatted;
-							$("#destination_address").val(newAddress);
-							markerRef.bindPopup(`Tujuan diperbarui:<br>${newAddress}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+							$("#destination_address").val(res.formatted);
+							markerRef.bindPopup(`Tujuan diperbarui:<br>${res.formatted}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
 						} else {
 							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
 						}
-
-						if (origin_lat && origin_lon && dest_lat && dest_lon) {
-							hitungJarakDanTampilkan();
-						}
-
+						if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
 					}, 'json');
 				}
 
-				if (origin_lat && origin_lon && dest_lat && dest_lon) {
-					hitungJarakDanTampilkan();
-				}
+				if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
 			}, 'json');
 		}
 
@@ -658,10 +643,9 @@ if($mode == 'View')
 		}
 
 		function hitungJarak(lat1, lon1, lat2, lon2) {
-			const R = 6371; // radius bumi dalam KM
+			const R = 6371;
 			const dLat = toRad(lat2 - lat1);
 			const dLon = toRad(lon2 - lon1);
-
 			const rLat1 = toRad(lat1);
 			const rLat2 = toRad(lat2);
 
@@ -670,13 +654,13 @@ if($mode == 'View')
 				Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
 			const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-			const d = R * c;
-			return d;
+			return R * c;
 		}
 
 		function toRad(value) {
 			return value * Math.PI / 180;
 		}
+
     </script>
 	
   </head>
@@ -904,7 +888,14 @@ if($mode == 'View')
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Shipping Cost :</b></span>
 								<input type="text" id="biaya_kirim" style="text-align: right;width:40%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>
+								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" >
+							</div>
+
+							<div style="width:100%;" class="input-group">
+								<input type="hidden" id="max_price" style="text-align: right;width:40%;" 
+								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" >
+								<input type="hidden" id="min_price" style="text-align: right;width:40%;" 
+								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" >
 							</div>
 							
 							<div style="width:100%;" class="input-group">

@@ -105,6 +105,7 @@ else
 				$("#hal").val(hal);
 			});
 		}
+
 		function GetData(id) {
 			$("#id").val(id);	
 			$.post("ajax/price_crud.php", {
@@ -112,7 +113,7 @@ else
 				},
 				function (data, status) {
 					var data = JSON.parse(data);
-					// alert(data.origin_address);
+					
 					$("#id_asal").val(data.id_asal);
 					$("#id_tujuan").val(data.id_tujuan);
 					$("#origin_address").val(data.origin_address);
@@ -125,20 +126,24 @@ else
 					$("#price_type").val(data.price_type && data.price_type !== "" ? data.price_type : "high");
 
 					$("#jenis_mobil").val(data.jenis_mobil);
-
-					
 					$("#km").val(data.km);
-					$("#rate").val(Desimal(data.rate));
+					$("#max_price").val(Desimal(data.max_price));
+					$("#min_price").val(Desimal(data.min_price));
 					$("#uj").val(Desimal(data.uj));
 					$("#ritase").val(Desimal(data.ritase));
 					$("#stat").val(data.status);
 					$("#mode").val('Edit');
-					origin_address();
-					destination_address();
+
+					// 🧠 Kasih delay sedikit biar DOM update dulu
+					setTimeout(() => {
+						origin_address();
+						destination_address();
+					}, 200);
 				}
 			);
 			$("#Data").modal("show");
 		}
+
 
 		function add() {	
 			var r = confirm("Are you sure ?...");
@@ -154,7 +159,9 @@ else
 				var destination_lat = $("#destination_lat").val();
 				var destination_lon = $("#destination_lon").val();
 
-				var rate = $("#rate").val();
+				// var rate = $("#rate").val();
+				var max_price = $("#max_price").val();
+				var min_price = $("#min_price").val();
 				var jenis_mobil = $("#jenis_mobil").val();
 				var km = $("#distance_result").val();
 				var uj = $("#uj").val();
@@ -179,7 +186,11 @@ else
 
 					jenis_mobil:jenis_mobil,
 					km:km,
-					rate:rate,
+
+					// rate:rate,
+					max_price:max_price,
+					min_price:min_price,
+
 					ritase:ritase,
 					uj:uj,
 					stat:stat,
@@ -273,63 +284,63 @@ else
 				address: origin_address,
 				type: 'origin'
 			}, function (data) {
-				console.log("Data dari server (origin):", data);
-
 				if (data.status !== "success") {
 					alert("Gagal mendapatkan lokasi: " + data.message);
-					console.warn("Error response dari geoapify:", data);
-
 					origin_lat = null;
 					origin_lon = null;
 					$("#origin_lat").val('');
 					$("#origin_lon").val('');
 					$("#origin_map").hide();
-
-					if (window.originMap) {
-						window.originMap.remove();
-						window.originMap = null;
-					}
+					if (window.originMap) window.originMap.remove();
 					return;
 				}
 
 				origin_lat = data.lat;
 				origin_lon = data.lon;
-
-				// ✅ Tampilkan ke input lat/lon
 				$("#origin_lat").val(origin_lat.toFixed(6));
 				$("#origin_lon").val(origin_lon.toFixed(6));
+				$('#origin_map').show();
 
-				$('#origin_map').css('display', 'block');
-
-				if (window.originMap) {
-					window.originMap.remove();
-				}
+				if (window.originMap) window.originMap.remove();
 
 				window.originMap = L.map('origin_map').setView([origin_lat, origin_lon], 15);
 				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 					attribution: '© OpenStreetMap contributors'
 				}).addTo(window.originMap);
 
+				let originInitialLat = origin_lat;
+				let originInitialLon = origin_lon;
+
 				let marker = L.marker([origin_lat, origin_lon], { draggable: true }).addTo(window.originMap)
 					.bindPopup("Klik di peta untuk pindahkan marker").openPopup();
 
 				marker.on('dragend', function (e) {
 					let pos = e.target.getLatLng();
-					updateLocation(pos.lat, pos.lng, marker);
+					let jarak = hitungJarak(originInitialLat, originInitialLon, pos.lat, pos.lng);
+					if (jarak > 1) {
+						alert("Marker asal tidak boleh dipindah lebih dari 1KM.");
+						marker.setLatLng([originInitialLat, originInitialLon]);
+						marker.openPopup();
+					} else {
+						updateLocation(pos.lat, pos.lng, marker);
+					}
 				});
 
 				window.originMap.on('click', function (e) {
-					let lat = e.latlng.lat;
-					let lon = e.latlng.lng;
-					marker.setLatLng([lat, lon]);
-					updateLocation(lat, lon, marker);
+					let jarak = hitungJarak(originInitialLat, originInitialLon, e.latlng.lat, e.latlng.lng);
+					if (jarak > 1) {
+						alert("Marker asal tidak boleh dipindah lebih dari 1KM.");
+						marker.setLatLng([originInitialLat, originInitialLon]);
+						marker.openPopup();
+					} else {
+						marker.setLatLng([e.latlng.lat, e.latlng.lng]);
+						updateLocation(e.latlng.lat, e.latlng.lng, marker);
+					}
 				});
 
 				function updateLocation(lat, lon, markerRef) {
-					console.log("updateLocation fired", lat, lon);
 					origin_lat = lat;
 					origin_lon = lon;
-
 					$("#origin_lat").val(lat.toFixed(6));
 					$("#origin_lon").val(lon.toFixed(6));
 
@@ -338,18 +349,16 @@ else
 						lon: lon
 					}, function (res) {
 						if (res.status === "success") {
-							let newAddress = res.formatted;
-							$("#origin_address").val(newAddress);
-							markerRef.bindPopup(`Lokasi baru:<br>${newAddress}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+							$("#origin_address").val(res.formatted);
+							markerRef.bindPopup(`Lokasi baru:<br>${res.formatted}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
 						} else {
 							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
 						}
+						if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
 					}, 'json');
 				}
 
-				if (origin_lat && origin_lon && typeof dest_lat !== 'undefined' && typeof dest_lon !== 'undefined') {
-					hitungJarakDanTampilkan();
-				}
+				if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
 			}, 'json');
 		}
 
@@ -360,62 +369,63 @@ else
 				address: destination_address,
 				type: 'destination'
 			}, function (data) {
-				console.log("Data dari server (destination):", data);
-
 				if (data.status !== "success") {
 					alert("Gagal mendapatkan lokasi tujuan: " + data.message);
-					console.warn("Response error:", data);
-
 					dest_lat = null;
 					dest_lon = null;
 					$("#destination_lat").val('');
 					$("#destination_lon").val('');
 					$("#destination_map").hide();
-
-					if (window.destinationMap) {
-						window.destinationMap.remove();
-						window.destinationMap = null;
-					}
+					if (window.destinationMap) window.destinationMap.remove();
 					return;
 				}
 
 				dest_lat = data.lat;
 				dest_lon = data.lon;
-
 				$("#destination_lat").val(dest_lat.toFixed(6));
 				$("#destination_lon").val(dest_lon.toFixed(6));
+				$('#destination_map').show();
 
-				$('#destination_map').css('display', 'block');
-
-				if (window.destinationMap) {
-					window.destinationMap.remove();
-				}
+				if (window.destinationMap) window.destinationMap.remove();
 
 				window.destinationMap = L.map('destination_map').setView([dest_lat, dest_lon], 15);
 				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 					attribution: '© OpenStreetMap contributors'
 				}).addTo(window.destinationMap);
 
+				let destInitialLat = dest_lat;
+				let destInitialLon = dest_lon;
+
 				let marker = L.marker([dest_lat, dest_lon], { draggable: true }).addTo(window.destinationMap)
 					.bindPopup("Klik di peta untuk ubah titik tujuan").openPopup();
 
 				marker.on('dragend', function (e) {
 					let pos = e.target.getLatLng();
-					updateDestinationLocation(pos.lat, pos.lng, marker);
+					let jarak = hitungJarak(destInitialLat, destInitialLon, pos.lat, pos.lng);
+					if (jarak > 1) {
+						alert("Marker tujuan tidak boleh dipindah lebih dari 1KM.");
+						marker.setLatLng([destInitialLat, destInitialLon]);
+						marker.openPopup();
+					} else {
+						updateDestinationLocation(pos.lat, pos.lng, marker);
+					}
 				});
 
 				window.destinationMap.on('click', function (e) {
-					let lat = e.latlng.lat;
-					let lon = e.latlng.lng;
-					marker.setLatLng([lat, lon]);
-					updateDestinationLocation(lat, lon, marker);
+					let jarak = hitungJarak(destInitialLat, destInitialLon, e.latlng.lat, e.latlng.lng);
+					if (jarak > 1) {
+						alert("Marker tujuan tidak boleh dipindah lebih dari 1KM.");
+						marker.setLatLng([destInitialLat, destInitialLon]);
+						marker.openPopup();
+					} else {
+						marker.setLatLng([e.latlng.lat, e.latlng.lng]);
+						updateDestinationLocation(e.latlng.lat, e.latlng.lng, marker);
+					}
 				});
 
 				function updateDestinationLocation(lat, lon, markerRef) {
-					console.log("updateDestinationLocation fired", lat, lon);
 					dest_lat = lat;
 					dest_lon = lon;
-
 					$("#destination_lat").val(lat.toFixed(6));
 					$("#destination_lon").val(lon.toFixed(6));
 
@@ -424,18 +434,16 @@ else
 						lon: lon
 					}, function (res) {
 						if (res.status === "success") {
-							let newAddress = res.formatted;
-							$("#destination_address").val(newAddress);
-							markerRef.bindPopup(`Tujuan diperbarui:<br>${newAddress}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+							$("#destination_address").val(res.formatted);
+							markerRef.bindPopup(`Tujuan diperbarui:<br>${res.formatted}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
 						} else {
 							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
 						}
+						if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
 					}, 'json');
 				}
 
-				if (origin_lat && origin_lon && dest_lat && dest_lon) {
-					hitungJarakDanTampilkan();
-				}
+				if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
 			}, 'json');
 		}
 
@@ -495,10 +503,10 @@ else
 						<div style="width:100%" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"><b>Filter By :</b></span>
 							<select size="1" id="field1"  name="field1" style="padding:4px;margin-right:2px;width: 85px">
-								<option selected>Origin</option>
+								<option>Origin</option>
 								<option>Destination</option>
 								<option>Type</option>
-								<option value="<?php echo $field1; ?>"hidden><?php echo $field1; ?></option>
+								<option value="<?php echo $field1; ?>" selected hidden><?php echo $field1; ?></option>
 							</select>
 							<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
 							style="text-align: left;width:200px" onkeypress="ReadData(1)" >
@@ -506,10 +514,10 @@ else
 						<div style="width:100%" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"></span>
 							<select size="1" id="field2"  name="field2" style="padding:4px;margin-right:2px;width: 85px">
-								<option selected>Origin</option>
+								<option>Origin</option>
 								<option>Destination</option>
 								<option>Type</option>
-								<option value="<?php echo $field2; ?>" hidden><?php echo $field2; ?></option>
+								<option value="<?php echo $field2; ?>" selected hidden><?php echo $field2; ?></option>
 							</select>
 							<input type="text"  id ="search_name2" name="search_name2" value="<?php echo $search_name2; ?>" 
 							style="text-align: left;width:200px" onkeypress="ReadData(1)" >
@@ -654,11 +662,22 @@ else
 								<input type="text" id="distance_result" value="" style="text-transform: uppercase;text-align: left;width:80%;" readonly>
 							</div>
 
-							<div style="width:100%;" class="input-group">
+							<!-- <div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;;min-width:150px"><b>Price :</b></span>
 								<input type="text" id="rate" value="" style="text-align: right;width:40%;" 
 								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
+							</div> -->
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;;min-width:150px"><b>Max Price :</b></span>
+								<input type="text" id="max_price" value="" style="text-align: right;width:40%;" 
+								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
 							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;;min-width:150px"><b>min Price :</b></span>
+								<input type="text" id="min_price" value="" style="text-align: right;width:40%;" 
+								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  >
+							</div>
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Road Fee :</b></span>
 								<input type="text" id="uj" value="" style="text-align: right;width:40%;" 

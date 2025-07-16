@@ -449,12 +449,6 @@ if ($_GET['type'] == "Read")
 		$nilai_ppn = ($ppn/100) * $total;
 		$nilai_pph = ($pph/100) * $total;
 		$total = $total + $nilai_ppn - $nilai_pph;
-		
-		$sql = "update tr_jo set 
-				status = '1', tagihan = '$total'
-				where id_jo = '$id'	";
-		$hasil=mysqli_query($koneksi, $sql);
-
 
 		// ---------------- KIRIM KE API CMANCO ----------------
 		$id_supir = $rq['id_supir'];
@@ -502,12 +496,10 @@ if ($_GET['type'] == "Read")
 			}
 		}
 
-		// echo "<pre>";
-		// echo "Foto SO         : " . ($foto_so ?? '-') . "\n";
-		// echo "Surat Jalan     : " . ($surat_jalan ?? '-') . "\n";
-		// echo "Mutasi Rekening : " . ($mutasi_rekening ?? '-') . "\n";
-		// echo "</pre>";
-		// die();
+		if (is_null($foto_so) || is_null($surat_jalan) || is_null($mutasi_rekening)) {
+			echo "GAGAL: Lampiran (foto_so / surat_jalan / mutasi_rekening) belum ada!";
+			exit(mysqli_error($koneksi));
+		}
 
 		$data = [
 			'project'     		=> $rq['project_code'],
@@ -528,13 +520,15 @@ if ($_GET['type'] == "Read")
 			'mutasi_rekening'	=> $mutasi_rekening,
 		];
 
+
 		$sendApi = [
 			'trucking' => $data
 		];
 
 		// Encode ke JSON
 		$payload = json_encode($sendApi);
-		// die($payload);
+		// echo $payload;
+		// die();
 
 		// Inisialisasi cURL
 		// $ch = curl_init('http://127.0.0.1:8000/api/planning-borong-driver/store');
@@ -560,6 +554,13 @@ if ($_GET['type'] == "Read")
 		}
 
 		curl_close($ch);
+
+
+		// UPDATE JADI DONE
+		$sql = "update tr_jo set 
+			status = '1', tagihan = '$total'
+			where id_jo = '$id'	";
+		$hasil=mysqli_query($koneksi, $sql);
 
 		if (!$hasil) {	
 			exit(mysqli_error($koneksi));

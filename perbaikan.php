@@ -356,10 +356,10 @@
 					<div style="width:100%" class="input-group">
 						<span class="input-group-addon" style="text-align:right;"><b>Filter By :</b></span>
 						<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">
-							<option selected>No SPK</option>
+							<option>No SPK</option>
 							<option>No Police</option>
 							<option>Type</option>
-							<option value="<?php echo $field; ?>" hidden><?php echo $field; ?></option>
+							<option value="<?php echo $field; ?>" selected hidden><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
@@ -369,8 +369,8 @@
 						<select size="1" id="field1"  onchange="ReadData(1)" name="field1" style="padding:4px;margin-right:2px;width: 85px">
 							<option>No SPK</option>
 							<option>No Police</option>
-							<option>Type of work</option>
-							<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
+							<option>Type</option>
+							<option value="<?php echo $field1; ?>" selected hidden><?php echo $field1; ?></option>
 						</select>
 						<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >

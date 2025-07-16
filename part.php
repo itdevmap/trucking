@@ -384,7 +384,7 @@ else
 						<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 125px">
 							<option>Item Number</option>
 							<option>Description</option>
-							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
+							<option value="<?php echo $field; ?>" selected hidden><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >

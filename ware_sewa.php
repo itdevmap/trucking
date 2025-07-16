@@ -261,7 +261,7 @@ else
 							<option>No SO</option>
 							<option>Customer</option>
 							<option>Service Type</option>
-							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
+							<option value="<?php echo $field; ?>" selected hidden><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
@@ -272,7 +272,7 @@ else
 							<option>No SO</option>
 							<option>Customer</option>
 							<option>Service Type</option>
-							<option value="<?php echo $field1; ?>" selected><?php echo $field1; ?></option>
+							<option value="<?php echo $field1; ?>" selected hidden><?php echo $field1; ?></option>
 						</select>
 						<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
 						style="text-align: left;width:200px" onkeypress="ReadData(1)" >

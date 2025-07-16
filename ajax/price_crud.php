@@ -53,9 +53,10 @@ if ($_GET['type'] == "Read")
 					<th rowspan="2" width="18%" style="text-align: center;">ORIGIN ADDRESS</th>
 					<th rowspan="2" width="10%" style="text-align: center;">DESTINATION</th>
 					<th rowspan="2" width="18%" style="text-align: center;">DESTINATION ADDRESS</th>
-					<th rowspan="2" width="13%" style="text-align: center;">TYPE</th>
+					<th rowspan="2" width="10%" style="text-align: center;">TYPE</th>
 					<th rowspan="2" width="13%" style="text-align: center;">KM</th>
-					<th rowspan="2" width="7%" style="text-align: center;">PRICE</th>
+					<th rowspan="2" width="7%" style="text-align: center;">MAX PRICE</th>
+					<th rowspan="2" width="7%" style="text-align: center;">MIN PRICE</th>
 					<th rowspan="2" width="7%" style="text-align: center;">ROAD FEE</th>
 					<th rowspan="2" width="7%" style="text-align: center;">RITASE</th>
 					<th rowspan="2" width="7%" style="text-align: center;">PRICE TYPE</th>
@@ -73,14 +74,18 @@ if ($_GET['type'] == "Read")
 	$jmlperhalaman = $paging;
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 	
-	$SQL = "select m_rate_tr.*, m_kota_tr.nama_kota as asal, m_kota_tr1.nama_kota as tujuan 
-         	from 
-			m_rate_tr left join m_kota_tr on m_rate_tr.id_asal = m_kota_tr.id_kota
+
+	$SQL = "select 
+				m_rate_tr.*, 
+				m_kota_tr.nama_kota as asal, 
+				m_kota_tr1.nama_kota as tujuan 
+         	from m_rate_tr 
+			left join m_kota_tr on m_rate_tr.id_asal = m_kota_tr.id_kota
 			left join m_kota_tr as m_kota_tr1 on m_rate_tr.id_tujuan = m_kota_tr1.id_kota	
 			where $f1 LIKE '%$cari1%' and $f2 LIKE '%$cari2%' 
 			order by m_kota_tr.nama_kota asc, m_kota_tr1.nama_kota, m_rate_tr.jenis_mobil LIMIT $offset, $jmlperhalaman";	
 	$query = mysqli_query($koneksi, $SQL);	
-	// die($SQL);
+
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
     }
@@ -88,7 +93,8 @@ if ($_GET['type'] == "Read")
     {
     	while($row = mysqli_fetch_assoc($result))
     	{	
-			$rate = number_format($row['rate'],0);
+			$max_price = number_format($row['max_price'],0);
+			$min_price = number_format($row['min_price'],0);
 			$ritase = number_format($row['ritase'],0);
 			$uj = number_format($row['uj'],0);
 			$posisi++;		
@@ -100,7 +106,8 @@ if ($_GET['type'] == "Read")
 				<td style="text-align:center">'.$row['destination_address'].'</td>
 				<td style="text-align:center">'.$row['jenis_mobil'].'</td>
 				<td style="text-align:center">'.($row['km'] ?? '-').'</td>
-				<td style="text-align:right">'.$rate.'</td>
+				<td style="text-align:right">'.$max_price.'</td>
+				<td style="text-align:right">'.$min_price.'</td>
 				<td style="text-align:right">'.$uj.'</td>
 				<td style="text-align:right">'.$ritase.'</td>
 				<td style="text-align:center">'.$row['price_type'].'</td>
@@ -199,7 +206,11 @@ else if ($_POST['type'] == "Add_Data"){
 		$id_tujuan = $_POST['id_tujuan'];
 		$jenis_mobil = $_POST['jenis_mobil'];
 		$km = $_POST['km'];
-		$rate = $_POST['rate'];
+		
+		// $rate = $_POST['rate'];
+		$max_price = $_POST['max_price'];
+		$min_price = $_POST['min_price'];
+
 		$uj = $_POST['uj'];
 		$ritase = $_POST['ritase'];
 		$stat = $_POST['stat'];
@@ -214,13 +225,15 @@ else if ($_POST['type'] == "Add_Data"){
 		$destination_lat = $_POST['destination_lat'];
 		$destination_lon = $_POST['destination_lon'];
 		
-		$rate = str_replace(",","", $rate);
+		// $rate = str_replace(",","", $rate);
+		$max_price = str_replace(",","", $max_price);
+		$min_price = str_replace(",","", $min_price);
+
 		$uj = str_replace(",","", $uj);
 		$ritase = str_replace(",","", $ritase);
 		
 		if ($mode == 'Add') {
 
-			// 1. Cek duplikasi data
 			$cek_sql = "
 				SELECT id_rate FROM m_rate_tr 
 				WHERE id_asal = '$id_asal' 
@@ -236,22 +249,48 @@ else if ($_POST['type'] == "Add_Data"){
 				echo "QUERY_FAILED: " . mysqli_error($koneksi);
 				exit;
 			}
-
-			// 2. Jika data ditemukan, tolak insert
 			if (mysqli_num_rows($cek) > 0) {
 				echo "DATA_FOUND";
 				exit;
 			}
 
-			// 3. Lanjut insert karena belum ada
 			$sql = "INSERT INTO m_rate_tr (
-				id_asal, id_tujuan, jenis_mobil, origin_address, origin_lon, origin_lat, 
-				destination_address, destination_lon, destination_lat, km, rate, uj, ritase, 
-				price_type, status, created
-			) VALUES (
-				'$id_asal', '$id_tujuan', '$jenis_mobil', '$origin_address', '$origin_lon', '$origin_lat',
-				'$destination_address', '$destination_lon', '$destination_lat', '$km', '$rate', '$uj',
-				'$ritase', '$price_type', '1', '$id_user'
+				id_asal, 
+				id_tujuan, 
+				jenis_mobil, 
+				origin_address, 
+				origin_lon, 
+				origin_lat, 
+				destination_address, 
+				destination_lon, 
+				destination_lat, 
+				km, 
+				max_price,	 
+				min_price,	 
+				uj, 
+				ritase, 
+				price_type, 
+				status, 
+				created
+			) 
+			VALUES (
+				'$id_asal', 
+				'$id_tujuan', 
+				'$jenis_mobil', 
+				'$origin_address', 
+				'$origin_lon', 
+				'$origin_lat',
+				'$destination_address', 
+				'$destination_lon', 
+				'$destination_lat', 
+				'$km', 
+				'$max_price', 
+				'$min_price', 
+				'$uj',
+				'$ritase', 
+				'$price_type', 
+				'1', 
+				'$id_user'
 			)";
 
 			$hasil = mysqli_query($koneksi, $sql);
@@ -261,29 +300,29 @@ else if ($_POST['type'] == "Add_Data"){
 			} else {
 				echo "INSERT_FAILED: " . mysqli_error($koneksi);
 			}
-
 			exit;
 		}
 		else
 		{
 			$sql = "update m_rate_tr set 
-					id_asal = '$id_asal',
-					id_tujuan = '$id_tujuan',
-					jenis_mobil = '$jenis_mobil',
-					origin_address = '$origin_address',
-					origin_lon = '$origin_lon',
-					origin_lat = '$origin_lat',
-					destination_address = '$destination_address',
-					destination_lon = '$destination_lon',
-					destination_lat = '$destination_lat',
-					km = '$km',
-					rate = '$rate',
-					uj = '$uj',
-					ritase = '$ritase',
-					price_type = '$price_type',
-					status = '$stat',
-					created = '$id_user'
-					where id_rate = '$id'	";
+				id_asal = '$id_asal',
+				id_tujuan = '$id_tujuan',
+				jenis_mobil = '$jenis_mobil',
+				origin_address = '$origin_address',
+				origin_lon = '$origin_lon',
+				origin_lat = '$origin_lat',
+				destination_address = '$destination_address',
+				destination_lon = '$destination_lon',
+				destination_lat = '$destination_lat',
+				km = '$km',
+				max_price = '$max_price',
+				min_price = '$min_price',
+				uj = '$uj',
+				ritase = '$ritase',
+				price_type = '$price_type',
+				status = '$stat',
+				created = '$id_user'
+				where id_rate = '$id'	";
 			$hasil=mysqli_query($koneksi, $sql);
 		}
 		if (!$hasil) {	

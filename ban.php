@@ -442,6 +442,7 @@ else
 							<option>Type</option>
 							<option>Brand</option>
 							<option>No Police</option>
+							<!-- EDIT HERE FOR FILERT -->
 							<option value="<?php echo $field; ?>" selected hidden><?php echo $field; ?></option>
 						</select>
 						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
