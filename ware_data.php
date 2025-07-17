@@ -358,8 +358,7 @@ if($mode == 'View')
 					$("#tinggi").val(data.tinggi);
 					$("#berat").val(Desimal(data.berat));
 					// $("#vol").val(Desimal(data.vol));
-					$("#vol").val(parseFloat(data.vol).toFixed(5));
-
+					$("#vol").val(parseFloat(data.vol).toString());
 					$("#modex").val('Edit');
 				}
 			);

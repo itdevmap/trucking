@@ -252,7 +252,7 @@ else
 							<option >In Progress</option>
 							<option >Executed</option>
 							<option >All</option>
-							<option value="<?php echo $stat;?>" selected ><?php echo $stat;?></option>
+							<option value="<?php echo $stat;?>" selected hidden ><?php echo $stat;?></option>
 						</select>	
 					</div>
 					<div style="width:100%" class="input-group">

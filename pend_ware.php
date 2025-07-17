@@ -170,9 +170,6 @@ else
 		</form>
 	</div>	
 	
-	
-	
-	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>
 	

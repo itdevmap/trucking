@@ -80,12 +80,13 @@ $pdf->SetAutoPageBreak(false);
 
 // Fungsi buat satu blok surat jalan
 function renderSuratJalan($pdf, $startY, $no_sj, $no_do, $tgl_sj, $no_polisi, $nama_supir, $telp_supir, $nama_cust, $penerima, $barang, $berat, $vol, $no_cont, $no_seal, $ket) {
-    $pdf->Image("img/logo_print.jpg",7,$startY-15,25);  
-    $pdf->SetFont('arial','B',18);
-    $pdf->setXY(135,$startY);
-    $pdf->Cell(25,8,"SURAT JALAN",0,1,'L');
+    // Header dan Logo
+    $pdf->Image("img/logo_print.jpg", 7, $startY - 10, 25);  
+    $pdf->SetFont('arial','B',14);
+    $pdf->setXY(140, $startY - 5);
+    $pdf->Cell(60, 8, "SURAT JALAN", 0, 1, 'L');
 
-    $pdf->SetFont('arial','',10);
+    $pdf->SetFont('arial','',9);
     $field = [
         ["No SJ", $no_sj],
         ["No PO/DO", $no_do],
@@ -94,74 +95,60 @@ function renderSuratJalan($pdf, $startY, $no_sj, $no_do, $tgl_sj, $no_polisi, $n
         ["Supir", $nama_supir],
         ["No. Telp", $telp_supir],
     ];
-    foreach ($field as $f) {
-        $pdf->setX(135);
-        $pdf->Cell(20,4,$f[0],0,0,'L');
-        $pdf->Cell(3,4,":",0,0,'L');
-        $pdf->Cell(3,4,$f[1],0,1,'L');
+    $pdf->SetXY(140, $startY + 5);
+    foreach ($field as $i => $f) {
+        $pdf->setX(140);
+        $pdf->Cell(25, 5, $f[0], 0, 0, 'L');
+        $pdf->Cell(3, 5, ":", 0, 0, 'L');
+        $pdf->Cell(60, 5, $f[1], 0, 1, 'L');
     }
 
-    $pdf->setXY(8,$startY + 7);
-    $pdf->Cell(190,5,"Kepada Yth:",0,1,'L');
-    $pdf->SetFont('arial','',10);
+    // Kepada Yth
+    $pdf->SetXY(8, $startY + 5);
+    $pdf->SetFont('arial','',9);
+    $pdf->Cell(100,15,"Kepada Yth:", 0, 1, 'L');
     $pdf->setX(8);
-    $pdf->Cell(20,4,$nama_cust,0,1,'L');
+    $pdf->Cell(100,5, strtoupper($nama_cust), 0, 1, 'L');
     $pdf->setX(8);
-    $pdf->MultiCell(100,4,$penerima,0,1,'L');
+    $pdf->MultiCell(100,5,$penerima,0,1,'L');
 
-    $pdf->Cell(190,5,"",0,1,'L');
+    // Tabel Barang
+    $tableY = $startY + 40;
+    $pdf->SetFont('arial','',9);
+    $pdf->SetXY(8,$tableY);
+    $pdf->Cell(15,8,"NO",1,0,'C');
+    $pdf->Cell(60,8,"NAMA BARANG",1,0,'C');
+    $pdf->Cell(25,8,"QTY",1,0,'C');
+    $pdf->Cell(30,8,"NO. CONT",1,0,'C');
+    $pdf->Cell(25,8,"NO. SEAL",1,0,'C');
+    $pdf->Cell(40,8,"KETERANGAN",1,1,'C');
 
-    $boxY = $startY + 37;
-    $pdf->setXY(8,$boxY);
-    $pdf->Cell(15,7,"NO",1,0,'C');
-    $pdf->Cell(60,7,"NAMA BARANG",1,0,'C');
-    $pdf->Cell(25,7,"QTY",1,0,'C');
-    $pdf->Cell(30,7,"NO. CONT",1,0,'C');
-    $pdf->Cell(25,7,"NO. SEAL",1,0,'C');
-    $pdf->Cell(40,7,"KETERANGAN",1,1,'C');
+    // Isi Barang
+    $pdf->SetX(8);
+    $pdf->Cell(15,20,"1",1,0,'C');
+    $pdf->Cell(60,20, $barang,1,0,'L');
+    $pdf->Cell(25,20, "$berat KG\n$vol M3",1,0,'C');
+    $pdf->Cell(30,20, $no_cont,1,0,'C');
+    $pdf->Cell(25,20, $no_seal,1,0,'C');
+    $pdf->Cell(40,20, $ket,1,1,'L');
 
-    $pdf->setX(8);
-    $pdf->Cell(15,40,"",1,0,'C');
-    $pdf->Cell(60,40,"",1,0,'C');
-    $pdf->Cell(25,40,"",1,0,'C');
-    $pdf->Cell(30,40,"",1,0,'C');
-    $pdf->Cell(25,40,"",1,0,'C');
-    $pdf->Cell(40,40,"",1,1,'C');
-
-    $pdf->setXY(8,$boxY + 10);
-    $pdf->Cell(15,4,"1",0,0,'C');
-    $pdf->setXY(25,$boxY + 10);
-    $pdf->MultiCell(58,4,$barang,0,'L');
-
-    $pdf->setXY(83,$boxY + 10);
-    $pdf->Cell(25,4,"$berat KG",0,0,'C');
-    $pdf->setXY(83,$boxY + 15);
-    $pdf->Cell(25,4,"$vol M3",0,0,'C');
-
-    $pdf->setXY(109,$boxY + 10);
-    $pdf->Cell(28,4,$no_cont,0,0,'C');
-
-    $pdf->setXY(139,$boxY + 10);
-    $pdf->Cell(22,4,$no_seal,0,0,'C');
-
-    $pdf->setXY(164,$boxY + 10);
-    $pdf->MultiCell(37,4,$ket,0,'L');
-
-    $signY = $boxY + 40;
-    $pdf->setXY(8,$signY);
+    // Tanda Tangan
+    $signY = $tableY + 30;
+    $pdf->SetXY(8,$signY);
     $pdf->Cell(65,7,"YANG MENYERAHKAN",1,0,'C');
     $pdf->Cell(65,7,"TRUCKING",1,0,'C');
     $pdf->Cell(65,7,"PENERIMA",1,1,'C');
 
-    $pdf->setX(8);
-    $pdf->Cell(65,30,"",1,0,'C');
-    $pdf->Cell(65,30,"",1,0,'C');
-    $pdf->Cell(65,30,"",1,0,'C');
+    $pdf->SetX(8);
+    $pdf->Cell(65,25,"",1,0,'C');
+    $pdf->Cell(65,25,"",1,0,'C');
+    $pdf->Cell(65,25,"",1,0,'C');
 }
+
 
 // Cetak 2x (asli & copy)
 renderSuratJalan($pdf, 20, $no_sj, $no_do, $tgl_sj, $no_polisi, $nama_supir, $telp_supir, $nama_cust, $penerima, $barang, $berat, $vol, $no_cont, $no_seal, $ket);
-renderSuratJalan($pdf, 153, $no_sj, $no_do, $tgl_sj, $no_polisi, $nama_supir, $telp_supir, $nama_cust, $penerima, $barang, $berat, $vol, $no_cont, $no_seal, $ket);
+renderSuratJalan($pdf, 155, $no_sj, $no_do, $tgl_sj, $no_polisi, $nama_supir, $telp_supir, $nama_cust, $penerima, $barang, $berat, $vol, $no_cont, $no_seal, $ket);
 
 // ✅ Bersihkan buffer sebelum output PDF
 ob_end_clean();
