@@ -428,27 +428,33 @@ if ($_GET['type'] == "Read")
 } else if ($_POST['type'] == "Executed"){		
 	if($_POST['id'] != '' )
 	{	
-		$id = $_POST['id'];
-		$pq = mysqli_query($koneksi, "select * from tr_jo where id_jo  = '$id'");
-		$rq=mysqli_fetch_array($pq);	
 
-		$harga = $rq['biaya_kirim'];
-		$ppn = $rq['ppn'];
-		$pph = $rq['pph'];
-		$total = $total + $harga;
-		
-		$t1 = "select tr_jo_biaya.*, m_cost_tr.nama_cost from
-			tr_jo_biaya left join m_cost_tr on tr_jo_biaya.id_cost = m_cost_tr.id_cost
-			where tr_jo_biaya.id_jo = '$id' order by tr_jo_biaya.id_biaya ";
+		$id = $_POST['id'];
+		$pq = mysqli_query($koneksi, "SELECT * FROM tr_jo WHERE id_jo = '$id'");
+		$rq = mysqli_fetch_array($pq);	
+		$harga = (float) $rq['biaya_kirim'];
+		$ppn   = (float) $rq['ppn'];
+		$pph   = (float) $rq['pph'];
+
+		$total_awal = $harga;
+		$t1 = "SELECT tr_jo_biaya.*, m_cost_tr.nama_cost 
+			FROM tr_jo_biaya 
+			LEFT JOIN m_cost_tr ON tr_jo_biaya.id_cost = m_cost_tr.id_cost
+			WHERE tr_jo_biaya.id_jo = '$id' 
+			ORDER BY tr_jo_biaya.id_biaya";
 
 		$h1 = mysqli_query($koneksi, $t1); 
-		while ($d1=mysqli_fetch_array($h1))
-		{
-			$total = $total + $d1['harga'];
+		while ($d1 = mysqli_fetch_array($h1)) {
+			$total_awal += (float) $d1['harga'];
 		}
-		$nilai_ppn = ($ppn/100) * $total;
-		$nilai_pph = ($pph/100) * $total;
-		$total = $total + $nilai_ppn - $nilai_pph;
+
+		// Hitung PPN dan PPH dari total_awal (belum termasuk pajak)
+		$nilai_ppn = ($ppn / 100) * $total_awal;
+		$nilai_pph = ($pph / 100) * $total_awal;
+
+		// Total akhir setelah ditambah PPN dan dikurangi PPH
+		$total = $total_awal + $nilai_ppn - $nilai_pph;
+
 
 		// ---------------- KIRIM KE API CMANCO ----------------
 		$id_supir = $rq['id_supir'];
@@ -531,9 +537,9 @@ if ($_GET['type'] == "Read")
 		// die();
 
 		// Inisialisasi cURL
-		// $ch = curl_init('http://127.0.0.1:8000/api/planning-borong-driver/store');
+		$ch = curl_init('http://127.0.0.1:8000/api/planning-borong-driver/store');
 		// $ch = curl_init('http://192.168.1.221:8118/api/planning-borong-driver/store');
-		$ch = curl_init('https://cmanco.mitraadipersada.com/api/planning-borong-driver/store');
+		// $ch = curl_init('https://cmanco.mitraadipersada.com/api/planning-borong-driver/store');
 
 		// Set opsi cURL
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -576,7 +582,6 @@ if ($_GET['type'] == "Read")
 }else if ($_POST['type'] == "Add_Order"){		
 	if($_POST['id_cust'] != '' )
 	{
-		die();
 		$id_cust = $_POST['id_cust'];
 		$id_detil_bc = $_POST['id_detil_bc'];
 		$id_cont = $_POST['id_cont'];
@@ -604,7 +609,6 @@ if ($_GET['type'] == "Read")
 		$berat = str_replace(",","", $berat);
 		$vol = str_replace(",","", $vol);
 		$tanggalx = ConverTglSql($tanggal);
-		
 		
 		$ptgl = explode("-", $tanggal);
 		$tg = $ptgl[0];
@@ -656,10 +660,10 @@ if ($_GET['type'] == "Read")
 			}
 		}
 
-		$sql = "INSERT INTO  tr_jo (project_code, id_cust, id_detil_quo, no_jo, tgl_jo, no_do, penerima, barang, berat, vol, no_cont, no_seal,
-				id_asal, id_tujuan, jenis_mobil, id_mobil, id_supir, biaya_kirim, uj, ritase, ket, created, jenis_po, id_detil_bc) values
-					('$project_code','$id_cust', '0', '$no_sj', '$tanggalx', '$no_do', '$penerima', '$barang', '$berat', '$vol', '$no_cont', '$no_seal',
-				'$id_asal', '$id_tujuan', '$jenis', '$id_mobil', '$id_supir', '$biaya', '$uj', '$ritase', '$ket', '$id_user' , '$jenis_po', '$id_detil_bc')";
+		$sql = "INSERT INTO  tr_jo 
+		(project_code, id_cust, id_detil_quo, no_jo, tgl_jo, no_do, penerima, barang, berat, vol, no_cont, no_seal, id_asal, id_tujuan, jenis_mobil, id_mobil, id_supir, biaya_kirim, uj, ritase, ket, created, jenis_po, id_detil_bc) 
+		values
+		('$project_code','$id_cust', '0', '$no_sj', '$tanggalx', '$no_do', '$penerima', '$barang', '$berat', '$vol', '$no_cont', '$no_seal', '$id_asal', '$id_tujuan', '$jenis', '$id_mobil', '$id_supir', '$biaya', '$uj', '$ritase', '$ket', '$id_user' , '$jenis_po', '$id_detil_bc')";
 		$hasil= mysqli_query($koneksi, $sql);
 		
 		$sql = mysqli_query($koneksi, "select max(id_jo)as id from tr_jo ");			
@@ -688,6 +692,7 @@ if ($_GET['type'] == "Read")
 		$barang = addslashes(trim(strtoupper($_POST['barang'])));
 		$berat = $_POST['berat'];
 		$vol = $_POST['vol'];
+		$staple = $_POST['staple'] ?? 0;
 		$no_cont = trim(addslashes(strtoupper($_POST['no_cont'])));
 		$no_seal = trim(addslashes(strtoupper($_POST['no_seal'])));
 		$id_asal = $_POST['id_asal'];
@@ -698,6 +703,7 @@ if ($_GET['type'] == "Read")
 		$biaya = $_POST['biaya'];
 		$uj = $_POST['uj'];
 		$ritase = $_POST['ritase'];
+
 		$ket = trim(addslashes($_POST['ket']));
 		$biaya = str_replace(",","", $biaya);
 		$uj = str_replace(",","", $uj);
@@ -752,9 +758,9 @@ if ($_GET['type'] == "Read")
 						no_seal = '$no_seal',
 						id_mobil = '$id_mobil',
 						id_supir = '$id_supir',
+						staple = '$staple',
 						ket = '$ket'
 						where id_jo = '$id_jo' 	";
-			// die($sql);
 			$hasil= mysqli_query($koneksi, $sql);
 		}
 		

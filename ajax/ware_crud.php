@@ -1488,6 +1488,8 @@ else if ($_GET['type'] == "List_Barang")
 
 
 }	
+
+
 else if ($_GET['type'] == "Read_Out")
 {
 	$cari = trim($_GET['cari']);
@@ -1792,6 +1794,7 @@ else if ($_GET['type'] == "Read_Out")
     echo $data;
 
 }
+
 else if ($_GET['type'] == "ListPart_In")
 {	
 	$cari = $_GET['cari'];
@@ -1912,6 +1915,7 @@ else if ($_POST['type'] == "Del_Out")
     }
 	
 }
+
 else if($_GET['type'] == "Read_Out_Data")
 {
 	$id_data = $_GET['id_data'];
@@ -2049,6 +2053,7 @@ else if($_GET['type'] == "Read_Out_Data")
     echo $data;		
 
 }
+
 else if ($_POST['type'] == "Add_Out")
 {		
 	if($_POST['id_data'] != '' )

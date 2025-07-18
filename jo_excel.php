@@ -83,19 +83,23 @@ if($field == 'No Order')
 	
 	<tr>
 		<th style="font-size:12; width:90px;text-align:center">NO</th>
-		<th style="font-size:12; width:90px;text-align:center">TANGGAL</th>
+		<th style="font-size:12; width:90px;text-align:center">DATE</th>
 		<th style="font-size:12; width:600px;text-align:center">NO ORDER</th>
+		<th style="font-size:12; width:600px;text-align:center">PROJECT CODE</th>
 		<th style="font-size:12; width:600px;text-align:center">NO. PO</th>
-		<th style="font-size:12; width:700px;text-align:center">NO. POLISI</th>
+		<th style="font-size:12; width:700px;text-align:center">POLICE NUM</th>
 		<th style="font-size:12; width:700px;text-align:center">DRIVER</th>
 		<th style="font-size:12; width:700px;text-align:center">FEET</th>
 		<th style="font-size:12; width:700px;text-align:center">NO CONTAINER</th>
 		<th style="font-size:12; width:90px;text-align:center">CUSTOMER</th>
-		<th style="font-size:12; width:90px;text-align:center">GUDANG PENERIMA</th>
+		<th style="font-size:12; width:90px;text-align:center">RECIEVER</th>
 		<th style="font-size:12; width:90px;text-align:center">ROUTE</th>
-		<th style="font-size:12; width:700px;text-align:center">PRICE</th>
-		<th style="font-size:12; width:700px;text-align:center">UANG JALAN</th>
+		<th style="font-size:12; width:700px;text-align:center">DELIVERY COST</th>
+		<th style="font-size:12; width:700px;text-align:center">OTHER COST</th>
+		<th style="font-size:12; width:700px;text-align:center">TRAVEL EXPENSE</th>
 		<th style="font-size:12; width:700px;text-align:center">RITASE</th>
+		<th style="font-size:12; width:700px;text-align:center">OTHER AP</th>
+		<th style="font-size:12; width:700px;text-align:center">TAGIHAN</th>
 	</tr>
 	
 	<?php
@@ -123,6 +127,7 @@ if($field == 'No Order')
 			<td style="text-align:center"><?php echo "$n.";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[tgl_jo]";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[no_jo]";?></b></td>
+			<td style="text-align:center"><?php echo "$d1[project_code]";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[no_do]";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[no_polisi]";?></b></td>
 			<td style="text-align:left"><?php echo "$d1[nama_supir]";?></b></td>
@@ -131,12 +136,20 @@ if($field == 'No Order')
 			<td style="text-align:left"><?php echo "$d1[nama_cust]";?></b></td>
 			<td style="text-align:left"><?php echo "$d1[penerima]";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[tujuan]";?></b></td>
-			<td style="text-align:right"><?php echo "$d1[biaya_kirim]";?></b></td>
-			<td style="text-align:right"><?php echo "$d1[uj]";?></b></td>
-			<td style="text-align:right"><?php echo "$d1[ritase]";?></b></td>
-		</tr>
 
-		
+			<!-- DELIV COST -->
+			<td style="text-align:right"><?php echo "$d1[biaya_kirim]";?></b></td>
+			<!-- OTHER COST -->
+			<td style="text-align:right"><?php echo "$d1[biaya_kirim_lain]";?></b></td> 
+			<!-- TRAVEL EXPENSE -->
+			<td style="text-align:right"><?php echo "$d1[uj]";?></b></td>
+			<!-- RITASE -->
+			<td style="text-align:right"><?php echo "$d1[ritase]";?></b></td>
+			<!-- OTHER -->
+			<td style="text-align:right"><?php echo "$d1[uj_lain]";?></b></td>
+			<td style="text-align:right"><?php echo "$d1[tagihan]";?></b></td>
+			
+		</tr>
 	<?php }
 	$t_sisa = $t_tag - $t_bayar;
 	?>

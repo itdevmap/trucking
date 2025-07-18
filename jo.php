@@ -236,6 +236,7 @@
 					$("#biaya").val(Rupiah(data.biaya_kirim));	
 					$("#uj").val(Rupiah(data.uj));	
 					$("#ritase").val(Rupiah(data.ritase));	
+					$("#staple").val(Rupiah(data.staple));	
 					$("#ket").val(data.ket);		
 					$("#mode").val('Edit');		
 					if(data.jenis_po == '1')
@@ -250,6 +251,7 @@
 			);	
 			$('#Data').modal('show');
 		}
+
 		function AddOrder() {	
 			var tanggal = $("#tanggal").val();
 			var no_do = $("#no_do").val();
@@ -272,6 +274,7 @@
 					var barang = $("#barang").val();
 					var berat = $("#berat").val();
 					var vol = $("#vol").val();
+					var staple = $("#staple").val();
 					var no_cont = $("#no_cont").val();
 					var no_seal = $("#no_seal").val();
 					var id_asal = $("#id_asal").val();
@@ -293,6 +296,7 @@
 						barang:barang,
 						berat:berat,
 						vol:vol,
+						staple:staple,
 						no_cont:no_cont,						
 						no_seal:no_seal,						
 						id_asal:id_asal,
@@ -1195,6 +1199,12 @@
 								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  readonly>	
 							</div>
 							</div>
+							
+							<!-- <div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Staple :</b></span>								
+								<input type="hidden" id="staple" value="0" style="text-align: right;width:22%;">	
+							</div> -->
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Remarks :</b></span>
 								<input type="text" id="ketx" value="" style="text-align: left;width:80%;"   >	
@@ -1387,26 +1397,31 @@
 							</div>
 							
 							<div  id="tampil_ujx" style="display:none;">
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Deliv. Cost :</b></span>								
-								<input type="text" id="biaya" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Deliv. Cost :</b></span>								
+									<input type="text" id="biaya" value="0" style="text-align: right;width:22%;" 
+									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Travel Expense:</b></span>								
+									<input type="text" id="uj" value="0" style="text-align: right;width:22%;" 
+									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ritase :</b></span>								
+									<input type="text" id="ritase" value="0" style="text-align: right;width:22%;" 
+									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  readonly>	
+								</div>
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Travel Expense:</b></span>								
-								<input type="text" id="uj" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ritase :</b></span>								
-								<input type="text" id="ritase" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  readonly>	
-							</div>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Staple :</b></span>								
+								<input type="text" id="staple" style="text-align: right;width:22%;" >	
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Remarks :</b></span>
 								<input type="text" id="ket" value="" style="text-align: left;width:80%;"   >	
 							</div>
+							
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
 								<button type="button" class="btn btn-success"  onclick="AddOrder()">
