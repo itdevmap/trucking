@@ -236,7 +236,7 @@
 					$("#biaya").val(Rupiah(data.biaya_kirim));	
 					$("#uj").val(Rupiah(data.uj));	
 					$("#ritase").val(Rupiah(data.ritase));	
-					$("#staple").val(Rupiah(data.staple));	
+					$("#stapel").val(Rupiah(data.stapel));	
 					$("#ket").val(data.ket);		
 					$("#mode").val('Edit');		
 					if(data.jenis_po == '1')
@@ -274,7 +274,7 @@
 					var barang = $("#barang").val();
 					var berat = $("#berat").val();
 					var vol = $("#vol").val();
-					var staple = $("#staple").val();
+					var stapel = $("#stapel").val();
 					var no_cont = $("#no_cont").val();
 					var no_seal = $("#no_seal").val();
 					var id_asal = $("#id_asal").val();
@@ -296,7 +296,7 @@
 						barang:barang,
 						berat:berat,
 						vol:vol,
-						staple:staple,
+						stapel:stapel,
 						no_cont:no_cont,						
 						no_seal:no_seal,						
 						id_asal:id_asal,
@@ -1201,8 +1201,8 @@
 							</div>
 							
 							<!-- <div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Staple :</b></span>								
-								<input type="hidden" id="staple" value="0" style="text-align: right;width:22%;">	
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>stapel :</b></span>								
+								<input type="hidden" id="stapel" value="0" style="text-align: right;width:22%;">	
 							</div> -->
 
 							<div style="width:100%;" class="input-group">
@@ -1414,8 +1414,8 @@
 								</div>
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Staple :</b></span>								
-								<input type="text" id="staple" style="text-align: right;width:22%;" >	
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>stapel :</b></span>								
+								<input type="text" id="stapel" style="text-align: right;width:22%;" >	
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Remarks :</b></span>
