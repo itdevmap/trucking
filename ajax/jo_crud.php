@@ -518,6 +518,7 @@ if ($_GET['type'] == "Read")
 			'total'       		=> $total,
 			'ritase'      		=> $rq['ritase'],
 			'keterangan'  		=> $rq['ket'],
+			'stapel'  			=> $rq['stapel'],
 			'company'     		=> '7000',
 			'site'        		=> '9',
 			'nopol'       		=> $no_pol['no_polisi'],
@@ -537,9 +538,9 @@ if ($_GET['type'] == "Read")
 		// die();
 
 		// Inisialisasi cURL
-		$ch = curl_init('http://127.0.0.1:8000/api/planning-borong-driver/store');
+		// $ch = curl_init('http://127.0.0.1:8000/api/planning-borong-driver/store');
 		// $ch = curl_init('http://192.168.1.221:8118/api/planning-borong-driver/store');
-		// $ch = curl_init('https://cmanco.mitraadipersada.com/api/planning-borong-driver/store');
+		$ch = curl_init('https://cmanco.mitraadipersada.com/api/planning-borong-driver/store');
 
 		// Set opsi cURL
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -692,7 +693,7 @@ if ($_GET['type'] == "Read")
 		$barang = addslashes(trim(strtoupper($_POST['barang'])));
 		$berat = $_POST['berat'];
 		$vol = $_POST['vol'];
-		$staple = $_POST['staple'] ?? 0;
+		$stapel = $_POST['stapel'] ?? 0;
 		$no_cont = trim(addslashes(strtoupper($_POST['no_cont'])));
 		$no_seal = trim(addslashes(strtoupper($_POST['no_seal'])));
 		$id_asal = $_POST['id_asal'];
@@ -758,7 +759,7 @@ if ($_GET['type'] == "Read")
 						no_seal = '$no_seal',
 						id_mobil = '$id_mobil',
 						id_supir = '$id_supir',
-						staple = '$staple',
+						stapel = '$stapel',
 						ket = '$ket'
 						where id_jo = '$id_jo' 	";
 			$hasil= mysqli_query($koneksi, $sql);

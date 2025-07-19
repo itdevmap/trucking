@@ -410,13 +410,9 @@ else if ($_GET['type'] == "read_dock")
 				</tr>
 			</thead>';		
 	
-	// $SQL = "select t_ware_data.*, m_cust_tr.nama_cust from
-	// 		t_ware_data inner join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust	
-	// 		where t_ware_data.jenis = '1' and t_ware_data.jasa = '1' group by m_cust_tr.id_cust
-	// order by m_cust_tr.nama_cust";
 	$SQL = "select t_ware_data.*, m_cust_tr.nama_cust from
 			t_ware_data inner join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust	
-			where t_ware_data.jenis = '1' group by m_cust_tr.id_cust
+			where t_ware_data.jenis = '1' and t_ware_data.jasa = '1' group by m_cust_tr.id_cust
 	order by m_cust_tr.nama_cust";
 			
 	$query = mysqli_query($koneksi, $SQL);	
@@ -442,12 +438,9 @@ else if ($_GET['type'] == "read_dock")
 						$bln = $x;
 					}
 					
-					// $pq = mysqli_query($koneksi, "select sum(tagihan) as jml 
-					//   from  t_ware_data  where status = '1' and jenis = '1' and jasa = '1'
-					//   and year(tanggal) = '$tahun' and month(tanggal) = '$bln' and id_cust = '$row[id_cust]' ");					
 					$pq = mysqli_query($koneksi, "select sum(tagihan) as jml 
-					  from  t_ware_data  where status = '1' and jenis = '1'
-					  and year(tanggal) = '$tahun' and month(tanggal) = '$bln' and id_cust = '$row[id_cust]' ");
+					  from  t_ware_data  where status = '1' and jenis = '1' and jasa = '1'
+					  and year(tanggal) = '$tahun' and month(tanggal) = '$bln' and id_cust = '$row[id_cust]' ");		
 
 					$rq=mysqli_fetch_array($pq);
 					$pend = $rq['jml'] ;
@@ -471,13 +464,9 @@ else if ($_GET['type'] == "read_dock")
 				}else{
 				$bln = $x;
 			}
-			// $pq = mysqli_query($koneksi, "select sum(tagihan) as jml 
-			// 		  from  
-			// 		  t_ware_data  where status = '1' and jenis = '1' and jasa = '1'
-			// 		  and year(tanggal) = '$tahun' and month(tanggal) = '$bln' ");					
 			$pq = mysqli_query($koneksi, "select sum(tagihan) as jml 
 					  from  
-					  t_ware_data  where status = '1' and jenis = '1'
+					  t_ware_data  where status = '1' and jenis = '1' and jasa = '1'
 					  and year(tanggal) = '$tahun' and month(tanggal) = '$bln' ");	
 
 			$rq=mysqli_fetch_array($pq);

@@ -87,8 +87,6 @@ if($_SERVER['REQUEST_METHOD'] == "POST")
 		$xy1="Edit|$id_sewa|$cat";
 		$xy1=base64_encode($xy1);
 		header("Location: ware_sewa_data.php?id=$xy1");
-	
-		
 	}
 	
 	
@@ -109,7 +107,8 @@ if($mode == 'Add')
 	$bln = date('m');
 	$thn = date('Y');
 	$tanggal = date('d-m-Y');
-}else{
+}
+else{
 	
 	$pq = mysqli_query($koneksi, "select t_ware_sewa.*, m_cust_tr.nama_cust, t_ware_quo.quo_no, m_cost_tr.nama_cost
 		  from 
