@@ -516,7 +516,7 @@ if($mode == 'View')
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Qty :</b></span>
 								<input type="text" id="qty"  value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" 
 								onkeypress="return isNumber(event)" />	
-								<input type="text"  id ="unit" name="nama" style="padding:3px;text-align: center;width:10%" readonly  >
+								<input type="text"  id ="unit" name="nama" style="padding:3px;text-align: center;width:10%">
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Lokasi :</b></span>

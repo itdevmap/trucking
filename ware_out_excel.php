@@ -76,6 +76,7 @@ if($stat == 'In Progress')
 		<th style="font-size:12; width:600px;text-align:center">NO. DN</th>
 		<th style="font-size:12; width:600px;text-align:center">NO. EXT</th>
 		<th style="font-size:12; width:90px;text-align:center">NO. SJ</th>
+		<th style="font-size:12; width:90px;text-align:center">CUSTOMER</th>
 		<th style="font-size:12; width:600px;text-align:center">NO.CONTAINER</th>
 		<th style="font-size:12; width:600px;text-align:center">NOPOL</th>
 		<th style="font-size:12; width:600px;text-align:center">TUJUAN</th>
@@ -184,6 +185,7 @@ if($stat == 'In Progress')
 			<td style="text-align:center"><?php echo "$d1[no_doc]";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[no_do]";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[no_doc]";?></b></td>
+			<td style="text-align:center"><?php echo "$d1[nama_cust]";?></b></td>
 			<td style="text-align:center"><?php echo "$d2[no_cont]";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[no_polisi]";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[gudang]";?></b></td>

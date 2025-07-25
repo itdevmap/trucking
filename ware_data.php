@@ -319,6 +319,8 @@
 					var vol = $("#vol").val();
 					var berat = $("#berat").val();
 					var mode = $("#modex").val();
+					var msegi = $("#msegi").val();
+
 					//alert(mode);
 					$.post("ajax/ware_crud.php", {
 						id:id,
@@ -332,6 +334,7 @@
 						vol:vol,
 						berat:berat,
 						mode:mode,
+						msegi:msegi,
 						type : "Add_Data_Quo"
 						}, function (data, status) {
 						alert(data);
@@ -381,10 +384,13 @@
 			var lebar = parseFloat($("#lebar").val()) || 0;
 			var tinggi = parseFloat($("#tinggi").val()) || 0;
 
-			var vol = (panjang * lebar * tinggi) / 1000000;
 
+			var vol = (panjang * lebar * tinggi) / 1000000;
 			var formatted = parseFloat(vol.toFixed(8)).toString();
 			$("#vol").val(formatted);
+
+			var m = panjang * lebar;
+			$("#msegi").val(m);
 		}
 
 		function CekBarang(cb) {
@@ -683,6 +689,13 @@
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Volume :</b></span>
 								<input type="text" id="vol"  readonly value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" /> 	
+							</div>
+
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px">
+									<b>m<sup>2</sup> :</b>
+								</span>
+								<input type="text" id="msegi"  readonly value="" style="text-align: center;width:15%;border:1px solid rgb(169, 169, 169)" /> 	
 							</div>
 							
 							

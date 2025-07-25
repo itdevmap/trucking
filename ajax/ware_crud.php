@@ -518,6 +518,7 @@ else if ($_GET['type'] == "Read_Barang")
 					<th rowspan="2" width="5%" style="text-align: center;">WIDE</th>
 					<th rowspan="2" width="5%" style="text-align: center;">HEIGHT</th>
 					<th rowspan="2" width="5%" style="text-align: center;">VOL</th>
+					<th rowspan="2" width="5%" style="text-align: center;">M<sup>2</sup></th>
 					<th colspan="2" width="4%" style="text-align: center;">ACTION</th>						
 				</tr>
 				<tr>
@@ -540,6 +541,7 @@ else if ($_GET['type'] == "Read_Barang")
 			$berat = number_format($row['berat'],2);
 			// $vol = number_format($row['vol'],8);
 			$vol = rtrim(rtrim(number_format($row['vol'], 8, '.', ''), '0'), '.');
+			$msegi = rtrim(rtrim(number_format($row['msegi'], 8, '.', ''), '0'), '.');
 			
 			// $panjang = number_format($row['panjang'],2);
 			$panjang = rtrim(rtrim(number_format($row['panjang'], 8, '.', ''), '0'), '.');
@@ -557,7 +559,8 @@ else if ($_GET['type'] == "Read_Barang")
 				<td style="text-align:center">'.$panjang.'</td>
 				<td style="text-align:center">'.$lebar.'</td>
 				<td style="text-align:center">'.$tinggi.'</td>
-				<td style="text-align:center">'.$vol.'</td>';
+				<td style="text-align:center">'.$vol.'</td>
+				<td style="text-align:center">'.$msegi.'</td>';
 				
 				if($mode == 'Edit' ){
 					$data .= '<td>
@@ -697,13 +700,15 @@ else if ($_GET['type'] == "Read_Barang")
 		$vol = $_POST['vol'];
 		$berat = $_POST['berat'];
 		$mode = $_POST['mode'];
+		$msegi = $_POST['msegi'];
 		
 		$vol = str_replace(",","", $vol);
+		$msegi = str_replace(",","", $msegi);
 		$berat = str_replace(",","", $berat);
 		
 		if($mode == 'Add')
 		{			
-			$sql = "INSERT INTO t_ware (kode, id_quo, nama, unit, panjang, lebar, tinggi, berat, vol) values ('$kode', '$id_quo', '$nama', '$unit', '$panjang', '$lebar', '$tinggi', '$berat', '$vol')";
+			$sql = "INSERT INTO t_ware (kode, id_quo, nama, unit, panjang, lebar, tinggi, berat, vol, msegi) values ('$kode', '$id_quo', '$nama', '$unit', '$panjang', '$lebar', '$tinggi', '$berat', '$vol', '$msegi')";
 
 			// $hasil=mysqli_query($koneksi, $sql);
 		} else {
@@ -716,6 +721,7 @@ else if ($_GET['type'] == "Read_Barang")
 					tinggi = '$tinggi',
 					berat = '$berat',
 					vol = '$vol'
+					msegi = '$msegi'
 					where 	id_ware = '$id'	";
 			// $hasil=mysqli_query($koneksi, $sql);
 		}
