@@ -794,7 +794,7 @@ if($mode == 'View')
 	</div>	
 	
 
-	<!-- MODAL NAMBAH SO  -->
+	<!-- MODAL NAMBAH QUO  -->
 	<div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">
@@ -802,7 +802,7 @@ if($mode == 'View')
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Order</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Quotation</b>
 							</div>	
 							<br>
 				

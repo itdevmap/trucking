@@ -1,156 +1,155 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	include "lib.php";
 
-if(!isset($_SESSION['id_user'])  ){
- header('location:logout.php'); 
-}
-
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{		
-	$mode = $_POST['mode'];
-	$id_quo = $_POST['id_quo'];	
-	$quo_date = $_POST['quo_date'];	
-	$id_cust = $_POST['id_cust'];
-	$no_kontrak = trim(addslashes(strtoupper($_POST['no_kontrak'])));
-	$ket = addslashes(trim($_POST['ket']));
-	$quo_datex = ConverTglSql($quo_date);
-	$sales = $_POST['sales'];
-	$max_cbm = $_POST['max_cbm'];
-	$aging_sewa = $_POST['aging_sewa'];
-	$harga_sewa = $_POST['harga_sewa'];
-	$harga_handling = $_POST['harga_handling'];
-	$max_cbm = str_replace(",","", $max_cbm);
-	$harga_sewa = str_replace(",","", $harga_sewa);
-	$harga_handling = str_replace(",","", $harga_handling);
-	
-	if($mode == 'Add' )
-	{
-		$ptgl = explode("-", $quo_date);
-		$tg = $ptgl[0];
-		$bl = $ptgl[1];
-		$th = $ptgl[2];	
-		$query = "SELECT max(right(quo_no,5)) as maxID FROM t_ware_quo where  year(quo_date) = '$th'  ";
-		$hasil = mysqli_query($koneksi, $query);    
-		$data  = mysqli_fetch_array($hasil);
-		$idMax = $data['maxID'];
-		if ($idMax == '99999'){
-			$idMax='00000';
-		}
-		$noUrut = (int) $idMax;   
-		$noUrut++;  
-		if(strlen($noUrut)=='1'){
-			$noUrut="0000$noUrut";
-			}elseif(strlen($noUrut)=='2'){
-			$noUrut="000$noUrut";
-			}elseif(strlen($noUrut)=='3'){
-			$noUrut="00$noUrut";
-			}elseif(strlen($noUrut)=='4'){
-			$noUrut="0$noUrut";
-		}   
-		$year = substr($th,2,2);
-		$quo_no = "QWH-$year$noUrut";
-
-		// PEMBUATAN PROJECT CODE
-		$year_PC = date('y');
-		$sql = "SELECT project_code FROM t_ware_quo ORDER BY id_quo DESC LIMIT 1";
-		$result = mysqli_query($koneksi, $sql);
-
-		if (!$result) {
-			die("Query error: " . mysqli_error($koneksi));
-		}
-
-		if (mysqli_num_rows($result) == 0) {
-			$project_code = "WHS/$year_PC" . "0001";
-		} else {
-			$row = mysqli_fetch_assoc($result);
-			$lastProjectCode = $row['project_code'];
-			$lastYear = substr($lastProjectCode, 4, 2);
-
-			if ($lastYear !== $year) {
-				$project_code = "WHS/$year" . "0001";
-			} else {
-				$lastNum = (int)substr($lastProjectCode, -4);
-				$newNum = str_pad($lastNum + 1, 4, "0", STR_PAD_LEFT);
-				$project_code = "WHS/$year$newNum";
-			}
-		}
-
-		$sql = "INSERT INTO  t_ware_quo (project_code, quo_date, quo_no, id_cust, ket, created, sales, max_cbm, aging_sewa, harga_sewa, harga_handling, no_kontrak) values
-				('$project_code', '$quo_datex', '$quo_no', '$id_cust', '$ket', '$id_user', '$sales' , '$max_cbm', '$aging_sewa', '$harga_sewa', '$harga_handling', '$no_kontrak')";
-		$hasil= mysqli_query($koneksi, $sql);
-		
-		$sql = mysqli_query($koneksi, "select max(id_quo)as id from t_ware_quo ");			
-		$row = mysqli_fetch_array($sql);
-		$id_quo = $row['id'];
-		// die($id_quo);
-	}else{
-		$sql = "update t_ware_quo set 
-					id_cust = '$id_cust',
-					ket = '$ket',
-					sales = '$sales',
-					max_cbm = '$max_cbm',
-					aging_sewa = '$aging_sewa',
-					harga_sewa = '$harga_sewa',
-					harga_handling = '$harga_handling',
-					no_kontrak = '$no_kontrak'
-					where id_quo = '$id_quo'	";
-		$hasil=mysqli_query($koneksi,$sql);
+	if(!isset($_SESSION['id_user'])  ){
+	header('location:logout.php'); 
 	}
-	
-	$cat ="Data saved...";
-	$xy1="Edit|$id_quo|$cat";
-	$xy1=base64_encode($xy1);
-	header("Location: ware_data.php?id=$xy1");
-}
-else
-{	
-	$idx = $_GET['id'];	
-	$x=base64_decode($idx);
-	$pecah = explode("|", $x);
-	$mode= $pecah[0];
-	$id_quo = $pecah[1];
-	$cat = $pecah[2];
-}
 
-if($mode == 'Add')
-{
-	$quo_no = '-- Auto -- ';
-	$quo_date = date('d-m-Y');
-	
-}else{
-	
-	$pq = mysqli_query($koneksi, "select t_ware_quo.*, m_cust_tr.nama_cust
-		  from 
-		  t_ware_quo left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
-		  where t_ware_quo.id_quo = '$id_quo'  ");
-	$rq=mysqli_fetch_array($pq);	
-	$quo_no = $rq['quo_no'];
-	$quo_date = ConverTgl($rq['quo_date']);
-	$id_cust = $rq['id_cust'];
-	$nama_cust = $rq['nama_cust'];
-	$no_po = $rq['no_po'];
-	$ket = $rq['ket'];
-	$sales = $rq['sales'];
-	$stat = $rq['status'];
-	$no_kontrak = $rq['no_kontrak'];
-	$aging_sewa = $rq['aging_sewa'];
-	$project_code = $rq['project_code'];
-	$max_cbm  = number_format($rq['max_cbm'],2);
-	$harga_sewa  = number_format($rq['harga_sewa'],0);
-	$harga_handling  = number_format($rq['harga_handling'],0);
-	$disx = 'Disabled';
-}
+	if($_SERVER['REQUEST_METHOD'] == "POST")
+	{		
+		$mode = $_POST['mode'];
+		$id_quo = $_POST['id_quo'];	
+		$quo_date = $_POST['quo_date'];	
+		$id_cust = $_POST['id_cust'];
+		$no_kontrak = trim(addslashes(strtoupper($_POST['no_kontrak'])));
+		$ket = addslashes(trim($_POST['ket']));
+		$quo_datex = ConverTglSql($quo_date);
+		$sales = $_POST['sales'];
+		$max_cbm = $_POST['max_cbm'];
+		$aging_sewa = $_POST['aging_sewa'];
+		$harga_sewa = $_POST['harga_sewa'];
+		$harga_handling = $_POST['harga_handling'];
+		$max_cbm = str_replace(",","", $max_cbm);
+		$harga_sewa = str_replace(",","", $harga_sewa);
+		$harga_handling = str_replace(",","", $harga_handling);
+		
+		if($mode == 'Add' )
+		{
+			$ptgl = explode("-", $quo_date);
+			$tg = $ptgl[0];
+			$bl = $ptgl[1];
+			$th = $ptgl[2];	
+			$query = "SELECT max(right(quo_no,5)) as maxID FROM t_ware_quo where  year(quo_date) = '$th'  ";
+			$hasil = mysqli_query($koneksi, $query);    
+			$data  = mysqli_fetch_array($hasil);
+			$idMax = $data['maxID'];
+			if ($idMax == '99999'){
+				$idMax='00000';
+			}
+			$noUrut = (int) $idMax;   
+			$noUrut++;  
+			if(strlen($noUrut)=='1'){
+				$noUrut="0000$noUrut";
+				}elseif(strlen($noUrut)=='2'){
+				$noUrut="000$noUrut";
+				}elseif(strlen($noUrut)=='3'){
+				$noUrut="00$noUrut";
+				}elseif(strlen($noUrut)=='4'){
+				$noUrut="0$noUrut";
+			}   
+			$year = substr($th,2,2);
+			$quo_no = "QWH-$year$noUrut";
 
-if($mode == 'View')
-{
-	$dis = "Disabled";
-}
+			// PEMBUATAN PROJECT CODE
+			$year_PC = date('y');
+			$sql = "SELECT project_code FROM t_ware_quo ORDER BY id_quo DESC LIMIT 1";
+			$result = mysqli_query($koneksi, $sql);
 
+			if (!$result) {
+				die("Query error: " . mysqli_error($koneksi));
+			}
+
+			if (mysqli_num_rows($result) == 0) {
+				$project_code = "WHS/$year_PC" . "0001";
+			} else {
+				$row = mysqli_fetch_assoc($result);
+				$lastProjectCode = $row['project_code'];
+				$lastYear = substr($lastProjectCode, 4, 2);
+
+				if ($lastYear !== $year) {
+					$project_code = "WHS/$year" . "0001";
+				} else {
+					$lastNum = (int)substr($lastProjectCode, -4);
+					$newNum = str_pad($lastNum + 1, 4, "0", STR_PAD_LEFT);
+					$project_code = "WHS/$year$newNum";
+				}
+			}
+
+			$sql = "INSERT INTO  t_ware_quo (project_code, quo_date, quo_no, id_cust, ket, created, sales, max_cbm, aging_sewa, harga_sewa, harga_handling, no_kontrak) values
+					('$project_code', '$quo_datex', '$quo_no', '$id_cust', '$ket', '$id_user', '$sales' , '$max_cbm', '$aging_sewa', '$harga_sewa', '$harga_handling', '$no_kontrak')";
+			$hasil= mysqli_query($koneksi, $sql);
+			
+			$sql = mysqli_query($koneksi, "select max(id_quo)as id from t_ware_quo ");			
+			$row = mysqli_fetch_array($sql);
+			$id_quo = $row['id'];
+			// die($id_quo);
+		}else{
+			$sql = "update t_ware_quo set 
+						id_cust = '$id_cust',
+						ket = '$ket',
+						sales = '$sales',
+						max_cbm = '$max_cbm',
+						aging_sewa = '$aging_sewa',
+						harga_sewa = '$harga_sewa',
+						harga_handling = '$harga_handling',
+						no_kontrak = '$no_kontrak'
+						where id_quo = '$id_quo'	";
+			$hasil=mysqli_query($koneksi,$sql);
+		}
+		
+		$cat ="Data saved...";
+		$xy1="Edit|$id_quo|$cat";
+		$xy1=base64_encode($xy1);
+		header("Location: ware_data.php?id=$xy1");
+	}
+	else
+	{	
+		// die("lorem");
+		$idx = $_GET['id'];	
+		$x=base64_decode($idx);
+		$pecah = explode("|", $x);
+		$mode= $pecah[0];
+		$id_quo = $pecah[1];
+		$cat = $pecah[2];
+	}
+
+	if($mode == 'Add')
+	{
+		$quo_no = '-- Auto -- ';
+		$quo_date = date('d-m-Y');
+		
+	}else{
+		
+		$pq = mysqli_query($koneksi, "select t_ware_quo.*, m_cust_tr.nama_cust
+			from 
+			t_ware_quo left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
+			where t_ware_quo.id_quo = '$id_quo'  ");
+		$rq=mysqli_fetch_array($pq);	
+		$quo_no = $rq['quo_no'];
+		$quo_date = ConverTgl($rq['quo_date']);
+		$id_cust = $rq['id_cust'];
+		$nama_cust = $rq['nama_cust'];
+		$no_po = $rq['no_po'];
+		$ket = $rq['ket'];
+		$sales = $rq['sales'];
+		$stat = $rq['status'];
+		$no_kontrak = $rq['no_kontrak'];
+		$aging_sewa = $rq['aging_sewa'];
+		$project_code = $rq['project_code'];
+		$max_cbm  = number_format($rq['max_cbm'],2);
+		$harga_sewa  = number_format($rq['harga_sewa'],0);
+		$harga_handling  = number_format($rq['harga_handling'],0);
+		$disx = 'Disabled';
+	}
+
+	if($mode == 'View')
+	{
+		$dis = "Disabled";
+	}
 ?>
-
 
 <html>
   <head>
@@ -384,7 +383,8 @@ if($mode == 'View')
 
 			var vol = (panjang * lebar * tinggi) / 1000000;
 
-			$("#vol").val(vol.toFixed(5));
+			var formatted = parseFloat(vol.toFixed(8)).toString();
+			$("#vol").val(formatted);
 		}
 
 		function CekBarang(cb) {
@@ -396,6 +396,51 @@ if($mode == 'View')
 				$("#jenis_barang").val('0');
 			}
 		}	
+
+		function Download() 
+		{
+			var quo_no = $("#quo_no").val();
+			var win = window.open('ware_data_excel.php?quo_no='+quo_no);
+		}	
+
+		// IMPORT EXCEL
+		function modalImport(){
+			$('#importModal').modal('show');
+		}
+		function ImportExcel() {
+			const fileInput = document.getElementById("excel_file");
+			const file = fileInput.files[0];
+
+			if (!file) {
+				alert("Silakan pilih file Excel terlebih dahulu.");
+				return;
+			}
+
+			const quoNo = document.getElementById("no_quo").value;
+
+			const formData = new FormData();
+			formData.append("excel_file", file);
+			formData.append("no_quo", quoNo); // Tambahkan quo_no ke FormData
+
+			const previewWindow = window.open('', '_blank');
+
+			fetch("preview.php", {
+				method: "POST",
+				body: formData
+			})
+			.then(response => response.text())
+			.then(html => {
+				previewWindow.document.open();
+				previewWindow.document.write(html);
+				previewWindow.document.close();
+			})
+			.catch(error => {
+				previewWindow.document.write("<h3>Error saat memuat file</h3>");
+				console.error("Gagal import:", error);
+			});
+		}
+
+
     </script>
 	
   </head>
@@ -408,7 +453,7 @@ if($mode == 'View')
 		<aside class="main-sidebar">
 			<?php include "menu.php" ; ?>	
 		</aside>	
-		
+
 		<form method="post" name ="myform"  class="form-horizontal" onsubmit="return checkvalue(this)" > 
 			<div class="content-wrapper" style="min-height:750px">
 				<br>
@@ -545,6 +590,18 @@ if($mode == 'View')
 									<b>Add Barang</b>
 								</button>
 							<?php }?>
+							<button class="btn btn-block btn-warning" 
+								style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px" type="button"
+								onClick="javascript:Download()">
+								<span class="fa fa-print"></span>
+								<b>Print</b>
+							</button>
+							<button class="btn btn-block btn-primary" 
+									style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px" type="button" 
+									onClick="javascript:modalImport()">
+									<span class="fa fa-plus-square"></span>
+									<b>Import</b>
+								</button>
 							<div class="table-responsive mailbox-messages" style="min-height:10px">									
 								<div class="tampil_data"></div>
 							</div>	
@@ -684,8 +741,38 @@ if($mode == 'View')
 			</div>
 		</div>	
     </div>
-	
-	
+
+	<div class="modal fade" id="importModal"  role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content" style="background: none">
+				<div class="modal-body">	
+					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Import Excel</b>
+							</div>	
+							<br>
+							
+							<div class="form-group" style="padding: 0 10px;">
+								<label for="excel_file"><b>Pilih File Excel (.xls / .xlsx)</b></label>
+								<input type="file" class="form-control" name="excel_file" id="excel_file" accept=".xls,.xlsx" required>
+								<input type="hidden" value="<?= htmlspecialchars($quo_no ?? '') ?>" name="no_quo" id="no_quo">
+							</div>
+
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
+								<button type="button" class="btn btn-success"  onclick="ImportExcel()">
+								<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
+								<button type="button" class="btn btn-danger" data-dismiss="modal">
+								<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Cancel</b></button>	
+							</div>
+						</div>
+					</div>			
+				</div>
+			</div>
+		</div>	
+    </div>
+
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>
 	

@@ -360,7 +360,6 @@ else if ($_GET['type'] == "Read_Barang")
     	{	
 			$posisi++;				
 			$berat = number_format($row['berat'],2);
-			// $vol = number_format($row['vol'],8);
 			$vol = rtrim(rtrim(number_format($row['vol'], 8, '.', ''), '0'), '.');
 			$panjang = number_format($row['panjang'],2);
 			$lebar = number_format($row['lebar'],2);	
