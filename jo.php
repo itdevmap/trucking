@@ -833,42 +833,75 @@
 
 		// ------------------- FUNCTION ADD ATTACHMENT -------------------
 		// function AddAttc(id_jo) {
-		// 	document.getElementById('id_jo_attc').value = id_jo;
+		// 	$('#id_jo_attc').val(id_jo);
+		// 	$('.view_so').text('-'); 
+		// 	$('.view_sj').text('-'); 
+		// 	$('.view_mutasi').text('-');
+
 		// 	$('#DataAttc').modal('show');
+
+		// 	$.ajax({
+		// 		url: 'ajax/get_attachment_by_idjo.php',
+		// 		method: 'POST',
+		// 		data: { id_jo: id_jo },
+		// 		dataType: 'json',
+		// 		success: function (res) {
+		// 			if (res.status === 200) {
+		// 				res.data.forEach(function(file) {
+		// 					if (file.includes('foto_so_')) {
+		// 						$('.view_so').text(file);
+		// 					} else if (file.includes('surat_jalan_')) {
+		// 						$('.view_sj').text(file);
+		// 					} else if (file.includes('mutasi_rekening_')) {
+		// 						$('.view_mutasi').text(file);
+		// 					}
+		// 				});
+		// 			} else {
+		// 				console.warn(res.msg || 'No attachment found');
+		// 			}
+		// 		},
+		// 		error: function (xhr, err) {
+		// 			console.error("AJAX error:", err);
+		// 		}
+		// 	});
 		// }
-		function AddAttc(id_jo) {
-			$('#id_jo_attc').val(id_jo);
-			$('.view_so').text('-'); 
-			$('.view_sj').text('-'); 
-			$('.view_mutasi').text('-');
 
-			$('#DataAttc').modal('show');
+function AddAttc(id_jo) {
+	$('#id_jo_attc').val(id_jo);
+	$('.view_so').attr('href', '#').text('-');
+	$('.view_sj').attr('href', '#').text('-');
+	$('.view_mutasi').attr('href', '#').text('-');
 
-			$.ajax({
-				url: 'ajax/get_attachment_by_idjo.php',
-				method: 'POST',
-				data: { id_jo: id_jo },
-				dataType: 'json',
-				success: function (res) {
-					if (res.status === 200) {
-						res.data.forEach(function(file) {
-							if (file.includes('foto_so_')) {
-								$('.view_so').text(file);
-							} else if (file.includes('surat_jalan_')) {
-								$('.view_sj').text(file);
-							} else if (file.includes('mutasi_rekening_')) {
-								$('.view_mutasi').text(file);
-							}
-						});
-					} else {
-						console.warn(res.msg || 'No attachment found');
+	$('#DataAttc').modal('show');
+
+	$.ajax({
+		url: 'ajax/get_attachment_by_idjo.php',
+		method: 'POST',
+		data: { id_jo: id_jo },
+		dataType: 'json',
+		success: function (res) {
+			if (res.status === 200) {
+				res.data.forEach(function(file) {
+					let fileUrl = 'show_file.php?file=' + encodeURIComponent(file);
+
+					if (file.includes('foto_so_')) {
+						$('.view_so').attr('href', fileUrl).text(file);
+					} else if (file.includes('surat_jalan_')) {
+						$('.view_sj').attr('href', fileUrl).text(file);
+					} else if (file.includes('mutasi_rekening_')) {
+						$('.view_mutasi').attr('href', fileUrl).text(file);
 					}
-				},
-				error: function (xhr, err) {
-					console.error("AJAX error:", err);
-				}
-			});
+				});
+			} else {
+				console.warn(res.msg || 'No attachment found');
+			}
+		},
+		error: function (xhr, err) {
+			console.error("AJAX error:", err);
 		}
+	});
+}
+
 
 		function SaveAttc() {
 			var formData = new FormData(document.getElementById('form_attachment'));
@@ -1659,17 +1692,22 @@
 								<div class="form-group mt-3">
 									<label for=""><b>File SO:</b></label>
 									<input type="file" class="form-control" id="file_so" name="file_so">
-									<p class=""><b>Berhasil Upload Berkas : </b><span class="view_so"></span></p>
+									<!-- <p class=""><b>Berhasil Upload Berkas : </b><span class="view_so"></span></p> -->
+									<p><b>Lihat File SO: </b><a href="#" class="view_so" target="_blank"></a></p>
+
 								</div>
 								<div class="form-group mt-3">
 									<label for=""><b>File SJ:</b></label>
 									<input type="file" class="form-control" id="file_sj" name="file_sj">
-									<p class=""><b>Berhasil Upload Berkas : </b><span class="view_sj"></span></p>
+									<!-- <p class=""><b>Berhasil Upload Berkas : </b><span class="view_sj"></span></p> -->
+									<p><b>Lihat File SJ : </b><a href="#" class="view_sj" target="_blank"></a></p>
+
 								</div>
 								<div class="form-group mt-3">
 									<label for=""><b>File Mutasi:</b></label>
 									<input type="file" class="form-control" id="file_mutasi" name="file_mutasi">
-									<p class=""><b>Berhasil Upload Berkas : </b><span class="view_mutasi"></span></p>
+									<!-- <p class=""><b>Berhasil Upload Berkas : </b><span class="view_mutasi"></span></p> -->
+									<p><b>Lihat File Mutasi : </b><a href="#" class="view_sj" target="_blank"></a></p>
 								</div>
 
 								<div class="form-group mt-3 text-right">

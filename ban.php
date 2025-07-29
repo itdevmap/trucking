@@ -476,13 +476,25 @@ else
 								style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = ""
 								onClick="javascript:Download()">
 								<span class="fa fa-file-text"></span>
-								<b>Download Recap</b>
+								<b>Recaps</b>
 							</button>	
 							<button class="btn btn-block btn-warning" 
 								style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = ""
 								onClick="javascript:DownloadDetil()">
 								<span class="fa fa-file-text"></span>
-								<b>Download Detail</b>
+								<b>Details</b>
+							</button>	
+							<button class="btn btn-block btn-warning" 
+								style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = ""
+								onClick="javascript:DownloadDetil()">
+								<span class="fa fa-file-text"></span>
+								<b>Tire Conditions</b>
+							</button>	
+							<button class="btn btn-block btn-warning" 
+								style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = ""
+								onClick="javascript:DownloadDetil()">
+								<span class="fa fa-file-text"></span>
+								<b>Change Logs</b>
 							</button>	
 						</span>
 						<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">

@@ -381,9 +381,6 @@ if ($_GET['type'] == "Read")
 					where tr_jo.tgl_jo between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' and tr_jo.status = '$stat' ");
 			
 			}
-	
-				
-						
 				$rq=mysqli_fetch_array($pq);
 				$total_record = $rq['jml'];										
 				$total_halaman = ceil($total_record / $jmlperhalaman);					
@@ -507,6 +504,7 @@ if ($_GET['type'] == "Read")
 			exit(mysqli_error($koneksi));
 		}
 
+		$total_cmanco = $rq['uj'] + $rq['uj_lain'];
 		$data = [
 			'project'     		=> $rq['project_code'],
 			'so'          		=> $rq['no_jo'],
@@ -515,7 +513,7 @@ if ($_GET['type'] == "Read")
 			'tgl_order'   		=> $rq['tgl_jo'],
 			'penerima'    		=> $rq['penerima'],
 			'kontainer'   		=> $rq['no_cont'],
-			'total'       		=> $total,
+			'total'       		=> $total_cmanco,
 			'ritase'      		=> $rq['ritase'],
 			'keterangan'  		=> $rq['ket'],
 			'stapel'  			=> $rq['stapel'],
@@ -539,8 +537,8 @@ if ($_GET['type'] == "Read")
 
 		// Inisialisasi cURL
 		// $ch = curl_init('http://127.0.0.1:8000/api/planning-borong-driver/store');
-		// $ch = curl_init('http://192.168.1.221:8118/api/planning-borong-driver/store');
-		$ch = curl_init('https://cmanco.mitraadipersada.com/api/planning-borong-driver/store');
+		$ch = curl_init('http://192.168.1.221:8118/api/planning-borong-driver/store');
+		// $ch = curl_init('https://cmanco.mitraadipersada.com/api/planning-borong-driver/store');
 
 		// Set opsi cURL
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
