@@ -478,6 +478,7 @@
 		function ListUJ(id, stat) {
 			$("#id_jo").val(id);
 			$("#stat_uj").val(stat);
+
 			if(stat == '1')
 			{
 				document.getElementById("btnUJ").disabled = true;
@@ -490,6 +491,7 @@
 				});
 			$("#DaftarUJ").modal("show");
 		}
+
 		function TampilUJ() 
 		{			
 			$("#biaya_uj").val('');
@@ -502,6 +504,7 @@
 			var id_cost = $("#id_cost_uj").val();
 			var biaya = $("#biaya_uj").val();
 			var mode = $("#mode_uj").val();
+
 			$.post("ajax/jo_crud.php", {
 				id_jo:id_jo,
 				id:id,
@@ -831,77 +834,71 @@
 			var win = window.open('jo_excel.php?id='+idx);
 		}	
 
-		// ------------------- FUNCTION ADD ATTACHMENT -------------------
-		// function AddAttc(id_jo) {
-		// 	$('#id_jo_attc').val(id_jo);
-		// 	$('.view_so').text('-'); 
-		// 	$('.view_sj').text('-'); 
-		// 	$('.view_mutasi').text('-');
-
-		// 	$('#DataAttc').modal('show');
-
-		// 	$.ajax({
-		// 		url: 'ajax/get_attachment_by_idjo.php',
-		// 		method: 'POST',
-		// 		data: { id_jo: id_jo },
-		// 		dataType: 'json',
-		// 		success: function (res) {
-		// 			if (res.status === 200) {
-		// 				res.data.forEach(function(file) {
-		// 					if (file.includes('foto_so_')) {
-		// 						$('.view_so').text(file);
-		// 					} else if (file.includes('surat_jalan_')) {
-		// 						$('.view_sj').text(file);
-		// 					} else if (file.includes('mutasi_rekening_')) {
-		// 						$('.view_mutasi').text(file);
-		// 					}
-		// 				});
-		// 			} else {
-		// 				console.warn(res.msg || 'No attachment found');
-		// 			}
-		// 		},
-		// 		error: function (xhr, err) {
-		// 			console.error("AJAX error:", err);
-		// 		}
-		// 	});
-		// }
-
-function AddAttc(id_jo) {
-	$('#id_jo_attc').val(id_jo);
-	$('.view_so').attr('href', '#').text('-');
-	$('.view_sj').attr('href', '#').text('-');
-	$('.view_mutasi').attr('href', '#').text('-');
-
-	$('#DataAttc').modal('show');
-
-	$.ajax({
-		url: 'ajax/get_attachment_by_idjo.php',
-		method: 'POST',
-		data: { id_jo: id_jo },
-		dataType: 'json',
-		success: function (res) {
-			if (res.status === 200) {
-				res.data.forEach(function(file) {
-					let fileUrl = 'show_file.php?file=' + encodeURIComponent(file);
-
-					if (file.includes('foto_so_')) {
-						$('.view_so').attr('href', fileUrl).text(file);
-					} else if (file.includes('surat_jalan_')) {
-						$('.view_sj').attr('href', fileUrl).text(file);
-					} else if (file.includes('mutasi_rekening_')) {
-						$('.view_mutasi').attr('href', fileUrl).text(file);
-					}
-				});
-			} else {
-				console.warn(res.msg || 'No attachment found');
-			}
-		},
-		error: function (xhr, err) {
-			console.error("AJAX error:", err);
+		// ------------------- CLAIM -------------------
+		function ListClaim(id, stat) {
+			$("#id_jo").val(id);
+			$("#DaftarClaim").modal("show");
 		}
-	});
-}
 
+		function AddClaim() {
+			var id_jo = $("#id_jo").val();
+			var status = $("#status").val();
+			var biaya = $("#biaya_claim").val();
+
+			if (biaya.trim() === "") {
+				alert("Biaya tidak boleh kosong!");
+				return;
+			}
+
+			$.post("ajax/jo_crud.php", {
+				id_jo: id_jo,
+				status: status,
+				biaya: biaya,
+				type: "Add_Claim"
+			}, function (data, respStatus) {
+				ReadData(1);
+				$("#DaftarClaim").modal("hide");
+			});
+		}
+
+
+
+		// ------------------- FUNCTION ADD ATTACHMENT -------------------
+		function AddAttc(id_jo) {
+			$('#id_jo_attc').val(id_jo);
+			$('.view_so').attr('href', '#').text('-');
+			$('.view_sj').attr('href', '#').text('-');
+			$('.view_mutasi').attr('href', '#').text('-');
+
+			$('#DataAttc').modal('show');
+
+			$.ajax({
+				url: 'ajax/get_attachment_by_idjo.php',
+				method: 'POST',
+				data: { id_jo: id_jo },
+				dataType: 'json',
+				success: function (res) {
+					if (res.status === 200) {
+						res.data.forEach(function(file) {
+							let fileUrl = 'show_file.php?file=' + encodeURIComponent(file);
+
+							if (file.includes('foto_so_')) {
+								$('.view_so').attr('href', fileUrl).text(file);
+							} else if (file.includes('surat_jalan_')) {
+								$('.view_sj').attr('href', fileUrl).text(file);
+							} else if (file.includes('mutasi_rekening_')) {
+								$('.view_mutasi').attr('href', fileUrl).text(file);
+							}
+						});
+					} else {
+						console.warn(res.msg || 'No attachment found');
+					}
+				},
+				error: function (xhr, err) {
+					console.error("AJAX error:", err);
+				}
+			});
+		}
 
 		function SaveAttc() {
 			var formData = new FormData(document.getElementById('form_attachment'));
@@ -926,8 +923,6 @@ function AddAttc(id_jo) {
 				}
 			});
 		}
-
-
 	</script>	
 	
   </head>
@@ -948,8 +943,6 @@ function AddAttc(id_jo) {
 				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Order</b></font></h1></li>					
 			</ol>
 			<br>
-			
-			
 			<div class="col-md-12" >
 				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
 					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
@@ -1018,7 +1011,6 @@ function AddAttc(id_jo) {
 					<br>	
 				</div>
             </div>
-			
 			<div class="col-md-12" >
 				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
 					<div style="width:100%;background: #fff;" class="input-group" >
@@ -1584,13 +1576,48 @@ function AddAttc(id_jo) {
 							<?php }?>
 							<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:-1px; margin-bottom:2px;padding:2px;padding-left:5px;padding-right:6px">
 								<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Close</b></button>	
-							<div class="table-responsive mailbox-messages" >									
+							<div class="table-responsive mailbox-messages">									
 								<div class="tampil_uj"></div>
 							</div>
 							
 						</div>
 					</div>		
 				</div>	
+			</div>
+		</div>	
+    </div>
+
+	<div class="modal fade" id="DaftarClaim"  role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content" style="background: none">
+				<div class="modal-body">
+					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Other AP Data</b>
+							</div>	
+							<br>
+
+							<input type="hidden" id="id_jo">
+							<input type="hidden" id="status">
+
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Biaya :</b></span>
+								<input type="text" id="biaya_claim" style="text-align: right;width:50%;" 
+								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  >
+							</div>
+
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
+								<button type="button" class="btn btn-success"  onclick="AddClaim()">
+								<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
+								<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:1px">
+								<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Cancel</b></button>	
+							</div>
+							<br>
+						</div>
+					</div>			
+				</div>
 			</div>
 		</div>	
     </div>
@@ -1634,7 +1661,6 @@ function AddAttc(id_jo) {
 						</div>
 					</div>			
 				</div>
-			
 			</div>
 		</div>	
     </div>
@@ -1692,7 +1718,6 @@ function AddAttc(id_jo) {
 								<div class="form-group mt-3">
 									<label for=""><b>File SO:</b></label>
 									<input type="file" class="form-control" id="file_so" name="file_so">
-									<!-- <p class=""><b>Berhasil Upload Berkas : </b><span class="view_so"></span></p> -->
 									<p><b>Lihat File SO: </b><a href="#" class="view_so" target="_blank"></a></p>
 
 								</div>
@@ -1707,7 +1732,7 @@ function AddAttc(id_jo) {
 									<label for=""><b>File Mutasi:</b></label>
 									<input type="file" class="form-control" id="file_mutasi" name="file_mutasi">
 									<!-- <p class=""><b>Berhasil Upload Berkas : </b><span class="view_mutasi"></span></p> -->
-									<p><b>Lihat File Mutasi : </b><a href="#" class="view_sj" target="_blank"></a></p>
+									<p><b>Lihat File Mutasi : </b><a href="#" class="view_mutasi" target="_blank"></a></p>
 								</div>
 
 								<div class="form-group mt-3 text-right">

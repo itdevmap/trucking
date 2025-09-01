@@ -117,7 +117,7 @@ if($field == 'No Order')
 			left join m_mobil_tr on tr_jo.id_mobil = m_mobil_tr.id_mobil
 			left join m_supir_tr on tr_jo.id_supir = m_supir_tr.id_supir
 			where tr_jo.tgl_jo between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' 
-			order by tr_jo.tgl_jo desc, tr_jo.no_jo desc";	
+			order by tr_jo.tgl_jo asc, tr_jo.no_jo asc";	
 	$h1=mysqli_query($koneksi, $t1);       
 	while ($d1=mysqli_fetch_array($h1))
 	{

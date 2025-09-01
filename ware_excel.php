@@ -73,10 +73,10 @@ $cari1 = $pecah[6];
 	
 	<?php
 	$t1 = "select t_ware.*, t_ware_quo.quo_no,	m_cust_tr.nama_cust
-			  from 
-		   t_ware left join t_ware_quo on t_ware.id_quo = t_ware_quo.id_quo
-		   left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
-		   where  t_ware_quo.status = '1' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' 
+			from 
+		   	t_ware left join t_ware_quo on t_ware.id_quo = t_ware_quo.id_quo
+		   	left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
+		   	where  t_ware_quo.status = '1' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' 
 			order by t_ware.nama";	
 	
 

@@ -70,7 +70,7 @@ $tgl_keluar = strtotime($rq['tanggal']);
 $pdf=new PDF('P','mm','A4');
 $pdf->AliasNbPages();
 $pdf->AddPage();
-$pdf->SetAutoPageBreak(false);
+$pdf->SetAutoPageBreak(true);
 
 
 

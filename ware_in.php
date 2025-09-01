@@ -267,8 +267,16 @@ else
 			var idx = btoa(id);
 			var win = window.open('ware_in_excel.php?id='+idx);
 		}
-		function DownloadData(id) 
+		function DownloadInOut(id) 
 		{			
+			var tgl1 = $("#tgl1").val();
+			var tgl2 = $("#tgl2").val();	
+			var field = $("#field").val();
+			var stat = $("#stat").val();
+			var cari = $("#search_name").val();
+			var field1 = $("#field1").val();
+			var cari1 = $("#search_name1").val();
+			var id = tgl1+'|'+tgl2+'|'+field+'|'+cari+'|'+field1+'|'+cari1+'|'+stat;
 			var idx = btoa(id);
 			var win = window.open('ware_in_out_excel.php?id='+idx);
 		}
@@ -391,6 +399,12 @@ else
 								onClick="javascript:Download()">
 								<span class="fa fa-file-text"></span>
 								<b>Download</b>
+							</button>	
+							<button class="btn btn-block btn-info" 
+								style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = ""
+								onClick="javascript:DownloadInOut()">
+								<span class="fa fa-file-text"></span>
+								<b>Download In-Out</b>
 							</button>	
 						</span>
 						<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">

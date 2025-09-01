@@ -13,8 +13,7 @@ $m_del = $rq['m_del'];
 $m_view = $rq['m_view'];
 $m_exe = $rq['m_exe'];
 
-if ($_GET['type'] == "Read")
-{
+if ($_GET['type'] == "Read"){
 	$cari = trim($_GET['cari']);
 	$hal = $_GET['hal'];
 	$paging = $_GET['paging'];
@@ -95,6 +94,7 @@ if ($_GET['type'] == "Read")
 					<th rowspan="2" width="9%" style="text-align: center;">DRIVER</th>
 					<th colspan="2" width="15%" style="text-align: center;">AR</th>
 					<th colspan="3" width="16%" style="text-align: center;">AP</th>
+					<th rowspan="2" width="5%" style="text-align: center;">CLAIM</th>
 					<th rowspan="2" width="5%" style="text-align: center;">CREATED</th>
 					<th rowspan="2" width="5%" style="text-align: center;">STATUS</th>
 					<th colspan="3" width="6%" style="text-align: center;">ACTION</th>	
@@ -264,7 +264,17 @@ if ($_GET['type'] == "Read")
 					$data .='<td></td>';
 				}	
 				
-				$data .= '<td style="text-align:center">'.$row['created'].'</td>
+				
+				$data .= '
+				<td style="text-align:right">
+					<button class="btn btn-block btn-default"  
+						style="padding:1px;border-radius:0px;width:100%;text-align:right" type="button" 
+						onClick="javascript:ListClaim('.$row['id_jo'].', '.$row['status'].')">
+						'.$row['claim'].'
+					</button>
+				</td>
+
+				<td style="text-align:center">'.$row['created'].'</td>
 				<td style="text-align:center">
 					<button type="button" class="btn btn-'.$label.'" style="width:100%;padding:1px;margin:-3px">'.$status.'</button>
 				</td>';
@@ -422,7 +432,8 @@ if ($_GET['type'] == "Read")
 				$data .= '</ul></div>';				
     echo $data;
 
-} else if ($_POST['type'] == "Executed"){		
+}
+else if ($_POST['type'] == "Executed"){		
 	if($_POST['id'] != '' )
 	{	
 
@@ -432,6 +443,7 @@ if ($_GET['type'] == "Read")
 		$harga = (float) $rq['biaya_kirim'];
 		$ppn   = (float) $rq['ppn'];
 		$pph   = (float) $rq['pph'];
+		$claim   = (float) $rq['claim'];
 
 		$total_awal = $harga;
 		$t1 = "SELECT tr_jo_biaya.*, m_cost_tr.nama_cost 
@@ -445,125 +457,121 @@ if ($_GET['type'] == "Read")
 			$total_awal += (float) $d1['harga'];
 		}
 
-		// Hitung PPN dan PPH dari total_awal (belum termasuk pajak)
 		$nilai_ppn = ($ppn / 100) * $total_awal;
 		$nilai_pph = ($pph / 100) * $total_awal;
-
-		// Total akhir setelah ditambah PPN dan dikurangi PPH
 		$total = $total_awal + $nilai_ppn - $nilai_pph;
 
 
 		// ---------------- KIRIM KE API CMANCO ----------------
-		$id_supir = $rq['id_supir'];
-		$supir_sql = "select nama_supir
-			from m_supir_tr
-			where id_supir = '$id_supir'";
-		$supir 	= mysqli_query($koneksi, $supir_sql); 
-		$spr 	= mysqli_fetch_array($supir);	
+			// $id_supir = $rq['id_supir'];
+			// $supir_sql = "select nama_supir
+			// 	from m_supir_tr
+			// 	where id_supir = '$id_supir'";
+			// $supir 	= mysqli_query($koneksi, $supir_sql); 
+			// $spr 	= mysqli_fetch_array($supir);	
 
-		$id_cust = $rq['id_cust'];
-		$cust_sql = "select nama_cust
-			from m_cust_tr
-			where id_cust = '$id_cust'";
-		$cust 	= mysqli_query($koneksi, $cust_sql); 
-		$cst 	= mysqli_fetch_array($cust);
+			// $id_cust = $rq['id_cust'];
+			// $cust_sql = "select nama_cust
+			// 	from m_cust_tr
+			// 	where id_cust = '$id_cust'";
+			// $cust 	= mysqli_query($koneksi, $cust_sql); 
+			// $cst 	= mysqli_fetch_array($cust);
 
-		$id_mobil = $rq['id_mobil'];
-		$mobil_sql = "select no_polisi
-			from m_mobil_tr
-			where id_mobil = '$id_mobil'";
-		$mobil 	= mysqli_query($koneksi, $mobil_sql); 
-		$no_pol 	= mysqli_fetch_array($mobil);	
+			// $id_mobil = $rq['id_mobil'];
+			// $mobil_sql = "select no_polisi
+			// 	from m_mobil_tr
+			// 	where id_mobil = '$id_mobil'";
+			// $mobil 	= mysqli_query($koneksi, $mobil_sql); 
+			// $no_pol 	= mysqli_fetch_array($mobil);	
 
-		$attach_sql = "SELECT attachment
-					FROM tr_jo_attachment
-					WHERE id_jo = '$id'";
-		$attachment = mysqli_query($koneksi, $attach_sql);
+			// $attach_sql = "SELECT attachment
+			// 			FROM tr_jo_attachment
+			// 			WHERE id_jo = '$id'";
+			// $attachment = mysqli_query($koneksi, $attach_sql);
 
-		$attch = [];
-		while ($row = mysqli_fetch_assoc($attachment)) {
-			$attch[] = $row['attachment'];
-		}
+			// $attch = [];
+			// while ($row = mysqli_fetch_assoc($attachment)) {
+			// 	$attch[] = $row['attachment'];
+			// }
 
-		$foto_so = null;
-		$surat_jalan = null;
-		$mutasi_rekening = null;
+			// $foto_so = null;
+			// $surat_jalan = null;
+			// $mutasi_rekening = null;
 
-		foreach ($attch as $file) {
-			if (strpos($file, 'foto_so') !== false) {
-				$foto_so = $file;
-			} elseif (strpos($file, 'surat_jalan') !== false) {
-				$surat_jalan = $file;
-			} elseif (strpos($file, 'mutasi_rekening') !== false) {
-				$mutasi_rekening = $file;
-			}
-		}
+			// foreach ($attch as $file) {
+			// 	if (strpos($file, 'foto_so') !== false) {
+			// 		$foto_so = $file;
+			// 	} elseif (strpos($file, 'surat_jalan') !== false) {
+			// 		$surat_jalan = $file;
+			// 	} elseif (strpos($file, 'mutasi_rekening') !== false) {
+			// 		$mutasi_rekening = $file;
+			// 	}
+			// }
 
-		if (is_null($foto_so) || is_null($surat_jalan) || is_null($mutasi_rekening)) {
-			echo "GAGAL: Lampiran (foto_so / surat_jalan / mutasi_rekening) belum ada!";
-			exit(mysqli_error($koneksi));
-		}
+			// if (is_null($foto_so) || is_null($surat_jalan) || is_null($mutasi_rekening)) {
+			// 	echo "GAGAL: Lampiran (foto_so / surat_jalan / mutasi_rekening) belum ada!";
+			// 	exit(mysqli_error($koneksi));
+			// }
 
-		$total_cmanco = $rq['uj'] + $rq['uj_lain'];
-		$data = [
-			'project'     		=> $rq['project_code'],
-			'so'          		=> $rq['no_jo'],
-			'driver'      		=> $spr['nama_supir'],
-			'customer'    		=> $cst['nama_cust'],
-			'tgl_order'   		=> $rq['tgl_jo'],
-			'penerima'    		=> $rq['penerima'],
-			'kontainer'   		=> $rq['no_cont'],
-			'total'       		=> $total_cmanco,
-			'ritase'      		=> $rq['ritase'],
-			'keterangan'  		=> $rq['ket'],
-			'stapel'  			=> $rq['stapel'],
-			'company'     		=> '7000',
-			'site'        		=> '9',
-			'nopol'       		=> $no_pol['no_polisi'],
-			'foto_so'     		=> $foto_so,
-			'surat_jalan'     	=> $surat_jalan,
-			'mutasi_rekening'	=> $mutasi_rekening,
-		];
+			// $total_cmanco = $rq['uj'] + $rq['uj_lain'];
+			// $data = [
+			// 	'project'     		=> $rq['project_code'],
+			// 	'so'          		=> $rq['no_jo'],
+			// 	'driver'      		=> $spr['nama_supir'],
+			// 	'customer'    		=> $cst['nama_cust'],
+			// 	'tgl_order'   		=> $rq['tgl_jo'],
+			// 	'penerima'    		=> $rq['penerima'],
+			// 	'kontainer'   		=> $rq['no_cont'],
+			// 	'total'       		=> $total_cmanco,
+			// 	'ritase'      		=> $rq['ritase'],
+			// 	'keterangan'  		=> $rq['ket'],
+			// 	'stapel'  			=> $rq['stapel'],
+			// 	'company'     		=> '7000',
+			// 	'site'        		=> '9',
+			// 	'nopol'       		=> $no_pol['no_polisi'],
+			// 	'foto_so'     		=> $foto_so,
+			// 	'surat_jalan'     	=> $surat_jalan,
+			// 	'mutasi_rekening'	=> $mutasi_rekening,
+			// ];
 
+			// $sendApi = [
+			// 	'trucking' => $data
+			// ];
 
-		$sendApi = [
-			'trucking' => $data
-		];
+			// // Encode ke JSON
+			// $payload = json_encode($sendApi);
+			// // echo $payload;
+			// // die();
 
-		// Encode ke JSON
-		$payload = json_encode($sendApi);
-		// echo $payload;
-		// die();
+			// // Inisialisasi cURL
+			// // $ch = curl_init('http://127.0.0.1:8000/api/planning-borong-driver/store');
+			// // $ch = curl_init('http://192.168.1.221:8118/api/planning-borong-driver/store');
+			// $ch = curl_init('https://cmanco.mitraadipersada.com/api/planning-borong-driver/store');
 
-		// Inisialisasi cURL
-		// $ch = curl_init('http://127.0.0.1:8000/api/planning-borong-driver/store');
-		$ch = curl_init('http://192.168.1.221:8118/api/planning-borong-driver/store');
-		// $ch = curl_init('https://cmanco.mitraadipersada.com/api/planning-borong-driver/store');
+			// // Set opsi cURL
+			// curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			// curl_setopt($ch, CURLOPT_POST, true);
+			// curl_setopt($ch, CURLOPT_HTTPHEADER, [
+			// 	'Content-Type: application/json',
+			// 	'Content-Length: ' . strlen($payload)
+			// ]);
+			// curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 
-		// Set opsi cURL
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_POST, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, [
-			'Content-Type: application/json',
-			'Content-Length: ' . strlen($payload)
-		]);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+			// $response = curl_exec($ch);
 
-		$response = curl_exec($ch);
-
-		if (curl_errno($ch)) {
-			echo 'cURL Error: ' . curl_error($ch);
-		} else {
-			echo "Response dari API:\n";
-			echo $response;
-		}
-
-		curl_close($ch);
-
+			// if (curl_errno($ch)) {
+			// 	echo 'cURL Error: ' . curl_error($ch);
+			// } else {
+			// 	echo "Response dari API:\n";
+			// 	echo $response;
+			// }
+			// curl_close($ch);
+		// ---------------- END API  ----------------
 
 		// UPDATE JADI DONE
 		$sql = "update tr_jo set 
-			status = '1', tagihan = '$total'
+			status = '1', 
+			tagihan = '$total'
 			where id_jo = '$id'	";
 		$hasil=mysqli_query($koneksi, $sql);
 
@@ -576,9 +584,8 @@ if ($_GET['type'] == "Read")
 			echo "Data Executed!";
 		}
 	}	
-	
-	
-}else if ($_POST['type'] == "Add_Order"){		
+}
+else if ($_POST['type'] == "Add_Order"){		
 	if($_POST['id_cust'] != '' )
 	{
 		$id_cust = $_POST['id_cust'];
@@ -680,7 +687,8 @@ if ($_GET['type'] == "Read")
 		}
 	}		
 	
-}else if ($_POST['type'] == "Update_Order"){		
+}
+else if ($_POST['type'] == "Update_Order"){		
 	if($_POST['mode'] != '' )
 	{	
 		$mode = $_POST['mode'];
@@ -775,7 +783,8 @@ if ($_GET['type'] == "Read")
 		}
 	}		
 
-}else if ($_POST['type'] == "Update_PPN"){		
+}
+else if ($_POST['type'] == "Update_PPN"){		
 	if($_POST['id_jo'] != '' )
 	{	
 		$id_jo = $_POST['id_jo'];
@@ -798,7 +807,8 @@ if ($_GET['type'] == "Read")
 	}	
 
 	
-}else if ($_POST['type'] == "Del_Order"){
+}
+else if ($_POST['type'] == "Del_Order"){
 	$id = $_POST['id']; 	
 	
 	$sql = "UPDATE t_jo_cont set id_jo_ptj = '0' where id_jo_ptj = '$id' ";	
@@ -812,7 +822,8 @@ if ($_GET['type'] == "Read")
         exit(mysqli_error($koneksi));
     }	
 
-}else if ($_POST['type'] == "Detil_Data"){
+}
+else if ($_POST['type'] == "Detil_Data"){
 	$id = $_POST['id'];	
     $query = "select tr_jo.*, tr_quo.quo_no, m_cust_tr.nama_cust, m_kota_tr.nama_kota as asal, m_kota1.nama_kota as tujuan,
 			m_mobil_tr.no_polisi, m_supir_tr.nama_supir
@@ -842,7 +853,8 @@ if ($_GET['type'] == "Read")
     echo json_encode($response);
 
 
-}else if($_GET['type'] == "List_Biaya_Lain")
+}
+else if($_GET['type'] == "List_Biaya_Lain")
 {
 	$id = $_GET['id'];
 	$stat = $_GET['stat'];
@@ -919,7 +931,8 @@ if ($_GET['type'] == "Read")
 			
     echo $data;	
 
-}else if ($_POST['type'] == "Add_Biaya_Lain"){		
+}
+else if ($_POST['type'] == "Add_Biaya_Lain"){		
 	if($_POST['mode'] != '' )
 	{	
 		$id_jo = $_POST['id_jo'];
@@ -959,7 +972,8 @@ if ($_GET['type'] == "Read")
 	}	
 
 
-}else if ($_POST['type'] == "Detil_Biaya_Lain"){
+}
+else if ($_POST['type'] == "Detil_Biaya_Lain"){
 	$id = $_POST['id'];	
     $query = "select * from  tr_jo_biaya where id_biaya  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
@@ -978,14 +992,16 @@ if ($_GET['type'] == "Read")
     }
     echo json_encode($response);	
 
-}else if ($_POST['type'] == "Del_Biaya_Lain"){
+}
+else if ($_POST['type'] == "Del_Biaya_Lain"){
 	$id = $_POST['id']; 
     $query = "DELETE FROM tr_jo_biaya WHERE id_biaya = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
         exit(mysqli_error($koneksi));
     }	
 	
-}else if($_GET['type'] == "List_UJ")
+}
+else if($_GET['type'] == "List_UJ")
 {
 	$id = $_GET['id'];
 	$stat = $_GET['stat'];
@@ -1056,7 +1072,8 @@ if ($_GET['type'] == "Read")
     echo $data;		
 	
 	
-}else if ($_POST['type'] == "Add_UJ"){		
+}
+else if ($_POST['type'] == "Add_UJ"){		
 	if($_POST['mode'] != '' )
 	{	
 		$id_jo = $_POST['id_jo'];
@@ -1092,7 +1109,28 @@ if ($_GET['type'] == "Read")
 	}	
 
 
-}else if ($_POST['type'] == "Detil_UJ"){
+}
+else if ($_POST['type'] == "Add_Claim") {
+    $id_jo  = $_POST['id_jo'];
+    $status = $_POST['status'];
+
+    $biaya  = str_replace(",", "", $_POST['biaya']);
+    $biaya  = floatval($biaya);
+
+    $sql = "UPDATE tr_jo
+            SET claim = '$biaya'
+            WHERE id_jo = '$id_jo'";
+			
+    $hasil = mysqli_query($koneksi, $sql);
+
+    if (!$hasil) {
+        echo "Data Error...!";
+    } else {
+        echo "Data saved!";
+    }
+}
+
+else if ($_POST['type'] == "Detil_UJ"){
 	$id = $_POST['id'];	
     $query = "select * from  tr_jo_uj where id_uj  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
@@ -1111,7 +1149,8 @@ if ($_GET['type'] == "Read")
     }
     echo json_encode($response);	
 
-}else if ($_POST['type'] == "Del_UJ"){
+}
+else if ($_POST['type'] == "Del_UJ"){
 	$id = $_POST['id']; 
     $query = "DELETE FROM tr_jo_uj WHERE id_uj = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
@@ -1119,8 +1158,8 @@ if ($_GET['type'] == "Read")
     }	
 	
 	
-}else if ($_GET['type'] == "ListPO")
-{	
+}
+else if ($_GET['type'] == "ListPO"){
 	$cari = $_GET['cari'];
 	$data = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">
@@ -1174,7 +1213,8 @@ if ($_GET['type'] == "Read")
     $data .= '</table>';
     echo $data;			
 	
-}else if ($_POST['type'] == "DetilPO"){
+}
+else if ($_POST['type'] == "DetilPO"){
 	$id = $_POST['id'];	
     $query = "select t_jo_bc_cont.*, t_jo_bc.alamat_ambil, t_jo_bc.id_kota, t_jo_bc.id_asal, t_jo_cont.ket, t_jo_cont.berat, t_jo_cont.vol,
 			t_jo_cont.no_cont, t_jo_cont.feet, t_jo_tagihan.no_tagihan, m_kota_tr.nama_kota, m_cust.nama_cust 

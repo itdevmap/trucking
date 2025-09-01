@@ -709,8 +709,6 @@ else if ($_GET['type'] == "Read_Barang")
 		if($mode == 'Add')
 		{			
 			$sql = "INSERT INTO t_ware (kode, id_quo, nama, unit, panjang, lebar, tinggi, berat, vol, msegi) values ('$kode', '$id_quo', '$nama', '$unit', '$panjang', '$lebar', '$tinggi', '$berat', '$vol', '$msegi')";
-
-			// $hasil=mysqli_query($koneksi, $sql);
 		} else {
 			$sql = "update t_ware set 
 					kode = '$kode',
@@ -720,10 +718,9 @@ else if ($_GET['type'] == "Read_Barang")
 					lebar = '$lebar',
 					tinggi = '$tinggi',
 					berat = '$berat',
-					vol = '$vol'
+					vol = '$vol',
 					msegi = '$msegi'
 					where 	id_ware = '$id'	";
-			// $hasil=mysqli_query($koneksi, $sql);
 		}
 
 		$hasil = mysqli_query($koneksi, $sql);
@@ -969,8 +966,6 @@ else if ($_GET['type'] == "Read_In")
 			order  by t_ware_data.tanggal desc LIMIT $offset, $jmlperhalaman";
 	}
 	
-	
-			
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
@@ -1133,7 +1128,6 @@ else if ($_GET['type'] == "Read_In")
 	$data .= '<div class="paginate paginate-dark wrapper">
 				<ul>';
 					
-
 				if($stat == 'All')
 				{
 					$pq = mysqli_query($koneksi, "select count(t_ware_data_detil.id_detil) as jml
@@ -3000,6 +2994,9 @@ else if($_GET['type'] == "Read_Sewa_Data")
 		
 		$tagihan =  $harga_sewa * $sisa_cbm;
 		$tagihanx = number_format($tagihan,0);
+		
+		// echo $sisa_cbm ;
+		// die();
 		$data .= '<tr><td colspan="5"></td>';
 		$data .= '<td style="text-align:right;background:#eee;color:#000"><b>Jumlah Tagihan :</b></td>	
 				  <td style="text-align:right;background:#008d4c;color:#fff"><b>'.$tagihanx.'</b></td>';

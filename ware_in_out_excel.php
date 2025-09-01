@@ -3,127 +3,110 @@ include "koneksi.php";
 include "lib.php";
 
 header("Content-type: application/vnd-ms-excel");
-header("Content-Disposition: attachment; filename=DATA BARANG KELUAR.xls");
+header("Content-Disposition: attachment; filename=Ware_InOut.xls");
+header("Pragma: no-cache");
+header("Expires: 0");
 
-$idx = $_GET['id'];	
-$id=base64_decode($idx);
-	
-$pq = mysqli_query($koneksi,"select t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, t_ware_data_detil.masuk, t_ware_data_detil.keluar, t_ware.nama, t_ware.kode, 
-			t_ware.vol, t_ware.unit, m_cust_tr.nama_cust, m_lokasi_ware.nama as nama_lokasi
-			from  
-			t_ware_data left join t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data
-			left join t_ware on t_ware_data_detil.id_ware = t_ware.id_ware 
-			left join t_ware_quo on t_ware.id_quo = t_ware_quo.id_quo
-			left join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
-			left join m_lokasi_ware on t_ware_data_detil.id_lokasi = m_lokasi_ware.id_lokasi
-		    where t_ware_data_detil.id_detil = '$id' ");
-$rq=mysqli_fetch_array($pq);
+$idx   = isset($_GET['id']) ? $_GET['id'] : '';
+$pecah = explode("|", base64_decode($idx));
 
-$ptgl = explode("-", $rq['tanggal']);
-$th = $ptgl[0];
-$bl = $ptgl[1];		
-$tg = $ptgl[2];
-$year = substr($th,2,2);
-$batch = "$tg.$bl.$year $rq[no_cont]";	
-		
-$no_doc = $rq['no_doc'];
-$nama_cust = $rq['nama_cust'];
-$kode = $rq['kode'];	
-$nama = $rq['nama'];
-$qty = $rq['masuk'];
-$unit = $rq['unit'];
+$tgl1  = isset($pecah[0]) && $pecah[0] !== '' ? $pecah[0] : '1900-01-01';
+$tgl2  = isset($pecah[1]) && $pecah[1] !== '' ? $pecah[1] : '2100-12-31';
+
+$tgl1x = date('Y-m-d', strtotime($tgl1));
+$tgl2x = date('Y-m-d', strtotime($tgl2));
+
+
+$sql = "
+	SELECT
+		td.tanggal AS tanggal,
+		td.no_doc AS no_doc,
+		w.kode AS kode_barang,
+		w.nama AS nama_barang,
+		wd.masuk AS qty_masuk,
+		wd.keluar AS qty_keluar,
+		w.unit AS satuan,
+		CASE WHEN td.jenis = '0' THEN 'IN' ELSE 'OUT' END AS jenis
+	FROM t_ware_data_detil wd
+	JOIN t_ware_data td   ON td.id_data = wd.id_data
+	LEFT JOIN t_ware w    ON wd.id_ware = w.id_ware
+	WHERE td.tanggal BETWEEN '$tgl1x' AND '$tgl2x'
+	ORDER BY td.tanggal ASC, wd.id_detil ASC
+";
+$k = isset($koneksi) ? $koneksi : (isset($conn) ? $conn : null);
+if (!$k) {
+    die("ERROR: Koneksi database (\$koneksi / \$conn) tidak ditemukan. Pastikan include 'koneksi.php' benar.");
+}
+
+$q = mysqli_query($k, $sql);
+if ($q === false) {
+    die("<pre>Query gagal:\n" . mysqli_error($k) . "\n\nSQL:\n$sql</pre>");
+}
+
+$data = [];
+while ($row = mysqli_fetch_assoc($q)) {
+    $tanggal = $row['tanggal'];
+    $no_doc = $row['no_doc'];
+    $kode    = $row['kode_barang'];
+    $nama    = $row['nama_barang'];
+    $satuan  = $row['satuan'];
+    $jenis   = $row['jenis'];
+
+    if ($row['jenis'] === 'IN') {
+        $qty = (float)$row['qty_masuk'];
+    } else {
+        $qty = (float)$row['qty_keluar'];
+    }
+
+    if ($qty == 0) continue;
+
+    $data[] = [
+        'tanggal'     => $tanggal,
+        'no_doc'      => $no_doc,
+        'kode_barang' => $kode,
+        'nama_barang' => $nama,
+        'qty'         => $qty,
+        'satuan'      => $satuan,
+        'jenis'       => $jenis,
+    ];
+}
+
+usort($data, function($a, $b) {
+    $ta = strtotime($a['tanggal']);
+    $tb = strtotime($b['tanggal']);
+    if ($ta === $tb) return strcmp($a['kode_barang'], $b['kode_barang']);
+    return $ta <=> $tb;
+});
 ?>
-
-<table border="0">
-	<tr>
-		<th colspan="7" style="font-size:24;text-align:left">Data Barang Keluar</th>
-	</tr>
-	<tr>
-		<th style="font-size:12; width:90px;text-align:left"></th>
-		<th colspan="7" style="font-size:12; text-align:left"></th>
-	</tr>
-	<tr>
-		<th colspan="2" style="font-size:12; width:90px;text-align:left">No Doc</th>
-		<th colspan="7" style="font-size:12; text-align:left"><?php echo $no_doc;?></th>
-	</tr>
-	<tr>
-		<th colspan="2" style="font-size:12; width:90px;text-align:left">Item Number</th>
-		<th colspan="7" style="font-size:12; text-align:left"><?php echo $kode;?></th>
-	</tr>
-	<tr>
-		<th colspan="2" style="font-size:12; width:90px;text-align:left">Item Description</th>
-		<th colspan="7" style="font-size:12; text-align:left"><?php echo $nama;?></th>
-	</tr>
-	<tr>
-		<th colspan="2" style="font-size:12; width:90px;text-align:left">Customer</th>
-		<th colspan="7" style="font-size:12; text-align:left"><?php echo $nama_cust;?></th>
-	</tr>
-	<tr>
-		<th colspan="2" style="font-size:12; width:90px;text-align:left">Bact Number</th>
-		<th colspan="7" style="font-size:12; text-align:left"><?php echo $batch;?></th>
-	</tr>
-	<tr>
-		<th colspan="2" style="font-size:12; width:90px;text-align:left">Qty Inbound</th>
-		<th colspan="7" style="font-size:12; text-align:left"><?php echo "$qty $unit";?></th>
-	</tr>
-	<tr>
-		<th colspan="2" style="font-size:12; width:90px;text-align:left"></th>
-		<th colspan="7" style="font-size:12; text-align:left"></th>
-	</tr>
-</table>
-
-
 <table border="1">
-	
-	<tr>
-		<th style="font-size:12; width:90px;text-align:center">No</th>
-		<th style="font-size:12; width:90px;text-align:center">Date</th>
-		<th style="font-size:12; width:90px;text-align:center">No SJ</th>
-		<th style="font-size:12; width:90px;text-align:center">Tujuan</th>
-		<th style="font-size:12; width:90px;text-align:center">Qty Outbound</th>
-	</tr>
-	
-	<?php
-	$total = 0;
-	$t1 = "select t_ware_data.*, t_ware_data_detil.masuk, t_ware_data_detil.keluar
-		   from 
-		   t_ware_data inner join t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data	
-		   where t_ware_data_detil.id_detil_masuk = '$id' and t_ware_data.status = '1'	";
-	$h1=mysqli_query($koneksi, $t1);       
-	while ($d1=mysqli_fetch_array($h1))
-	{
-		$n++;
-		$total = $total + $d1['keluar'];
-		$sisa  = $qty - $d1['keluar'];
-		$keluar = $d1['keluar'];
-		
-	?>
-	
-		<tr>
-			<td style="font-size:12; text-align:center"><?php echo "$n.";?></b></td>
-			<td style="font-size:12; text-align:center"><?php echo "$d1[tanggal]";?></b></td>
-			<td style="font-size:12; text-align:center"><?php echo "$d1[no_doc]";?></b></td>
-			<td style="font-size:12; text-align:center"><?php echo "$d1[gudang]";?></b></td>
-			<td style="font-size:12; text-align:center"><?php echo "$keluar";?></b></td>
-		</tr>
-
-		
-	<?php }	
-	//$sisa = $t_in - $t_out;
-	?>
-	<tr>
-		<td colspan="3" style="font-size:12;text-align:center"></b></td>
-		<td style="font-size:12;text-align:right">Total Outbound</b></td>
-		<td style="font-size:12;text-align:center"><?php echo "$total";?></b></td>
-	</tr>
-	<tr>
-		<td colspan="3" style="font-size:12;text-align:center"></b></td>
-		<td style="font-size:12;text-align:right">Qty Inbound</b></td>
-		<td style="font-size:12;text-align:center"><?php echo "$qty";?></b></td>
-	</tr>
-	<tr>
-		<td colspan="3" style="font-size:12;text-align:center"></b></td>
-		<td style="font-size:12;text-align:right">Sisa</b></td>
-		<td style="font-size:12;text-align:center"><?php echo "$sisa";?></b></td>
-	</tr>
-</table>	
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Tanggal</th>
+            <th>NO Doc</th>
+            <th>Kode Barang</th>
+            <th>Nama Barang</th>
+            <th>Qty</th>
+            <th>Satuan</th>
+            <th>Jenis</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($data)) { ?>
+            <tr>
+                <td colspan="7" style="text-align:center">Tidak ada data pada rentang tanggal tersebut.</td>
+            </tr>
+        <?php } else { $no = 1; foreach ($data as $r) { ?>
+            <tr>
+                <td><?php echo $no++; ?></td>
+                <td><?php echo htmlspecialchars($r['tanggal']); ?></td>
+                <td><?php echo htmlspecialchars($r['no_doc']); ?></td>
+                <td><?php echo htmlspecialchars($r['kode_barang']); ?></td>
+                <td><?php echo htmlspecialchars($r['nama_barang']); ?></td>
+                <td style="text-align:right;"><?php echo number_format($r['qty'], 2, ',', '.'); ?></td>
+                <td><?php echo htmlspecialchars($r['satuan']); ?></td>
+                <td><?php echo htmlspecialchars($r['jenis']); ?></td>
+            </tr>
+        <?php }} ?>
+    </tbody>
+</table>
