@@ -141,7 +141,8 @@ if ($_GET['type'] == "Read")
 				
     echo $data;
 
-}else if ($_POST['type'] == "add"){		
+}
+else if ($_POST['type'] == "add"){
 	if($_POST['mode'] != '' )
 	{		
 		$id = $_POST['id'];
@@ -193,7 +194,8 @@ if ($_GET['type'] == "Read")
 		}
 	}	
 	
-}else if ($_POST['type'] == "detil"){
+}
+else if ($_POST['type'] == "detil"){
 	$id = $_POST['id'];	
     $query = "select * from m_user_tr where id  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {

@@ -18,9 +18,9 @@
 
 	if($_GET['action']=='cari')
 	{	
-		$tahun = $_POST[tahun];
-		$bulan = $_POST[bulan];
-		$hal = $_POST[hal];
+		$tahun = $_POST['tahun'];
+		$bulan = $_POST['bulan'];
+		$hal = $_POST['hal'];
 	}
 	else
 	{
@@ -73,10 +73,7 @@
 		</aside>	
 		
 		<div class="content-wrapper" style="min-height:300px;background-image: url('img/main.jpg');background-size: cover;">
-			
 		</div>
-		
-		
 	</div>	
 		
 	

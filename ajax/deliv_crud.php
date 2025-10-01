@@ -898,10 +898,13 @@ if ($_GET['type'] == "Read")
 
 
 }else if ($_POST['type'] == "Cek_Rate"){
+
 	$id_asal = $_POST['id_asal'];	
 	$id_tujuan = $_POST['id_tujuan'];	
 	$jenis_mobil = $_POST['jenis_mobil'];	
-    $query = "select * from m_rate_tr where id_asal  = '$id_asal' and id_tujuan = '$id_tujuan' and jenis_mobil = '$jenis_mobil' ";
+	
+    $query = "SELECT * FROM m_rate_tr WHERE id_asal  = '$id_asal' AND id_tujuan = '$id_tujuan' AND jenis_mobil = '$jenis_mobil' ";
+
     if (!$result = mysqli_query($koneksi, $query)) {
         exit(mysqli_error($koneksi));
     }

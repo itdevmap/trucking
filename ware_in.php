@@ -254,8 +254,7 @@ else
 				);
 			}
 		}
-		function Download() 
-		{
+		function Download() {
 			var tgl1 = $("#tgl1").val();
 			var tgl2 = $("#tgl2").val();	
 			var field = $("#field").val();
@@ -265,10 +264,10 @@ else
 			var cari1 = $("#search_name1").val();
 			var id = tgl1+'|'+tgl2+'|'+field+'|'+cari+'|'+field1+'|'+cari1+'|'+stat;
 			var idx = btoa(id);
+
 			var win = window.open('ware_in_excel.php?id='+idx);
 		}
-		function DownloadInOut(id) 
-		{			
+		function DownloadInOut(id){
 			var tgl1 = $("#tgl1").val();
 			var tgl2 = $("#tgl2").val();	
 			var field = $("#field").val();
@@ -279,6 +278,10 @@ else
 			var id = tgl1+'|'+tgl2+'|'+field+'|'+cari+'|'+field1+'|'+cari1+'|'+stat;
 			var idx = btoa(id);
 			var win = window.open('ware_in_out_excel.php?id='+idx);
+		}
+		function DownloadStok(id) {			
+			var idx = btoa(id);
+			var win = window.open('ware_stok_in_excel.php?id='+idx);
 		}
 	</script>	
 	

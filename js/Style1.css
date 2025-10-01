@@ -1,0 +1,30 @@
+table
+{
+	border-collapse: collapse;
+}
+td, th
+{
+	border-top: solid 0px #666666;
+	border-bottom: solid 1px #666666;
+	white-space: nowrap;
+	padding-left: 0px;
+	padding-right: 0px;
+	text-align: left;
+}
+th
+{
+	background-color: #666666;
+	color: #ffffff;
+}
+#outerDiv
+{
+	position: relative;
+}
+#innerDiv
+{
+	overflow: auto;
+}
+#innerDiv td
+{
+	white-space: nowrap;
+}

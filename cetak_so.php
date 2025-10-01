@@ -25,42 +25,126 @@ class PDF extends FPDF
             $s='[] 0 d';
         $this->_out($s);
     }	
+
     function Header() {  }
+
     function Footer()
     {  
-        $this->SetTextColor(51, 102, 153);
-        $this->SetY(-25);   
-        $this->SetFont('arial','BI',11);
-        $this->SetFont('arial','BI',11);
-        $tanggal_cetak = date("d-m-Y h:i:s");
         $this->SetTextColor(0, 0, 0);
         $this->SetY(-15);   
         $this->SetFont('arial','',6);
         $this->SetX(6); 
     }   
+
+    // ============= Tambahan untuk tabel auto height =============
+    function Row($data, $widths, $aligns) {
+        $nb = 0;
+        for ($i=0; $i<count($data); $i++) {
+            $nb = max($nb, $this->NbLines($widths[$i], $data[$i]));
+        }
+        $h = 5 * $nb;
+
+        $this->CheckPageBreak($h);
+
+        for ($i=0; $i<count($data); $i++) {
+            $w = $widths[$i];
+            $a = isset($aligns[$i]) ? $aligns[$i] : 'L';
+
+            $x = $this->GetX();
+            $y = $this->GetY();
+
+            // border cell
+            $this->Rect($x, $y, $w, $h);
+
+            // isi cell
+            $this->MultiCell($w, 5, $data[$i], 0, $a);
+
+            $this->SetXY($x + $w, $y);
+        }
+
+        // pindah ke baris baru
+        $this->Ln($h);
+    }
+
+    function CheckPageBreak($h)
+    {
+        if($this->GetY()+$h>$this->PageBreakTrigger)
+            $this->AddPage($this->CurOrientation);
+    }
+
+    function NbLines($w, $txt)
+    {
+        $cw = &$this->CurrentFont['cw'];
+        if($w==0)
+            $w = $this->w-$this->rMargin-$this->x;
+        $wmax = ($w-2*$this->cMargin)*1000/$this->FontSize;
+        $s = str_replace("\r",'',$txt);
+        $nb = strlen($s);
+        if($nb>0 and $s[$nb-1]=="\n")
+            $nb--;
+        $sep = -1;
+        $i = 0;
+        $j = 0;
+        $l = 0;
+        $nl = 1;
+        while($i<$nb)
+        {
+            $c = $s[$i];
+            if($c=="\n")
+            {
+                $i++;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+                continue;
+            }
+            if($c==' ')
+                $sep = $i;
+            $l += $cw[$c];
+            if($l>$wmax)
+            {
+                if($sep==-1)
+                {
+                    if($i==$j)
+                        $i++;
+                }
+                else
+                    $i = $sep+1;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+            }
+            else
+                $i++;
+        }
+        return $nl;
+    }
 }
 
 $idx = $_GET['id'];	
 $id_jo = base64_decode($idx);
+
+// ----------- DATA HEADER -----------
 $pq = mysqli_query($koneksi, 
-"SELECT tr_jo.*, 
-	tr_quo.quo_no, 
-	m_cust_tr.nama_cust, 
-	m_kota_tr.nama_kota as asal, 
-	m_kota1.nama_kota as tujuan,
-	m_mobil_tr.no_polisi, 
-	m_supir_tr.nama_supir
-FROM tr_jo 
-	LEFT JOIN tr_quo_data ON tr_jo.id_detil_quo = tr_quo_data.id_detil
-	LEFT JOIN tr_quo ON tr_quo_data.id_quo = tr_quo.id_quo
-	LEFT JOIN m_kota_tr ON tr_jo.id_asal = m_kota_tr.id_kota
-	LEFT JOIN m_kota_tr as m_kota1 ON tr_jo.id_tujuan = m_kota1.id_kota
-	LEFT JOIN m_cust_tr ON tr_jo.id_cust = m_cust_tr.id_cust
-	LEFT JOIN m_mobil_tr ON tr_jo.id_mobil = m_mobil_tr.id_mobil
-	LEFT JOIN m_supir_tr ON tr_jo.id_supir = m_supir_tr.id_supir
+"SELECT 
+	tr_jo.no_jo,
+	tr_jo.tgl_jo,
+	tr_jo.penerima,
+	m_cust_tr.nama_cust
+FROM tr_jo
+LEFT JOIN tr_quo ON tr_quo.id_quo = tr_jo.id_quo
+LEFT JOIN tr_jo_detail ON tr_jo_detail.id_so = tr_jo.id_jo
+LEFT JOIN sap_project ON tr_jo.sap_project = sap_project.rowid
+LEFT JOIN m_cust_tr ON tr_jo.id_cust = m_cust_tr.id_cust
+LEFT JOIN m_kota_tr AS m_asal ON m_asal.id_kota = tr_jo_detail.id_asal
+LEFT JOIN m_kota_tr AS m_tujuan ON m_tujuan.id_kota = tr_jo_detail.id_tujuan
+LEFT JOIN tr_sj ON tr_sj.no_jo = tr_jo.no_jo
 WHERE tr_jo.id_jo = '$id_jo'");
 
 $rq = mysqli_fetch_array($pq);
+
 $no_jo = $rq['no_jo'];
 $no_do = $rq['no_do'];
 $ppn = $rq['ppn'];
@@ -70,8 +154,7 @@ $penerima = $rq['penerima'];
 $nama_cust = $rq['nama_cust'];
 $asal = $rq['asal'];
 $tujuan = $rq['tujuan'];
-$no_cont = $rq['no_cont'];
-$nama_supir = $rq['nama_supir'];
+$nama_supir = $rq['nama_supir'] ?? 'Driver';
 $jenis_mobil = $rq['jenis_mobil'];
 $harga = $rq['biaya_kirim'];
 $hargax = number_format($harga,0);
@@ -106,107 +189,153 @@ $pdf->MultiCell(100,4,"$penerima",0,'L');
 
 // Info utama
 $pdf->setXY(8,28);
-$pdf->Cell(18,4,"No SJ",0,0,'L'); $pdf->Cell(3,4,":",0,0,'C'); $pdf->Cell(20,4,"$no_jo",0,1,'L');
-$pdf->setX(8); $pdf->Cell(18,4,"No PO/DO",0,0,'L'); $pdf->Cell(3,4,":",0,0,'C'); $pdf->Cell(20,4,"$no_do",0,1,'L');
-$pdf->setX(8); $pdf->Cell(18,4,"Tanggal",0,0,'L'); $pdf->Cell(3,4,":",0,0,'C'); $pdf->Cell(20,4,"$tgl_jo",0,1,'L');
+$pdf->Cell(18,4,"No SO",0,0,'L'); 
+$pdf->Cell(3,4,":",0,0,'C'); 
+$pdf->Cell(20,4,"$no_jo",0,1,'L');
 
-// INI HEADER NYAAAA
-// HEADER TABEL
+$pdf->setX(8); 
+$pdf->Cell(18,4,"Tanggal",0,0,'L'); 
+$pdf->Cell(3,4,":",0,0,'C'); 
+$pdf->Cell(20,4,"$tgl_jo",0,1,'L');
+
+// ----------- TABEL HEADER -----------
+$widths = [10, 85, 10, 22, 20, 20, 23]; 
+$aligns = ['C','L','C','R','C','C','R'];
+
 $pdf->setXY(9,57);
 $pdf->SetFont('arial', 'B', 9);
-$pdf->Cell(10, 5, "NO", 1, 0, 'C');
-$pdf->Cell(85, 5, "KETERANGAN", 1, 0, 'C');
-$pdf->Cell(10, 5, "QTY", 1, 0, 'C');
-$pdf->Cell(22, 5, "HARGA", 1, 0, 'C');
-$pdf->Cell(20, 5, "PPN", 1, 0, 'C');
-$pdf->Cell(20, 5, "WTAX", 1, 0, 'C');
-$pdf->Cell(23, 5, "TOTAL", 1, 1, 'C');
+$pdf->Row(["NO","KETERANGAN","QTY","HARGA","PPN","WTAX","TOTAL"], $widths, $aligns);
 
-$y = 62;
-$n = 1;
+$pdf->SetFont('arial','',9);
+$pdf->setX(9);
 
-// KUMPULKAN UJ LAIN
-$uj_lain = "";
-$q_uj = mysqli_query($koneksi, "
-    SELECT tr_jo_uj.*, m_cost_tr.nama_cost
-    FROM tr_jo_uj
-    LEFT JOIN m_cost_tr ON tr_jo_uj.id_cost = m_cost_tr.id_cost
-    WHERE tr_jo_uj.id_jo = '$id_jo'
-    ORDER BY tr_jo_uj.id_uj
-");
-while ($d1 = mysqli_fetch_array($q_uj)) {
-    $harga = number_format($d1['harga'], 0);
-    $uj_lain .= "{$d1['nama_cost']} : $harga; ";
-}
-
-// SIAPKAN DATA BARIS UTAMA
-$data_info = "$no_cont; $nama_supir; UJ : $ujx; RITASE : $ritasex; $uj_lain";
-$len_data = strlen($data_info);
-$tinggi = ($len_data <= 38) ? 5 : (($len_data <= 69) ? 10 : 15);
-
-$ket_text = "TRUCKING 1 x $jenis_mobil ($asal - $tujuan)";
-$qty = 1;
-$pph_value = $pph;
-$wtax_value = "0";
-$harga_format = number_format($harga, 0);
-$total_format = $harga_format;
-
-// TULIS BARIS KETERANGAN
-$pdf->SetFont('arial', '', 9);
-
-// BARIS ISI
-$pdf->setXY(9, $y + 1);
-$pdf->Cell(10, 5, "$n.", 0, 0, 'C');
-$pdf->Cell(85, 5, $ket_text, 0, 0, 'L');
-$pdf->Cell(10, 5, $qty, 0, 0, 'C');
-$pdf->Cell(22, 5, $harga_format, 0, 0, 'R');
-$pdf->Cell(20, 5, $pph_value, 0, 0, 'C');
-$pdf->Cell(20, 5, $wtax_value, 0, 0, 'C');
-$pdf->Cell(23, 5, $total_format, 0, 0, 'R');
-
-// KETERANGAN TAMBAHAN
-$pdf->setXY(19, $y + 6);
-$pdf->MultiCell(105, 3.7, $data_info, 0, 'L');
-
-// GARIS BOX
-$pdf->setXY(9, $y);
-$pdf->Cell(10, $tinggi, "", 1, 0, 'C');
-$pdf->Cell(85, $tinggi, "", 1, 0, 'L');
-$pdf->Cell(10, $tinggi, "", 1, 0, 'C');
-$pdf->Cell(22, $tinggi, "", 1, 0, 'R');
-$pdf->Cell(20, $tinggi, "", 1, 0, 'C');
-$pdf->Cell(20, $tinggi, "", 1, 0, 'C');
-$pdf->Cell(23, $tinggi, "", 1, 1, 'R');
-
-// $t1 = "SELECT tr_jo_biaya.*, tr_jo_biaya.pph as pph_barang, m_cost_tr.nama_cost 
-// 		FROM tr_jo_biaya 
-//         LEFT JOIN m_cost_tr ON tr_jo_biaya.id_cost = m_cost_tr.id_cost
-//         WHERE tr_jo_biaya.id_jo = '$id_jo' ORDER BY tr_jo_biaya.id_biaya";
-// $h1 = mysqli_query($koneksi, $t1); 
-// while ($d1 = mysqli_fetch_array($h1)) {
-//     $n++;
-//     $hargax = number_format($d1['harga'], 0);
-//     $total += $d1['harga'];
-
-//     $pph_text = ($d1['pph'] != '' && $d1['pph'] != 0) ? $d1['pph'] . '%' : '-';
-//     $wtax_text = ($d1['wtax'] != '' && $d1['wtax'] != 0) ? $d1['wtax'] . '%' : '-';
-
-//     $pdf->setX(9);
-//     $pdf->Cell(10, 5, "$n.", 1, 0, 'C');
-//     $pdf->Cell(85, 5, $d1['nama_cost'], 1, 0, 'L');
-//     $pdf->Cell(15, 5, "1", 1, 0, 'C');
-//     $pdf->Cell(15, 5, $pph_text, 1, 0, 'C');
-//     $pdf->Cell(15, 5, $wtax_text, 1, 0, 'C');
-//     $pdf->Cell(25, 5, $hargax, 1, 0, 'R');
-//     $pdf->Cell(25, 5, $hargax, 1, 1, 'R');
+// kumpulkan UJ lain
+// $uj_lain = "";
+// $q_uj = mysqli_query($koneksi,
+//     "SELECT tr_jo_uj.*, m_cost_tr.nama_cost
+//     FROM tr_jo_uj
+//     LEFT JOIN m_cost_tr ON tr_jo_uj.id_cost = m_cost_tr.id_cost
+//     WHERE tr_jo_uj.id_jo = '$id_jo'
+//     ORDER BY tr_jo_uj.id_uj");
+// while ($d1 = mysqli_fetch_array($q_uj)) {
+//     $harga = number_format($d1['harga'], 0);
+//     $uj_lain .= "{$d1['nama_cost']} : $harga; ";
 // }
 
-$t1 = "SELECT tr_jo_biaya.*, tr_jo_biaya.pph as pph_barang, m_cost_tr.nama_cost 
+// $data_info = "$no_cont; $nama_supir; UJ : $ujx; RITASE : $ritasex; $uj_lain";
+
+// $ket_text = "TRUCKING 1 x $jenis_mobil ($asal - $tujuan)";
+// $qty = 1;
+// $pph_value = $pph ?? 0;
+// $wtax_value = "0";
+// $harga_format = number_format($harga, 0);
+// $total_format = $harga_format;
+
+// baris utama
+// $pdf->Row([$n, $ket_text."\n".$data_info, $qty, $harga_format, $pph_value, $wtax_value, $total_format], $widths, $aligns);
+
+// $so_detail = "SELECT 
+//     tr_jo_detail.id_asal,
+//     tr_jo_detail.id_tujuan,
+//     tr_jo_detail.jenis_mobil,
+//     tr_jo_detail.harga,
+//     GROUP_CONCAT(tr_jo_detail.container ORDER BY tr_jo_detail.container SEPARATOR ', ') AS containers,
+//     COUNT(tr_jo_detail.container) AS jml_container,
+//     m_asal.nama_kota AS asal,
+//     m_tujuan.nama_kota AS tujuan
+// FROM tr_jo_detail
+// LEFT JOIN tr_jo ON tr_jo.id_jo = tr_jo_detail.id_so
+// LEFT JOIN m_kota_tr AS m_asal ON m_asal.id_kota = tr_jo_detail.id_asal
+// LEFT JOIN m_kota_tr AS m_tujuan ON m_tujuan.id_kota = tr_jo_detail.id_tujuan
+// WHERE tr_jo.id_jo = '$id_jo'
+// GROUP BY tr_jo_detail.id_asal, tr_jo_detail.id_tujuan, tr_jo_detail.jenis_mobil";
+
+$so_detail = "SELECT 
+    tr_jo_detail.jenis_mobil,
+    m_asal.nama_kota AS asal,
+    m_tujuan.nama_kota AS tujuan,
+    tr_sj.container,
+    m_supir_tr.nama_supir,
+    tr_jo_detail.uj,
+    tr_jo_detail.ritase,
+    tr_jo_detail.harga,
+    CONCAT(
+        'TRUCKING 1X ', tr_jo_detail.jenis_mobil, 
+        ' (', m_asal.nama_kota, '-', m_tujuan.nama_kota, ') ',
+        'Cont ', tr_sj.container,
+        '; Driver ', m_supir_tr.nama_supir,
+        '; UJ: ', tr_jo_detail.uj,
+        '; Ritase: ', tr_jo_detail.ritase,
+        ';'
+    ) AS keterangan
+FROM tr_jo
+LEFT JOIN tr_jo_detail ON tr_jo_detail.id_so = tr_jo.id_jo
+LEFT JOIN m_kota_tr AS m_asal ON m_asal.id_kota = tr_jo_detail.id_asal
+LEFT JOIN m_kota_tr AS m_tujuan ON m_tujuan.id_kota = tr_jo_detail.id_tujuan
+INNER JOIN tr_sj ON tr_sj.no_jo = tr_jo.no_jo
+LEFT JOIN m_supir_tr ON m_supir_tr.id_supir = tr_sj.id_supir
+WHERE tr_jo.id_jo = '$id_jo'";
+
+
+$data_detail = mysqli_query($koneksi, $so_detail); 
+$total_wtax_rupiah = 0;
+
+while ($d1 = mysqli_fetch_array($data_detail)) {
+    $n++;
+    $harga = $d1['harga'];
+    $hargax = number_format($harga, 0);
+    $total += $harga;
+
+    $ppn = $d1['pph'];
+    $wtax = $d1['wtax'];
+    $ppn_rupiah_text = '0';
+    $wtax_rupiah_text = '0';
+    $pdf->setX(9);
+
+    $jenis_mobil    = $d1['jenis_mobil'];
+    $asal           = $d1['asal'];
+    $tujuan         = $d1['tujuan'];
+    $containers     = $d1['container'];
+    $nama_supir     = $d1['nama_supir'];
+
+    $ket_text = "TRUCKING 1X $jenis_mobil ($asal - $tujuan)";
+    $data_info = "Cont $containers; Driver : $nama_supir; UJ : $ujx; RITASE : $ritasex; $uj_lain";
+
+    if ($ppn != '' && $ppn != 0) {
+        $ppn_rupiah = ($ppn / 100) * $harga;
+        $total_ppn_rupiah += $ppn_rupiah;
+        $ppn_rupiah_text = number_format($ppn_rupiah, 0, ',', '.');
+    }
+
+    if ($wtax != '' && $wtax != 0) {
+        $wtax_rupiah = ($wtax / 100) * $harga;
+        $total_wtax_rupiah += $wtax_rupiah;
+        $wtax_rupiah_text = number_format($wtax_rupiah, 0, ',', '.');
+    }
+
+    $pdf->Row([
+        $n,
+        $ket_text."\n".$data_info,
+        1,
+        $hargax,
+        $ppn_rupiah_text,
+        $wtax_rupiah_text,
+        $hargax
+    ], $widths, $aligns);
+}
+
+// biaya tambahan
+$t1 = "SELECT 
+            tr_jo_biaya.*, 
+            tr_jo_biaya.pph AS pph_barang, 
+            m_cost_tr.nama_cost 
         FROM tr_jo_biaya 
         LEFT JOIN m_cost_tr ON tr_jo_biaya.id_cost = m_cost_tr.id_cost
-        WHERE tr_jo_biaya.id_jo = '$id_jo' ORDER BY tr_jo_biaya.id_biaya";
+        WHERE tr_jo_biaya.id_jo = '$id_jo' 
+        ORDER BY tr_jo_biaya.id_biaya";
 $h1 = mysqli_query($koneksi, $t1); 
 $total_wtax_rupiah = 0;
+
 while ($d1 = mysqli_fetch_array($h1)) {
     $n++;
     $harga = $d1['harga'];
@@ -215,95 +344,78 @@ while ($d1 = mysqli_fetch_array($h1)) {
 
     $ppn = $d1['pph'];
     $wtax = $d1['wtax'];
+    $ppn_rupiah_text = '0';
+    $wtax_rupiah_text = '0';
+    $pdf->setX(9);
 
-    // $pph_text = ($pph != '' && $pph != 0) ? $pph . '%' : '-';
+    if ($ppn != '' && $ppn != 0) {
+        $ppn_rupiah = ($ppn / 100) * $harga;
+        $total_ppn_rupiah += $ppn_rupiah;
+        $ppn_rupiah_text = number_format($ppn_rupiah, 0, ',', '.');
+    }
 
     if ($wtax != '' && $wtax != 0) {
         $wtax_rupiah = ($wtax / 100) * $harga;
         $total_wtax_rupiah += $wtax_rupiah;
-		$wtax_rupiah_text = number_format($wtax_rupiah, 0, ',', '.');
-        $wtax_text = $wtax . '%';
-    } else {
-        $wtax_text = '-';
+        $wtax_rupiah_text = number_format($wtax_rupiah, 0, ',', '.');
     }
 
-	// ASLINYA PPN SAYA TYPO
-    if ($ppn != '' && $ppn != 0) {
-        $ppn_rupiah = ($ppn / 100) * $harga;
-        $total_ppn_rupiah += $ppn_rupiah;
-		$ppn_rupiah_text = number_format($ppn_rupiah, 0, ',', '.');
-        $ppn_text = $ppn . '%';
-    } else {
-        $ppn_text = '-';
-    }
-
-    $pdf->setX(9);
-    $pdf->Cell(10, 5, "$n.", 1, 0, 'C');
-    $pdf->Cell(85, 5, $d1['nama_cost'], 1, 0, 'L');
-    $pdf->Cell(10, 5, "1", 1, 0, 'C');
-    $pdf->Cell(22, 5, $hargax, 1, 0, 'R');
-    // $pdf->Cell(20, 5, $ppn_text, 1, 0, 'C');
-    $pdf->Cell(20, 5, $ppn_rupiah_text, 1, 0, 'C');
-    // $pdf->Cell(20, 5, $wtax_text, 1, 0, 'C');
-    $pdf->Cell(20, 5, $wtax_rupiah_text, 1, 0, 'C');
-    $pdf->Cell(23, 5, $hargax, 1, 1, 'R');
+    $pdf->Row([
+        $n,
+        $d1['nama_cost'],
+        1,
+        $hargax,
+        $ppn_rupiah_text,
+        $wtax_rupiah_text,
+        $hargax
+    ], $widths, $aligns);
 }
 
-
-
+// subtotal
 $totalx = number_format($total,0);
 $pdf->setX(9);
 $pdf->Cell(127,4,"",0,0,'C');
 $pdf->Cell(40,5,"SUB TOTAL ",1,0,'R');
 $pdf->Cell(23,5,"$totalx",1,1,'R');
 
-// $nilai_ppn = ($ppn/100) * $total;
-// $nilai_ppnx = number_format($nilai_ppn,0);
-// $pdf->setX(9);
-// $pdf->Cell(135,4,"",0,0,'C');
-// $pdf->Cell(30,5,"PPN ($ppn%)",1,0,'R');
-// $pdf->Cell(25,5,"$nilai_ppnx",1,1,'R');
-
-// Total PPN
+// total PPN
 $ppn_total_text = number_format($total_ppn_rupiah, 0);
 $pdf->setX(9);
 $pdf->Cell(127, 4, "", 0, 0, 'C');
 $pdf->Cell(40, 5, "PPN TOTAL", 1, 0, 'R');
 $pdf->Cell(23, 5, $ppn_total_text, 1, 1, 'R');
 
-// Total WTAX
+// total WTAX
 $wtax_total_text = number_format($total_wtax_rupiah, 0);
 $pdf->setX(9);
 $pdf->Cell(127, 4, "", 0, 0, 'C');
 $pdf->Cell(40, 5, "WTAX TOTAL", 1, 0, 'R');
 $pdf->Cell(23, 5, $wtax_total_text, 1, 1, 'R');
 
-// Hitung total akhir pakai nilai asli (bukan hasil format)
-$grand_total = $total + $total_ppn_rupiah - $total_wtax_rupiah;
+// grand total
+$grand_total = $total + $total_ppn_rupiah;
 $totalx = number_format($grand_total, 0);
 $pdf->setX(9);
 $pdf->Cell(127, 4, "", 0, 0, 'C');
 $pdf->Cell(40, 5, "TOTAL", 1, 0, 'R');
 $pdf->Cell(23, 5, $totalx, 1, 1, 'R');
 
-
+// tanda tangan
 $pdf->Cell(30,15,"",0,1,'R');
 $pdf->setX(55);
 $pdf->Cell(50,4,"Menyetujui,",0,0,'C');
 $pdf->Cell(50,4,"Mengetahui, ",0,1,'C');
-
 $pdf->Cell(30,20,"",0,1,'R');
-
 $pdf->SetFont('arial','U',9);
 $pdf->setX(55);
 $pdf->Cell(50,4,"Hamdan Wahyu",0,0,'C');
 $pdf->Cell(50,4,"",0,1,'C');
-
 $pdf->SetFont('arial','',9);
 $pdf->setX(55);
 $pdf->Cell(50,4,"Manager PTEJ",0,0,'C');
 $pdf->Cell(50,4,"GM Logistic",0,1,'C');
 
+// update db
 $sql = "UPDATE tr_jo SET tagihan = '$total' WHERE id_jo = '$id_jo'"; 
 $hasil = mysqli_query($koneksi, $sql);	
 

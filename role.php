@@ -12,7 +12,7 @@ if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
 if($_GET['action']=='cari')
 {
 	$hal='1';	
-	$search_name = $_POST[search_name];
+	$search_name = $_POST['search_name'];
 }
 else
 {

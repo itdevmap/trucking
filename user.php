@@ -69,6 +69,7 @@ else
 				$("#hal").val(hal);
 			});
 		}
+
 		function GetData(id) {
 			$("#id").val(id);	
 			document.getElementById('id_user').disabled = true;
@@ -96,7 +97,7 @@ else
 			$("#Data").modal("show");
 		}
 
-		function add() {	
+		function add() {
 			var email = $("#email").val();
 			if(!$("#id_user").val()){
 				alert("ID User harus diisi !..");

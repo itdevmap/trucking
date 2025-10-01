@@ -4,7 +4,7 @@ include "koneksi.php";
 include "session_log.php"; 
 //include "lib.php";
 
-$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='13' ");
+$pq = mysqli_query($koneksi,"SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='13' ");
 $rq=mysqli_fetch_array($pq);	
 $m_edit = $rq['m_edit'];
 $m_add = $rq['m_add'];
@@ -82,6 +82,7 @@ else
 					$("#ama").val(data.sapitemcode_ama);
 					$("#ptl").val(data.sapitemcode_ptl);
 					$("#aa").val(data.sapitemcode_aa);
+					$("#item_pph").val(data.item_pph);
 					$("#mode").val('Edit');
 				}
 			);
@@ -98,6 +99,7 @@ else
 				if (r == true) {	
 					var id = $("#id").val();
 					var cost_name = $("#cost_name").val();
+					var item_pph = $("#item_pph").val();
 					var stat = $("#stat").val();
 					var st = $("#st").val();
 					var sim = $("#sim").val();
@@ -111,6 +113,7 @@ else
 						id:id,
 						cost_name:cost_name,
 						mode:mode,
+						item_pph:item_pph,
 						st:st,
 						stat:stat,
 						sim:sim,
@@ -270,6 +273,13 @@ else
 								<input type="text" id="aa"  value="" style="text-transform: uppercase;
 								text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
 							</div>								
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Item PPH :</b></span>
+								<select id="item_pph"  style="width: 20%;">
+									<option value="yes" >YES</option>
+									<option value="no" >NO</option>
+								</select>						
+							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Status :</b></span>
 								<select id="stat"  style="width: 20%;">

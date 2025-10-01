@@ -42,7 +42,6 @@
 
 ?>
 
-
 <html>
   <head>
     <meta charset="utf-8">
@@ -178,8 +177,7 @@
 			}
 			return true;
 		}
-		function ReadData(hal) 
-		{
+		function ReadData(hal) {
 			var tgl1 = $("#tgl1").val();
 			var tgl2 = $("#tgl2").val();	
 			var cari = $("#search_name").val();
@@ -204,64 +202,64 @@
 			});
 		}		
 		
-		function GetData(id){	
+		function GetData(id){
 			var jenis_role = $("#jenis_role").val();
 			if (jenis_role == '2'){
-				document.getElementById("tampil_ujx").style.display = 'none';
+				$("#tampil_ujx").hide();
 			} else {
-				document.getElementById("tampil_ujx").style.display = 'inline';
+				$("#tampil_ujx").show();
 			}
+
 			$("#id_jo").val(id);
-			$.post("ajax/jo_crud.php", {
-					id: id, type:"Detil_Data"
-				},
-				function (data, status) {
-					var data = JSON.parse(data);
-					$("#no_jo").val(data.no_jo);
-					$("#no_do").val(data.no_do);
-					$("#tanggal").val(changeDateFormat(data.tgl_jo));
-					$("#no_cont").val(data.no_cont);
-					$("#no_seal").val(data.no_seal);
-					$("#barang").val(data.barang);
-					$("#berat").val(Desimal(data.berat));
-					$("#vol").val(Desimal(data.vol));
-					$("#jenis_mobil").val(data.jenis_mobil);
-					$("#penerima").val(data.penerima);
-					$("#id_asal").val(data.id_asal);
-					$("#nama_asal").val(data.asal);
-					$("#id_tujuan").val(data.id_tujuan);
-					$("#nama_tujuan").val(data.tujuan);
-					$("#id_mobil").val(data.id_mobil);
-					$("#id_supir").val(data.id_supir);	
-					$("#biaya").val(Rupiah(data.biaya_kirim));	
-					$("#uj").val(Rupiah(data.uj));	
-					$("#ritase").val(Rupiah(data.ritase));	
-					$("#stapel").val(Rupiah(data.stapel));	
-					$("#ket").val(data.ket);		
-					$("#mode").val('Edit');		
-					if(data.jenis_po == '1')
-					{
-						document.getElementById('no_do').readOnly=true;
-						document.getElementById('no_cont').readOnly=true;
-					}else{
-						document.getElementById('no_do').readOnly=false;
-						document.getElementById('no_cont').readOnly=false;
-					}
+
+			$.post("ajax/jo_crud.php", { id: id, type:"Detil_Data" }, function (res) {
+				var data = JSON.parse(res);
+
+				$("#no_jo").val(data.no_jo);
+				$("#project_codex").val(data.project_code);
+				$("#sap_projectx").val(data.kode_project);
+
+				$("#no_do").val(data.no_do);
+				$("#sj_custx").val(data.sj_cust);
+				$("#no_sqx").val(data.quo_no);
+				$("#no_po").val(data.code_po);
+
+				$("#tanggal").val(changeDateFormat(data.tgl_jo));
+				$("#jenis_mobil").val(data.jenis_mobil);
+				$("#penerima").val(data.penerima);
+				$("#id_asal").val(data.id_asal);
+				$("#nama_asal").val(data.asal);
+				$("#id_tujuan").val(data.id_tujuan);
+				$("#nama_tujuan").val(data.tujuan);
+				$("#biaya").val(Rupiah(data.harga));	
+				$("#uj").val(Rupiah(data.uj));	
+				$("#ritase").val(Rupiah(data.ritase));	
+				$("#stapel").val(Rupiah(data.stapel));	
+				$("#cont_edit").val(data.container);		
+				$("#ket").val(data.ket);		
+				$("#mode").val('Edit');		
+
+				if(data.jenis_po == '1'){
+					$("#no_do, #no_cont").prop("readonly", true);
+				} else {
+					$("#no_do, #no_cont").prop("readonly", false);
 				}
-			);	
-			$('#Data').modal('show');
+			});
+
+			$('#ModelEdit').modal('show');
 		}
 
-		function AddOrder() {	
+		function AddOrder() {
 			var tanggal = $("#tanggal").val();
 			var no_do = $("#no_do").val();
+
 			if(tanggal == '' )
 			{
 				alert("Tanggal harus diisi !..");
 			}
-			else if(no_do == '')
+			else if(no_do === '')
 			{
-				alert("No. DO/PO harus diisi !..");
+				alert("No. PO harus diisi !..");
 			}
 			else
 			{
@@ -271,40 +269,31 @@
 					var tanggal = $("#tanggal").val();
 					var no_do = $("#no_do").val();
 					var penerima = $("#penerima").val();
-					var barang = $("#barang").val();
-					var berat = $("#berat").val();
-					var vol = $("#vol").val();
-					var stapel = $("#stapel").val();
-					var no_cont = $("#no_cont").val();
-					var no_seal = $("#no_seal").val();
 					var id_asal = $("#id_asal").val();
 					var id_tujuan = $("#id_tujuan").val();
 					var jenis_mobil = $("#jenis_mobil").val();
-					var id_mobil = $("#id_mobil").val();
-					var id_supir = $("#id_supir").val();
 					var biaya = $("#biaya").val();
+					var stapel = $("#stapel").val();
 					var uj = $("#uj").val();
 					var ritase = $("#ritase").val();
 					var ket = $("#ket").val();
 					var mode = $("#mode").val();
-					//alert(id_jo);
+					var sap_project = $("#sap_project").val();
+					var sj_custx = $("#sj_custx").val();
+					var cont_edit = $("#cont_edit").val();
+
 					$.post("ajax/jo_crud.php", {
 						id_jo:id_jo,
+						sj_custx:sj_custx,
+						cont_edit:cont_edit,
 						tanggal:tanggal,
 						no_do:no_do,
-						penerima:penerima,
-						barang:barang,
-						berat:berat,
-						vol:vol,
-						stapel:stapel,
-						no_cont:no_cont,						
-						no_seal:no_seal,						
+						penerima:penerima,					
 						id_asal:id_asal,
 						id_tujuan:id_tujuan,
-						jenis_mobil:jenis_mobil,						
-						id_mobil:id_mobil,						
-						id_supir:id_supir,
+						jenis_mobil:jenis_mobil,
 						biaya:biaya,
+						stapel:stapel,
 						uj:uj,
 						ritase:ritase,
 						ket:ket,
@@ -312,7 +301,7 @@
 						type : "Update_Order"
 						}, function (data, status) {
 						alert(data);
-						$("#Data").modal("hide");				
+						$("#ModelEdit").modal("hide");				
 						ReadData(1);
 					});
 				}
@@ -331,7 +320,7 @@
 			);
 			$("#DataPPN").modal("show");
 		}
-		function AddPPN() {	
+		function AddPPN() {
 			var r = confirm("Are you sure ?...");
 			if (r == true) {
 				var id_jo = $("#id_ppn").val();					
@@ -386,7 +375,6 @@
 			}
 		}
 
-		
 		function ListBiaya_Lain(id, stat) {
 			$("#id_jo").val(id);
 			$("#stat_biaya").val(stat);
@@ -402,20 +390,45 @@
 				});
 			$("#DaftarBiayaLain").modal("show");
 		}
-		function TampilBiayaLain() 
-		{			
+
+		function TampilBiayaLain() {
 			$("#biaya_lain").val('');
 			$("#mode_biaya_lain").val('Add');
 			$('#DataBiayaLain').modal('show');
+			checkPPH();
+			$("#id_cost_biaya").off('change').on('change', function() {
+				checkPPH();
+			});
 		}
-		function AddBiayaLain() {
-			var id_jo = $("#id_jo").val();
-			var id = $("#id_biaya_lain").val();
+
+		function checkPPH() {
+			var id_jo   = $("#id_jo").val();
 			var id_cost = $("#id_cost_biaya").val();
-			var biaya = $("#biaya_lain").val();
-			var pph = $("#pph").val();
-			var wtax = $("#wtax").val();
-			var mode = $("#mode_biaya_lain").val();
+
+			$.post("ajax/jo_crud.php", {
+				id_cost: id_cost,
+				id_jo: id_jo,
+				type: "checkPPH"
+			}, function (res) {
+				console.log(res);
+				if (res.pph_fix) {
+					$("#wtax").val(res.pph_fix);
+				} else {
+					$("#wtax").val(0);
+				}
+			}, "json");
+		}
+
+		function AddBiayaLain() {
+			var id_jo 		= $("#id_jo").val();
+			var id 			= $("#id_biaya_lain").val();
+			var id_cost 	= $("#id_cost_biaya").val();
+			var biaya 		= $("#biaya_lain").val();
+			var pph 		= $("#pph").val();
+			var wtax 		= $("#wtax").val();
+			var remark_cost	= $("#remark_cost").val();
+			var mode 		= $("#mode_biaya_lain").val();
+
 			$.post("ajax/jo_crud.php", {
 				id_jo:id_jo,
 				id:id,
@@ -423,6 +436,7 @@
 				biaya:biaya,
 				pph:pph,
 				wtax:wtax,
+				remark_cost:remark_cost,
 				mode:mode,
 				type : "Add_Biaya_Lain"
 				}, function (data, status) {
@@ -440,7 +454,9 @@
 				
 			});
 		}	
+
 		function GetBiayaLain(id) {
+
 			$("#id_biaya_lain").val(id);	
 			$.post("ajax/jo_crud.php", {
 					id: id, type:"Detil_Biaya_Lain"
@@ -492,8 +508,7 @@
 			$("#DaftarUJ").modal("show");
 		}
 
-		function TampilUJ() 
-		{			
+		function TampilUJ() {
 			$("#biaya_uj").val('');
 			$("#mode_uj").val('Add');
 			$('#DataUJ').modal('show');
@@ -558,8 +573,7 @@
 			}
 		}
 		
-		function TampilData() 
-		{
+		function TampilData() {
 			var jenis_role = $("#jenis_role").val();
 			if (jenis_role == '2'){
 				document.getElementById("tampil_uj").style.display = 'none';
@@ -608,61 +622,265 @@
 			CekRate();
 			$('#DataBaru').modal('show');
 		}
-		function TampilPO(){	
-			$("#cari_po").val('');
-			ListPO();
-			$('#DaftarPO').modal('show');
-		}
 		$(document).on('hidden.bs.modal', '.modal', function () {
 			if ($('.modal:visible').length) {
 				$('body').addClass('modal-open');
 			}
 		});
-		function ListPO() {	
-			var cari = $("#cari_po").val();
-			$.get("ajax/jo_crud.php", {cari:cari,  type:"ListPO" }, function (data, status) {
-				$(".tampil_po").html(data);
-				$("#hal").val(hal);
-			});
-		}
-		function PilihPO(id) {	
-		
-			$.post("ajax/jo_crud.php", {
-					id: id, type:"DetilPO"
-				},
-				function (data, status) {
-					var data = JSON.parse(data);	
-					$("#no_dox").val(data.no_tagihan);
-					$("#id_detil_bc").val(id);
-					$("#id_contx").val(data.id_cont);
-					$("#id_cust").val('1');
-					$("#nama_cust").val('PLANET TRANS LOGISTIC, PT');
-					$("#penerimax").val(data.nama_cust+'\n'+data.alamat_ambil);
-					$("#barangx").val(data.ket);
-					$("#beratx").val(Desimal(data.berat));
-					$("#volx").val(Desimal(data.vol));
-					$("#no_contx").val(data.no_cont);
-					$("#id_asalx").val(data.id_asal);
-					$("#id_tujuanx").val(data.id_kota);
-					$("#jenisx").val(data.feet);
-					CekRate();
+
+		// ------------------- AJAX TAMPIL PO PTL -------------------
+			function TampilPO(){
+				$("#cari_po").val('');
+				ListPO();
+				$('#DaftarPO').modal('show');
+			}
+			function ListPO() {	
+				var cari = $("#cari_po").val();
+				$.get("ajax/jo_crud.php", {cari:cari,  type:"ListPO" }, function (data, status) {
+					$(".tampil_po").html(data);
+					$("#hal").val(hal);
+				});
+			}
+			function PilihPO(id) {
+				$.post("ajax/jo_crud.php", {
+						id: id, type:"DetilPO"
+					},
+					function (data, status) {
+						var data = JSON.parse(data);	
+						$("#no_dox").val(data.no_tagihan);
+						$("#id_detil_bc").val(id);
+						$("#id_contx").val(data.id_cont);
+						$("#id_cust").val('1');
+						$("#nama_cust").val('PLANET TRANS LOGISTIC, PT');
+						$("#penerimax").val(data.nama_cust+'\n'+data.alamat_ambil);
+						$("#barangx").val(data.ket);
+						$("#beratx").val(Desimal(data.berat));
+						$("#volx").val(Desimal(data.vol));
+						$("#no_contx").val(data.no_cont);
+						$("#id_asalx").val(data.id_asal);
+						$("#id_tujuanx").val(data.id_kota);
+						$("#jenisx").val(data.feet);
+						CekRate();
+					}
+				);
+				$("#DaftarPO").modal("hide");
+			}
+
+		// ------------------- AJAX TAMPIL SAP PROJECT -------------------
+			function TampilSAP(){
+				$cari = $("#cari_SAP").val('');
+				ListSAP();
+				$('#DaftarSAP').modal('show');
+			}
+			function ListSAP() {
+				var cari = $("#cari_SAP").val();
+				$.get("ajax/jo_crud.php", {cari:cari,  type:"ListSAP" }, function (data, status) {
+					$(".tampil_SAP").html(data);
+					$("#hal").val(hal);
+				});
+			}
+			function PilihSAP(id) {
+				$.post("ajax/jo_crud.php", {
+						id: id, type:"DetilSAP"
+					},
+					function (data, status) {
+						var data = JSON.parse(data);	
+						$("#sap_project").val(data.kode_project);
+					}
+				);
+				$("#DaftarSAP").modal("hide");
+			}
+
+		// ------------------- AJAX TAMPIL SQ -------------------
+			function TampilSQ(){
+				$cari = $("#cari_SQ").val('');
+				ListSQ();
+				$('#DaftarSQ').modal('show');
+			}
+			function ListSQ() {
+				var cari = $("#cari_SQ").val();
+				$.get("ajax/jo_crud.php", {cari:cari,  type:"ListSQ" }, function (data, status) {
+					$(".tampil_SQ").html(data);
+					$("#hal").val(hal);
+				});
+			}
+			function PilihSQ(id_quo) {
+				$.post("ajax/jo_crud.php", {
+						id_quo: id_quo, type:"DetilSQ"
+					},
+					function (data, status) {
+						var data = JSON.parse(data);	
+						$("#no_sq").val(data.quo_no);
+						$("#jenisx").val(data.jenis_mobil).trigger("change");
+						$("#biayax").val(Rupiah(data.harga));
+						$("#ujx").val(0);
+						$("#ritasex").val(0);
+					}
+				);
+				$("#DaftarSQ").modal("hide");
+			}
+		// ------------------- AJAX TAMPIL PO TR -------------------
+			function TampilPOTR(){
+				$cari = $("#cari_POTR").val('');
+				ListPOTR();
+				$('#DaftarPOTR').modal('show');
+			}
+			function ListPOTR() {
+				var cari = $("#cari_POTR").val();
+				$.get("ajax/jo_crud.php", {cari:cari,  type:"ListPOTR" }, function (data, status) {
+					$(".tampil_POTR").html(data);
+					$("#hal").val(hal);
+				});
+			}
+			function PilihPOTR(id_po) {
+				$.post("ajax/jo_crud.php", {
+						id_po: id_po, type:"DetilPOTR"
+					},
+					function (data, status) {
+						var data = JSON.parse(data);	
+						$("#id_quo").val(data.id_quo);
+						$("#id_po").val(data.id_po);
+						$("#is_trucking").val(data.code_po);
+						$("#id_sap").val(data.sap_project);
+						$("#sap_project").val(data.kode_project);
+						$("#no_sq").val(data.quo_no);
+						$("#nama_cust").val(data.nama_cust);
+						$("#id_cust").val(data.id_cust);
+						$("#id_asalx").val(data.id_origin).trigger("change");
+						$("#id_tujuanx").val(data.id_destination).trigger("change");
+						$("#jenisx").val(data.jenis_mobil.toUpperCase()).trigger("change");
+						$("#biayax").val(Rupiah(data.harga));
+						
+						$("#ujx").val(0);
+						$("#ritasex").val(0);
+					}
+				);
+				$("#DaftarPOTR").modal("hide");
+			}
+
+		// ------------------- UP SO TO SAP -------------------
+			function TampilUpSAP(id_jo){
+				$cari = $("#cari_UpSAP").val('');
+				ListUpSAP(id_jo);
+				$('#DaftarUpSAP').modal('show');
+			}
+			function ListUpSAP(id_jo) {
+				var cari = $("#cari_UpSAP").val();
+				$.get("ajax/jo_crud.php", {cari:cari,id_jo:id_jo,  type:"ListUpSAP" }, function (data, status) {
+					$(".tampil_UpSAP").html(data);
+					$("#hal").val(hal);
+				});
+			}
+			function SaveUpSAP() {
+				let selected = [];
+				$('input[name="sap_selected[]"]:checked').each(function () {
+					selected.push($(this).val());
+				});
+
+				if (selected.length === 0) {
+					alert("Pilih minimal 1 data!");
+					return;
 				}
-			);
-			$("#DaftarPO").modal("hide");
-		}
-		function TampilCust(){	
+
+				$("#btnSaveSAP").prop("disabled", true).text("Processing...");
+
+				$.ajax({
+					url: "ajax/jo_crud.php",
+					type: "POST",
+					data: { type: "SaveUpSAP", ids: selected },
+					dataType: "json",
+					success: function (res) {
+						if (res.success === false) {
+							alert("Gagal: " + res.message);
+						} else {
+							alert("Data berhasil dikirim ke SAP!");
+							console.log(res);
+							$('#DaftarUpSAP').modal('hide');
+						}
+					},
+					error: function (xhr, status, err) {
+						console.error(xhr.responseText);
+						alert("Terjadi error: " + err);
+					},
+					complete: function () {
+						$("#btnSaveSAP").prop("disabled", false).text("Save to SAP");
+						ReadData();
+					}
+				});
+			}
+			$(document).on('click', '#btnSaveSAP', function () {
+				SaveUpSAP();
+			});
+
+		// ------------------- UP AR TO SAP -------------------
+			function TampilUpAR(id_jo){
+				$cari = $("#cari_UpAR").val('');
+				ListUpAR(id_jo);
+				$('#DaftarUpAR').modal('show');
+			}
+			function ListUpAR(id_jo) {
+				var cari = $("#cari_UpAR").val();
+				$.get("ajax/jo_crud.php", {cari:cari,id_jo:id_jo,  type:"ListUpAR" }, function (data, status) {
+					$(".tampil_UpAR").html(data);
+					$("#hal").val(hal);
+				});
+			}
+			function SaveUpAR() {
+				let selected = [];
+				$('input[name="ar_selected[]"]:checked').each(function () {
+					selected.push($(this).val());
+				});
+
+				if (selected.length === 0) {
+					alert("Pilih minimal 1 data!");
+					return;
+				}
+
+				$("#btnSaveAR").prop("disabled", true).text("Processing...");
+
+				$.ajax({
+					url: "ajax/jo_crud.php",
+					type: "POST",
+					data: { type: "SaveUpAR", ids: selected },
+					dataType: "json",
+					success: function (res) {
+						if (res.success === false) {
+							alert("Gagal: " + res.message);
+						} else {
+							alert("Data berhasil dikirim ke AR!");
+							console.log(res);
+							$('#DaftarUpAR').modal('hide');
+						}
+					},
+					error: function (xhr, status, err) {
+						console.error(xhr.responseText);
+						alert("Terjadi error: " + err);
+					},
+					complete: function () {
+						$("#btnSaveAR").prop("disabled", false).text("Save to AR");
+						ReadData();
+					}
+				});
+			}
+			$(document).on('click', '#btnSaveAR', function () {
+				SaveUpAR();
+			});
+
+		
+
+		function TampilCust(){
 			$("#cari").val('');
 			ListCust();
 			$('#DaftarCust').modal('show');
 		}
-		function ListCust() {	
+		function ListCust() {
 			var cari = $("#cari").val();
 			$.get("ajax/cust_crud.php", {cari:cari,  type:"ListCust" }, function (data, status) {
 				$(".tampil_cust").html(data);
 				$("#hal").val(hal);
 			});
 		}
-		function PilihCust(id) {	
+		function PilihCust(id) {
 			$.post("ajax/cust_crud.php", {
 					id: id, type:"DetilData"
 				},
@@ -674,108 +892,101 @@
 			);
 			$("#DaftarCust").modal("hide");
 		}
-		function AddBaru() {
-			var id_cust = $("#id_cust").val();
-			var no_do = $("#no_dox").val();
-			var tanggal = $("#tanggalx").val();
-			var id_asal = $("#id_asalx").val();
-			var id_tujuan = $("#id_tujuanx").val();
 
-			if(tanggal == '')
-			{
-				alert ("Tanggal harus diisi !..");				
+		function AddBaru() {
+			var id_cust  = $("#id_cust").val();
+			var no_do    = $("#no_dox").val();
+			var id_po    = $("#is_trucking").val();
+			var id_quo   = $("#id_quo").val();
+			var tanggal  = $("#tanggalx").val();
+			var id_asal  = $("#id_asalx").val();
+			var id_tujuan= $("#id_tujuanx").val();
+			var uj       = $("#ujx").val();
+			var ritase   = $("#ritasex").val();
+
+			// alert(uj);
+			// return;
+
+			if (tanggal === '') {
+				alert("Tanggal harus diisi !..");	
+				return;			
 			}			
-			else if(no_do == '')
-			{
-				alert ("No DO/PO harus diisi !..");				
+			else if (no_do === '' && id_po === '') {
+				alert("No. PO harus diisi !..");
+				return;
 			}
-			else if(id_cust == '')
-			{
-				alert ("Customer harus diisi !..");				
+			else if (id_cust === '') {
+				alert("Customer harus diisi !..");		
+				return;		
 			}
-			else if(id_asal == '')
-			{
-				alert ("Asal harus diisi !..");				
+			else if (id_asal === '') {
+				alert("Asal harus diisi !..");
+				return;				
 			}
-			else if(id_tujuan == '')
-			{
-				alert ("Tujuan harus diisi !..");				
+			else if (id_tujuan === '') {
+				alert("Tujuan harus diisi !..");
+				return;				
 			}
-			else
-			{
-				var tanggal = $("#tanggalx").val();
-				var id_cust = $("#id_cust").val();
-				var id_detil_bc = $("#id_detil_bc").val();
-				var id_cont = $("#id_contx").val();
-				var jenis_po = $("#jenis_po").val();
-				var no_do = $("#no_dox").val();
-				var penerima = $("#penerimax").val();
-				var barang = $("#barangx").val();
-				var berat = $("#beratx").val();
-				var vol = $("#volx").val();
-				var no_cont = $("#no_contx").val();
-				var no_seal = $("#no_sealx").val();
-				var id_asal = $("#id_asalx").val();
-				var id_tujuan = $("#id_tujuanx").val();
-				var jenis = $("#jenisx").val();
-				var id_mobil = $("#id_mobilx").val();
-				var id_supir = $("#id_supirx").val();
-				var biaya = $("#biayax").val();
-				var uj = $("#ujx").val();
-				var ritase = $("#ritasex").val();
-				var ket = $("#ketx").val();
-				$.post("ajax/jo_crud.php", {
-					tanggal:tanggal,
-					id_detil_bc:id_detil_bc,
-					jenis_po:jenis_po,
-					id_cont:id_cont,
-					id_cust:id_cust,
-					no_do:no_do,
-					penerima:penerima,
-					barang:barang,
-					berat:berat,
-					vol:vol,
-					no_cont:no_cont,
-					no_seal:no_seal,
-					id_asal:id_asal,
-					id_tujuan:id_tujuan,
-					jenis:jenis,
-					id_mobil:id_mobil,
-					id_supir:id_supir,
-					biaya:biaya,
-					uj:uj,
-					ritase:ritase,
-					ket:ket,
-					type : "Add_Order"
-				}, function (data, status) {
-					alert(data);
-					$("#DataBaru").modal("hide");				
-					ReadData(1);
-				});
+			else if (uj <= 0 || ritase <= 0) {
+				alert("Check Master Price, UJ dan Ritase tidak boleh 0 !..");
+				return;				
 			}
-			
-		}	
-		function CekRate()
-		{
+
+			// alert(uj);
+			// return;
+
+			// lanjutkan proses simpan
+			var id_cont  = $("#id_contx").val();
+			var cont_add = $("#cont_add").val();
+			var penerima = $("#penerimax").val();
+			var jenis    = $("#jenisx").val();
+			var biaya    = $("#biayax").val();
+			var ket      = $("#ketx").val();
+			var id_sap   = $("#id_sap").val();
+			var sj_cust  = $("#sj_cust").val();
+
+			$.post("ajax/jo_crud.php", {
+				id_po:id_po,
+				id_quo:id_quo,
+				tanggal:tanggal,
+				id_cust:id_cust,
+				no_do:no_do,
+				sap_project:id_sap,
+				sj_cust:sj_cust,
+				penerima:penerima,
+				id_asal:id_asal,
+				id_tujuan:id_tujuan,
+				jenis:jenis,
+				biaya:biaya,
+				uj:uj,
+				ritase:ritase,
+				ket:ket,
+				cont_add:cont_add,
+				type : "Add_Order"
+			}, function (data, status) {
+				alert(data);
+				$("#DataBaru").modal("hide");				
+				ReadData(1);
+			});
+		}
+
+		function CekRate() {
 			var id_asal = $("#id_asalx").val();
 			var id_tujuan = $("#id_tujuanx").val();
 			var jenis_mobil = $("#jenisx").val();
 			var id_cust = $("#id_cust").val();
-			//alert(id_cust);
 			$("#biaya_kirim").val('0');	
 			$.post("ajax/quo_crud.php", {
 				id_cust:id_cust, id_asal: id_asal, id_tujuan:id_tujuan, jenis_mobil:jenis_mobil, type:"Cek_Rate_Cust"
 				},
 				function (data, status) {
 					var data = JSON.parse(data);	
-					//alert(data.status);
 					if(data.status == 200)
 					{
 						CekRate_Umum();
 					}
 					else
 					{
-						$("#biayax").val(Rupiah(data.rate));
 						$("#ujx").val(Rupiah(data.uj));
 						$("#ritasex").val(Rupiah(data.ritase));
 					}
@@ -784,8 +995,7 @@
 				}
 			);
 		}
-		function CekRate_Umum()
-		{
+		function CekRate_Umum() {
 			//alert('ddd');
 			var id_asal = $("#id_asalx").val();
 			var id_tujuan = $("#id_tujuanx").val();
@@ -797,31 +1007,31 @@
 				},
 				function (data, status) {
 					var data = JSON.parse(data);					
-					$("#biayax").val(Rupiah(data.rate));
+					// $("#biayax").val(Rupiah(data.rate));
 					$("#ujx").val(Rupiah(data.uj));
 					$("#ritasex").val(Rupiah(data.ritase));
 				}
 			);
 		}
-		function CekPTL(cb) {
-			$("#id_cust").val('');
-			$("#nama_cust").val('');
-			var checkBox = document.getElementById("cek_ptl");
-			if (checkBox.checked == true){
-				$("#jenis_po").val('1');
-				document.getElementById("po").style.display = 'inline';
-				document.getElementById('no_dox').readOnly=true;
-				document.getElementById("cust").style.display = 'none';
+		// function CekPTL(cb) {
+		// 	$("#id_cust").val('');
+		// 	$("#nama_cust").val('');
+		// 	var checkBox = document.getElementById("cek_ptl");
+
+		// 	if (checkBox.checked == true){
+		// 		$("#jenis_po").val('1');
+		// 		document.getElementById("po").style.display = 'inline';
+		// 		document.getElementById('no_dox').readOnly=true;
+		// 		document.getElementById("cust").style.display = 'none';
 			
-			} else {				
-				$("#jenis_po").val('0');
-				document.getElementById("po").style.display = 'none';
-				document.getElementById('no_dox').readOnly=false;
-				document.getElementById("cust").style.display = 'inline';
-			}
-		}	
-		function Download() 
-		{
+		// 	} else {				
+		// 		$("#jenis_po").val('0');
+		// 		document.getElementById("po").style.display = 'none';
+		// 		document.getElementById('no_dox').readOnly=false;
+		// 		document.getElementById("cust").style.display = 'inline';
+		// 	}
+		// }	
+		function Download() {
 			var tgl1 = $("#tgl1").val();
 			var tgl2 = $("#tgl2").val();	
 			var cari = $("#search_name").val();
@@ -834,95 +1044,258 @@
 			var win = window.open('jo_excel.php?id='+idx);
 		}	
 
-		// ------------------- CLAIM -------------------
-		function ListClaim(id, stat) {
-			$("#id_jo").val(id);
-			$("#DaftarClaim").modal("show");
-		}
+		function checkUJ() {
 
-		function AddClaim() {
-			var id_jo = $("#id_jo").val();
-			var status = $("#status").val();
-			var biaya = $("#biaya_claim").val();
-
-			if (biaya.trim() === "") {
-				alert("Biaya tidak boleh kosong!");
-				return;
-			}
+			var type_price = $("#price_type").val();
+			var id_asal = $("#id_asalx").val();
+			var id_tujuan = $("#id_tujuanx").val();
+			var jenis_mobil = $("#jenisx").val();
 
 			$.post("ajax/jo_crud.php", {
-				id_jo: id_jo,
-				status: status,
-				biaya: biaya,
-				type: "Add_Claim"
-			}, function (data, respStatus) {
-				ReadData(1);
-				$("#DaftarClaim").modal("hide");
-			});
+				type_price:type_price, 
+				id_asal: id_asal, 
+				id_tujuan:id_tujuan, 
+				jenis_mobil:jenis_mobil, 
+				type:"checkUJ"
+				},
+				function (data, status) {
+					var data = JSON.parse(data);	
+					
+					$("#ujx").val(Rupiah(data.uj)?? 0);
+					$("#ritasex").val(Rupiah(data.ritase) ?? 0);
+				}
+			);
 		}
 
+		// ------------------- FITUR CLAIM -------------------
+			function ListClaim(id, stat) {
+				$("#id_jo").val(id);
+				$("#DaftarClaim").modal("show");
+			}
+			function AddClaim() {
+				var id_jo = $("#id_jo").val();
+				var status = $("#status").val();
+				var biaya = $("#biaya_claim").val();
 
+				if (biaya.trim() === "") {
+					alert("Biaya tidak boleh kosong!");
+					return;
+				}
+
+				$.post("ajax/jo_crud.php", {
+					id_jo: id_jo,
+					status: status,
+					biaya: biaya,
+					type: "Add_Claim"
+				}, function (data, respStatus) {
+					ReadData(1);
+					$("#DaftarClaim").modal("hide");
+				});
+			}
 
 		// ------------------- FUNCTION ADD ATTACHMENT -------------------
-		function AddAttc(id_jo) {
-			$('#id_jo_attc').val(id_jo);
-			$('.view_so').attr('href', '#').text('-');
-			$('.view_sj').attr('href', '#').text('-');
-			$('.view_mutasi').attr('href', '#').text('-');
+			function AddAttc(id_jo) {
+				$('#id_jo_attc').val(id_jo);
+				$('.view_so').attr('href', '#').text('-');
+				$('.view_sj').attr('href', '#').text('-');
+				$('.view_mutasi').attr('href', '#').text('-');
 
-			$('#DataAttc').modal('show');
+				$('#DataAttc').modal('show');
 
-			$.ajax({
-				url: 'ajax/get_attachment_by_idjo.php',
-				method: 'POST',
-				data: { id_jo: id_jo },
-				dataType: 'json',
-				success: function (res) {
-					if (res.status === 200) {
-						res.data.forEach(function(file) {
-							let fileUrl = 'show_file.php?file=' + encodeURIComponent(file);
+				$.ajax({
+					url: 'ajax/get_attachment_by_idjo.php',
+					method: 'POST',
+					data: { id_jo: id_jo },
+					dataType: 'json',
+					success: function (res) {
+						if (res.status === 200) {
+							res.data.forEach(function(file) {
+								let fileUrl = 'show_file.php?file=' + encodeURIComponent(file);
 
-							if (file.includes('foto_so_')) {
-								$('.view_so').attr('href', fileUrl).text(file);
-							} else if (file.includes('surat_jalan_')) {
-								$('.view_sj').attr('href', fileUrl).text(file);
-							} else if (file.includes('mutasi_rekening_')) {
-								$('.view_mutasi').attr('href', fileUrl).text(file);
+								if (file.includes('foto_so_')) {
+									$('.view_so').attr('href', fileUrl).text(file);
+								} else if (file.includes('surat_jalan_')) {
+									$('.view_sj').attr('href', fileUrl).text(file);
+								} else if (file.includes('mutasi_rekening_')) {
+									$('.view_mutasi').attr('href', fileUrl).text(file);
+								}
+							});
+						} else {
+							console.warn(res.msg || 'No attachment found');
+						}
+					},
+					error: function (xhr, err) {
+						console.error("AJAX error:", err);
+					}
+				});
+			}
+			function SaveAttc() {
+				var formData = new FormData(document.getElementById('form_attachment'));
+
+				$.ajax({
+					url: 'upload_attachment.php',
+					type: 'POST',
+					data: formData,
+					contentType: false,
+					processData: false,
+					success: function (res) {
+						if (res.includes("✅")) {
+							alert("Upload berhasil!");
+							$('#DataAttc').modal('hide');
+						} else {
+							alert("Gagal upload: " + res);
+						}
+					},
+					error: function (xhr, status, error) {
+						console.error("AJAX Error:", status, error);
+						alert("Gagal menghubungi server.");
+					}
+				});
+			}
+
+		// ------------------- PRINT AR -------------------
+			function TampilPrint(no_ar){
+				$("#no_ar").val(no_ar);
+				btnPrint()
+			}
+			function btnPrint() {
+				var no_ar   = $("#no_ar").val();
+
+				$.ajax({
+					url: "ajax/jo_crud.php",
+					method: "POST",
+					data: {
+						no_ar: no_ar,
+						type: "printAR"
+					},
+					success: function (data) {
+						try {
+							var res = JSON.parse(data);
+
+							if (res.status === "success") {
+								// window.open(res.url, "_blank");
+
+								// fetch(res.url)
+								// 	.then(response => response.blob())
+								// 	.then(blob => {
+								// 		var url = URL.createObjectURL(blob);
+								// 		var a = document.createElement("a");
+								// 		a.style.display = "none";
+								// 		a.href = url;
+								// 		a.download = "cetak_AR.pdf";
+								// 		document.body.appendChild(a);
+								// 		a.click();
+								// 		URL.revokeObjectURL(url);
+								// 		document.body.removeChild(a);
+								// 	})
+								// 	.catch(err => {
+								// 		alert("Gagal ambil file cetak: " + err);
+								// 	});
+
+								// var printWindow = window.open(res.url, "_blank");
+								// printWindow.onload = function () {
+								// 	printWindow.focus();
+								// 	printWindow.print();
+								// };
+
+								var printWindow = window.open(res.url, "_blank");
+								var timer = setInterval(function() {
+									if (printWindow.document.readyState === "complete") {
+										clearInterval(timer);
+
+										printWindow.focus();
+										printWindow.print();
+
+										setTimeout(function() {
+											printWindow.close();
+										}, 2000);
+									}
+								}, 500);
+
+								$("#no_ar").val('');
+								$("#username").val('')
+								$("#password").val('')
+								$('#ModalPrint').modal('hide');
+								ReadData();
+							} else {
+								alert(res.msg);
 							}
-						});
-					} else {
-						console.warn(res.msg || 'No attachment found');
+						} catch (e) {
+							alert("Response server tidak valid.");
+							console.log(data);
+						}
+					},
+					error: function (xhr, status, error) {
+						alert("AJAX Error: " + error);
 					}
-				},
-				error: function (xhr, err) {
-					console.error("AJAX error:", err);
-				}
-			});
-		}
+				});
+			}
+			function ApproveAR(no_ar, btnElement){
+				$(btnElement).prop("disabled", true);
+				$.ajax({
+					url: "ajax/jo_crud.php",
+					method: "POST",
+					data: {
+						no_ar: no_ar,
+						type: "sendApprovalAR"
+					},
+					success: function (data) {
+						try {
+							var res = JSON.parse(data);
+							if (res.status === "success") {
+								alert("Berhasil kirim approval ke atasan.");
+							} else {
+								alert(res.msg || "Gagal mengirim email.");
+							}
+						} catch (e) {
+							alert("Response tidak valid dari server.");
+						}
 
-		function SaveAttc() {
-			var formData = new FormData(document.getElementById('form_attachment'));
-
-			$.ajax({
-				url: 'upload_attachment.php',
-				type: 'POST',
-				data: formData,
-				contentType: false,
-				processData: false,
-				success: function (res) {
-					if (res.includes("✅")) {
-						alert("Upload berhasil!");
-						$('#DataAttc').modal('hide');
-					} else {
-						alert("Gagal upload: " + res);
+						// Enable tombol lagi
+						$(btnElement).prop("disabled", false);
+					},
+					error: function (xhr, status, error) {
+						alert("AJAX Error: " + error);
+						// Enable kembali kalau error
+						$(btnElement).prop("disabled", false);
 					}
-				},
-				error: function (xhr, status, error) {
-					console.error("AJAX Error:", status, error);
-					alert("Gagal menghubungi server.");
-				}
-			});
-		}
+				});
+			}
+
+		// --------- ADD SAP ---------
+			function AddSAP() {
+				$.get("ajax/po_crud.php", { type: "AddProject" }, function (res) {
+					$("#sap_project").val(res.newKode);
+					$("#rowid").val(res.rowid);
+
+					$("#DaftarSAP").modal("hide");
+				}, "json");
+			}
+			function checkPayment(id_vendor) {
+				$.post("ajax/po_crud.php", {
+					id_vendor: id_vendor,
+					type: "checkPayment"
+				}, function (data) {
+					try {
+						var res = JSON.parse(data);
+						if (res.status === "success") {
+							$("#payment").val(res.payment);
+							$("#buyer").val(res.nama_rek);
+						} else {
+							$("#payment").val("");
+							$("#buyer").val("");
+							alert("Data bank vendor tidak ditemukan.");
+						}
+					} catch (e) {
+						console.error("Invalid JSON:", data);
+						alert("Response server tidak valid.");
+					}
+				}).fail(function (xhr, status, error) {
+					alert("AJAX Error: " + error);
+				});
+			}
+
+
 	</script>	
 	
   </head>
@@ -937,317 +1310,412 @@
 		</aside>	
 		
 		<form method="post" name ="myform"  class="form-horizontal" > 
-		<div class="content-wrapper" style="min-height:750px">
-			<br>
-			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Order</b></font></h1></li>					
-			</ol>
-			<br>
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
-					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-							<b><i class="fa fa-search"></i>&nbsp;Filter Data</b>
-					</div>
-					<br>
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
-						<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
-						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
-						&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
-						<input type="text"  id ="tgl2" name="tgl2" value="<?php echo $tgl2; ?>" 
-						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >	
-					</div>	
+			<div class="content-wrapper" style="min-height:750px">
+				<br>
+				<ol class="breadcrumb">
+					<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Order</b></font></h1></li>					
+				</ol>
+				<br>
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
+						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+								<b><i class="fa fa-search"></i>&nbsp;Filter Data</b>
+						</div>
+						<br>
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
+							<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
+							style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
+							&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
+							<input type="text"  id ="tgl2" name="tgl2" value="<?php echo $tgl2; ?>" 
+							style="text-align: center;width:85px" onchange="ReadData(1)" readonly >	
+						</div>	
+						
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Status :</b></span>
+							<select id="stat" name ="stat"  style="width: 85px;padding:5px" onchange="ReadData(1)" >
+								<option >Open</option>
+								<option >Close</option>
+								<option >All</option>
+								<option value="<?php echo $stat;?>" selected ><?php echo $stat;?></option>
+							</select>	
+						</div>	
 					
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Status :</b></span>
-						<select id="stat" name ="stat"  style="width: 85px;padding:5px" onchange="ReadData(1)" >
-							<option >Open</option>
-							<option >Close</option>
-							<option >All</option>
-							<option value="<?php echo $stat;?>" selected ><?php echo $stat;?></option>
-						</select>	
+						<div style="width:100%" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Filter By :</b></span>
+							<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">
+								<option>No Order</option>
+								<option>No Quo</option>
+								<option>No DO</option>
+								<option>Customer</option>
+								<option>Origin</option>
+								<option>Destination</option>
+								<option>No Cont</option>
+								<option>No Police</option>
+								<option>Driver</option>
+								<option value="<?php echo $field; ?>" selected hidden><?php echo $field; ?></option>
+							</select>
+							<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
+							style="text-align: left;width:200px" onkeypress="ReadData(1)" >
+						</div>
+						<div style="width:100%" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"></span>
+							<select size="1" id="field1"  onchange="ReadData(1)" name="field1" style="padding:4px;margin-right:2px;width: 85px">
+								<option>No Order</option>
+								<option>No Quo</option>
+								<option>No DO</option>
+								<option>Customer</option>
+								<option>Origin</option>
+								<option>Destination</option>
+								<option>No Cont</option>
+								<option>No Police</option>
+								<option>Driver</option>
+								<option value="<?php echo $field1; ?>" selected hidden><?php echo $field1; ?></option>
+							</select>
+							<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
+							style="text-align: left;width:200px" onkeypress="ReadData(1)" >
+							<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
+							<input type="hidden"  id ="jenis_role" name="jenis_role" value="<?php echo $id_role; ?>" style="text-align: left;width:5%"  >
+							<button class="btn btn-block btn-primary" style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding-top:6px;padding-bottom:6px" 
+								type="submit">
+								<span class="glyphicon glyphicon-search"></span>
+							</button>
+						</div>
+						<br>	
+					</div>
+				</div>
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
+						<div style="width:100%;background: #fff;" class="input-group" >
+							<span class="input-group-addon" style="width:50%;text-align:left;padding:0px">
+								<?php if ($m_add == '1'){
+									$xy1="Add|";
+									$xy1=base64_encode($xy1);?>
+									<button class="btn btn-block btn-success" 
+									style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:2px" type="button"  title = "Created Order"
+									onClick="javascript:TampilData()">
+									<span class="fa  fa-plus-square"></span>
+									<b>Add Order</b>
+									</button>	
+								<?php }?>		
+								<button class="btn btn-block btn-warning" 
+									style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = ""
+									onClick="javascript:Download()">
+									<span class="fa fa-file-text"></span>
+									<b>Download</b>
+								</button>								
+							</span>
+							<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
+							Row Page :&nbsp;
+							<select size="1" id="paging"  name="paging" onchange="ReadData(1)" style="padding:4px;margin-right:2px">
+								<?php 
+								$tampil1="select * from m_paging  order by baris";
+								$hasil1=mysqli_query($koneksi, $tampil1);       
+								while ($data1=mysqli_fetch_array($hasil1)){  
+								?>
+								<option><?php echo $data1['baris'];?></option>
+								<?php }?>
+								<option value="<?php echo $paging; ?>" selected><?php echo $paging; ?></option>
+							</select>	
+							</span>	
+						</div>		
+					</div>
+				</div>			
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
+						<div class="table-responsive mailbox-messages" style="min-height:10px">									
+							<div class="tampil_data"></div>
+						</div>
 					</div>	
-				
-					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Filter By :</b></span>
-						<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">
-							<option>No Order</option>
-							<option>No Quo</option>
-							<option>No DO</option>
-							<option>Customer</option>
-							<option>Origin</option>
-							<option>Destination</option>
-							<option>No Cont</option>
-							<option>No Police</option>
-							<option>Driver</option>
-							<option value="<?php echo $field; ?>" selected hidden><?php echo $field; ?></option>
-						</select>
-						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
-						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
-					</div>
-					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"></span>
-						<select size="1" id="field1"  onchange="ReadData(1)" name="field1" style="padding:4px;margin-right:2px;width: 85px">
-							<option>No Order</option>
-							<option>No Quo</option>
-							<option>No DO</option>
-							<option>Customer</option>
-							<option>Origin</option>
-							<option>Destination</option>
-							<option>No Cont</option>
-							<option>No Police</option>
-							<option>Driver</option>
-							<option value="<?php echo $field1; ?>" selected hidden><?php echo $field1; ?></option>
-						</select>
-						<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
-						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
-						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
-						<input type="hidden"  id ="jenis_role" name="jenis_role" value="<?php echo $id_role; ?>" style="text-align: left;width:5%"  >
-						<button class="btn btn-block btn-primary" style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding-top:6px;padding-bottom:6px" 
-							type="submit">
-							<span class="glyphicon glyphicon-search"></span>
-						</button>
-					</div>
-					<br>	
-				</div>
-            </div>
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
-					<div style="width:100%;background: #fff;" class="input-group" >
-						<span class="input-group-addon" style="width:50%;text-align:left;padding:0px">
-							<?php if ($m_add == '1'){
-								$xy1="Add|";
-								$xy1=base64_encode($xy1);?>
-								<button class="btn btn-block btn-success" 
-								style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:2px" type="button"  title = "Created Order"
-								onClick="javascript:TampilData()">
-								<span class="fa  fa-plus-square"></span>
-								<b>Add Order</b>
-								</button>	
-							<?php }?>		
-							<button class="btn btn-block btn-warning" 
-								style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = ""
-								onClick="javascript:Download()">
-								<span class="fa fa-file-text"></span>
-								<b>Download</b>
-							</button>								
-						</span>
-						<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
-						Row Page :&nbsp;
-						<select size="1" id="paging"  name="paging" onchange="ReadData(1)" style="padding:4px;margin-right:2px">
-							<?php 
-							$tampil1="select * from m_paging  order by baris";
-							$hasil1=mysqli_query($koneksi, $tampil1);       
-							while ($data1=mysqli_fetch_array($hasil1)){  
-							?>
-							<option><?php echo $data1['baris'];?></option>
-							<?php }?>
-							<option value="<?php echo $paging; ?>" selected><?php echo $paging; ?></option>
-						</select>	
-						</span>	
-					</div>		
-				</div>
-            </div>			
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
-					<div class="table-responsive mailbox-messages" style="min-height:10px">									
-						<div class="tampil_data"></div>
-					</div>
-				</div>	
-            </div>
-			<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
 				</div>
 				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-		</div>		
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+			</div>		
 		</form>
 	</div>	
 	
-	<div class="modal fade" id="DataBaru"  role="dialog" aria-labelledby="myModalLabel">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content" style="background: none">	
-				<div class="modal-body">						
-					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">							
-						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
-							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Order</b>
-							</div>	
-							<br>	
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Order :</b></span>
-								<input type="text"  id ="no_sjx" style="text-align: center;width:22%" readonly  >
-								<input type="hidden" id="id_sjx"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
-								&nbsp;
-								<!-- <input type="checkbox" id="cek_ptl" style="margin-bottom:0px;" value="1"  onclick='CekPTL(this);'  > &nbsp;<b>PTL</b> -->
-								<input type="hidden" id="cek_ptl" style="margin-bottom:0px;" value="1"  onclick='CekPTL(this);'  ></b>
-								<input type="hidden" id="jenis_po"   style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
-							</div>	
+	<!-- ----------------- MODAL NEW SO ----------------- -->
+		<div class="modal fade" id="DataBaru"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">							
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Order</b>
+								</div>	
+								<br>	
 
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Project Code :</b></span>
-								<input type="text"  id ="project_code" style="text-align: center;width:22%" readonly placeholder="-- Auto --">
-							</div>	
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
-								<input type="text"  id ="tanggalx" style="text-align: center;width:22%" readonly  >
-							</div>
-							
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. DO/PO :</b></span>
-								<input type="text" id="no_dox" value="" style="text-transform: uppercase;text-align: left;width:80%;"   >	
-								<button class="btn btn-block btn-primary" id="po"
-									style="padding:6px;margin-top:-3px;border-radius:2px;margin-left:-1px" type="button" 
-									onClick="javascript:TampilPO()">
-									<span class="glyphicon glyphicon-search"></span>
-								</button>	
-								<input type="hidden" id="id_detil_bc"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
-								<input type="hidden" id="id_contx"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Customer :</b></span>
-								<input type="text"  id ="nama_cust" style="text-align: left;width:80%" readonly  >
-								<button class="btn btn-block btn-primary" id="cust"
-									style="padding:6px;margin-top:-3px;border-radius:2px;margin-left:-1px" type="button" 
-									onClick="javascript:TampilCust()">
-									<span class="glyphicon glyphicon-search"></span>
-								</button>	
-								<input type="hidden" id="id_cust"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Receiver :</b></span>
-								<textarea id="penerimax"
-								style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; 
-								border: 1px solid #444; padding: 5px;"  ></textarea>	
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Item Name :</b></span>
-								<input type="text" id="barangx" value="" style="text-transform: uppercase;text-align: left;width:80%;"   >	
-							</div>
-							
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Weight :</b></span>
-								<input type="text" id="beratx" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  > &nbsp;<b>KG</b>	
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Vol :</b></span>
-								<input type="text" id="volx" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  > &nbsp;<b>M3</b>	
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Container :</b></span>
-								<input type="text"  id ="no_contx" style="text-transform: uppercase;text-align: center;width:22%"  >														
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Seal :</b></span>
-								<input type="text"  id ="no_sealx" style="text-transform: uppercase;text-align: center;width:22%"  >														
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
-								<select id="id_asalx"  onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
-									<?php
-									$t1="select * from m_kota_tr where status = '1' order by nama_kota  ";
-									$h1=mysqli_query($koneksi, $t1);       
-									while ($d1=mysqli_fetch_array($h1)){?>
-									<option value="<?php echo $d1['id_kota'];?>" ><?php echo $d1['nama_kota'];?></option>
-									<?php }?>
-								</select>
-							</div>
+								<input type="hidden" id="id_po">  
+								<input type="hidden" id="id_sap">	
+								<input type="hidden" id="id_quo">  
+								<input type="hidden" id="id_cust"/>
 
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
-								<select id="id_tujuanx" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
-									<?php
-									$t1="select * from m_kota_tr where status = '1' order by nama_kota  ";
-									$h1=mysqli_query($koneksi, $t1);       
-									while ($d1=mysqli_fetch_array($h1)){?>
-									<option value="<?php echo $d1['id_kota'];?>" ><?php echo $d1['nama_kota'];?></option>
-									<?php }?>
-								</select>
-							</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Order :</b></span>
+									<input type="text"  id ="no_sjx" style="text-align: center;width:22%" readonly  >
+									<input type="hidden" id="id_sjx"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
+									&nbsp;
+									<input type="hidden" id="cek_ptl" style="margin-bottom:0px;" value="1"  onclick='CekPTL(this);' ></b>
+								</div>	
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Project Code :</b></span>
+									<input type="text"  id ="project_code" style="text-align: center;width:22%" readonly placeholder="-- Auto --">
+								</div>	
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
+									<div style="display:flex; align-items:center; gap:20px;">
+										<input type="text"  id ="tanggalx" style="text-align: center;width:22%" readonly>
+										<div>
+											<input type="radio" id="is_vendor" name="tipe_po" value="vendor">
+											<label for="is_vendor">Vendor</label>
+										</div>
+										<div>
+											<input type="radio" id="is_ptl" name="tipe_po" value="ptl">
+											<label for="is_ptl">PTL</label>
+										</div>
+									</div>
+								</div>
 
+								<div style="width:100%; display:none;" class="input-group" id="ptl_row">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px">
+										<b>No. PO PTL :</b>
+									</span>
+									<input type="text" id="no_dox" value="" style="text-transform: uppercase;text-align:left;width:58.9%;" readonly>  
+									<button class="btn btn-primary" id="po"
+										style="padding:6px 12px; border-radius:2px; margin-left:2px" type="button"
+										onClick="javascript:TampilPO()">
+										<span class="glyphicon glyphicon-search"></span>
+									</button>  
+								</div>
 
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
-								<select id="jenisx" name="jenisx" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
-									<?php
-									$t1="select * from m_jenis_mobil_tr where status = '1' order by nama   ";
-									$h1=mysqli_query($koneksi, $t1);       
-									while ($d1=mysqli_fetch_array($h1)){?>
-									<option value="<?php echo $d1['nama'];?>" ><?php echo $d1['nama'];?></option>
-									<?php }?>
-								</select>	
-							</div>							
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Police :</b></span>
-								<select id="id_mobilx"  style="width: 80%;padding:4px">
-									<?php
-									$t1="select * from m_mobil_tr where status = '1' order by no_polisi  ";
-									$h1=mysqli_query($koneksi, $t1);       
-									while ($d1=mysqli_fetch_array($h1)){?>
-									<option value="<?php echo $d1['id_mobil'];?>" ><?php echo $d1['no_polisi'];?></option>
-									<?php }?>
-								</select>
-							</div>
-						
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Driver :</b></span>
-								<select id="id_supirx"  style="width: 80%;padding:4px">
-									<?php
-									$t1="select * from m_supir_tr where status = '1' order by nama_supir  ";
-									$h1=mysqli_query($koneksi, $t1);       
-									while ($d1=mysqli_fetch_array($h1)){?>
-									<option value="<?php echo $d1['id_supir'];?>" ><?php echo $d1['nama_supir'];?></option>
-									<?php }?>
-								</select>
-							</div>
-							
-							<div  id="tampil_uj" style="display:none;">
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Deliv. Cost :</b></span>								
-								<input type="text" id="biayax" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Travel Expense :</b></span>								
-								<input type="text" id="ujx" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ritase :</b></span>								
-								<input type="text" id="ritasex" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  readonly>	
-							</div>
-							</div>
-							
-							<!-- <div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>stapel :</b></span>								
-								<input type="hidden" id="stapel" value="0" style="text-align: right;width:22%;">	
-							</div> -->
+								<div style="width:100%; display:none;" class="input-group" id="trucking_row">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px">
+										<b>No. PO TR :</b>
+									</span>
+									
+									<input type="text" id="is_trucking" value="" style="text-transform: uppercase;text-align: left; width:58.9%;" readonly>  
+									<button class="btn btn-primary" id="po"
+										style="padding:4px 12px; border-radius:2px; margin-left:2px" type="button"
+										onClick="javascript:TampilPOTR()">
+										<span class="glyphicon glyphicon-search"></span>
+									</button>  
+								</div>
 
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Remarks :</b></span>
-								<input type="text" id="ketx" value="" style="text-align: left;width:80%;"   >	
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Project :</b></span>
+									<input type="text" id="sap_project" style="text-transform: uppercase;text-align: left;width:80%;" readonly>	
+									
+									<button class="btn btn-block btn-primary" id="po"
+										style="padding:6px 12px;margin-top:-3px;border-radius:2px;margin-left:2px" type="button" 
+										onClick="javascript:TampilSAP()">
+										<span class="glyphicon glyphicon-search"></span>
+									</button>
+								</div>
+
+								<div style="width:100%;" class="input-group" id="trucking_row">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px">
+										<b>No. SQ :</b>
+									</span>
+									<input type="text" id="no_sq" value="" style="text-transform: uppercase;text-align: left; width:80%;" readonly>  
+									<button class="btn btn-primary" id="po"
+										style="padding:4px 12px; border-radius:2px; margin-left:2px" type="button"
+										onClick="javascript:TampilSQ()">
+										<span class="glyphicon glyphicon-search"></span>
+									</button>  
+								</div>
+								
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>DO/SJ Cust :</b></span>
+									<input type="text"  id ="sj_cust" style="text-align: left;width:80%">
+								</div>
+
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Container :</b></span>
+									<input type="text" id ="cont_add" style="text-align: left;width:80%">	
+								</div>
+								
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Customer :</b></span>
+									<input type="text"  id ="nama_cust" style="text-align: left;width:80%" readonly  >
+									<button class="btn btn-block btn-primary" id="cust"
+										style="padding:6px;margin-top:-3px;border-radius:2px;margin-left:-1px" type="button" 
+										onClick="javascript:TampilCust()">
+										<span class="glyphicon glyphicon-search"></span>
+									</button>	
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Receiver :</b></span>
+									<textarea id="penerimax"style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; border: 1px solid #444; padding: 5px;"></textarea>	
+								</div>
+
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
+									<select id="id_asalx" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
+										<?php
+										$t1="SELECT * from m_kota_tr where `status` = '1' order by nama_kota";
+										$h1=mysqli_query($koneksi, $t1);       
+										while ($d1=mysqli_fetch_array($h1)){?>
+										<option value="<?php echo $d1['id_kota'];?>" ><?php echo $d1['nama_kota'];?></option>
+										<?php }?>
+									</select>
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
+									<select id="id_tujuanx" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
+										<?php
+										$t1="SELECT * from m_kota_tr where `status` = '1' order by nama_kota";
+										$h1=mysqli_query($koneksi, $t1);       
+										while ($d1=mysqli_fetch_array($h1)){?>
+										<option value="<?php echo $d1['id_kota'];?>" ><?php echo $d1['nama_kota'];?></option>
+										<?php }?>
+									</select>
+								</div>
+
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
+									<select id="jenisx" name="jenisx" onchange="checkUJ()" <?php echo $dis;?> style="width: 80%;padding:4px">
+										<?php
+										$t1="SELECT * from m_jenis_mobil_tr where status = '1' order by nama   ";
+										$h1=mysqli_query($koneksi, $t1);       
+										while ($d1=mysqli_fetch_array($h1)){?>
+										<option value="<?php echo $d1['nama'];?>" ><?php echo $d1['nama'];?></option>
+										<?php }?>
+									</select>	
+								</div>	
+
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Price Type :</b></span>
+									<select id="price_type" name="price_type" onchange="checkUJ()" style="width: 80%;padding:4px">
+										<option value="high" >HIGH</option>
+										<option value="middle" >MIDDLE</option>
+										<option value="low" >LOW</option>
+									</select>	
+								</div>
+								
+								<div  id="tampil_uj" style="display:none;">
+									<div style="width:100%;" class="input-group">
+										<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Deliv. Cost :</b></span>								
+										<input type="text" id="biayax" style="text-align: right;width:22%;" 
+										onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
+									</div>
+									<div style="width:100%;" class="input-group">
+										<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Travel Expense :</b></span>								
+										<input type="text" id="ujx" value="0" style="text-align: right;width:22%;" 
+										onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>	
+									</div>
+									<div style="width:100%;" class="input-group">
+										<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ritase :</b></span>								
+										<input type="text" id="ritasex" value="0" style="text-align: right;width:22%;" 
+										onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>	
+									</div>
+								</div>
+
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Remarks :</b></span>
+									<input type="text" id="ketx" value="" style="text-align: left;width:80%;"   >	
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
+									<button type="button" class="btn btn-success"  onclick="AddBaru()">
+									<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
+									<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:1px">
+									<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Cancel</b></button>	
+								</div>
+								<br>
 							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
-								<button type="button" class="btn btn-success"  onclick="AddBaru()">
-								<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
-								<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:1px">
-								<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Cancel</b></button>	
-							</div>
-							<br>
-						</div>
-					</div>								
+						</div>								
+					</div>
 				</div>
-			</div>
-		</div>	
-    </div>
+			</div>	
+		</div>
+
+	<!-- ----------------- MODAL SEARCH POTR----------------- -->
+		<div class="modal fade" id="DaftarPOTR"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data POTR</b>
+								</div>	
+								<br>
+								<div style="width:100%" class="input-group" style="background:none !important;">
+									<span class="input-group-addon" style="width:80%;text-align:left;padding:0px">
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Search :</b>&nbsp;&nbsp;
+										<input type="text" id ="cari_POTR" style="text-align: left;width:200px">
+
+										<button class="btn btn-block btn-primary" style="margin:0px;margin-left:-3px;margin-bottom:3px;border-radius:2px;padding:5px" onClick="javascript:ListPOTR()">
+											<span class="glyphicon glyphicon-search"></span>
+										</button>
+
+										<button class="btn btn-block btn-danger" 
+										style="margin:0px;margin-left:-2px;margin-bottom:3px;border-radius:2px;padding:5px"  
+										data-dismiss="modal" >
+											<span class="glyphicon glyphicon-remove"></span>
+										</button>
+									</span>
+									<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+									</span>
+								</div>							
+								<div class="table-responsive mailbox-messages" >									
+									<div class="tampil_POTR"></div>
+								</div>
+								<br>
+							</div>		
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
+
+	<!-- ----------------- MODAL SEARCH SQ----------------- -->
+		<div class="modal fade" id="DaftarSQ"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data SQ</b>
+								</div>	
+								<br>
+								<div style="width:100%" class="input-group" style="background:none !important;">
+									<span class="input-group-addon" style="width:80%;text-align:left;padding:0px">
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Search :</b>&nbsp;&nbsp;
+										<input type="text" id ="cari_SQ" style="text-align: left;width:200px">
+
+										<button class="btn btn-block btn-primary" style="margin:0px;margin-left:-3px;margin-bottom:3px;border-radius:2px;padding:5px" onClick="javascript:ListSQ()">
+											<span class="glyphicon glyphicon-search"></span>
+										</button>
+
+										<button class="btn btn-block btn-danger" 
+										style="margin:0px;margin-left:-2px;margin-bottom:3px;border-radius:2px;padding:5px"  
+										data-dismiss="modal" >
+											<span class="glyphicon glyphicon-remove"></span>
+										</button>
+									</span>
+									<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+									</span>
+								</div>							
+								<div class="table-responsive mailbox-messages" >									
+									<div class="tampil_SQ"></div>
+								</div>
+								<br>
+							</div>		
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
 	
 	<div class="modal fade" id="DaftarPO"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
@@ -1288,6 +1756,130 @@
 			</div>
 		</div>	
     </div>
+
+	<!-- ----------------- MODAL SEARCH SAP PROJECT ----------------- -->
+	<div class="modal fade" id="DaftarSAP"  role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content" style="background: none">	
+				<div class="modal-body">						
+					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data SAP Project</b>
+							</div>	
+							<br>
+							<div style="width:100%" class="input-group" style="background:none !important;">
+								<span class="input-group-addon" style="width:80%;text-align:left;padding:0px">
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Search :</b>&nbsp;&nbsp;
+									<input type="text" id ="cari_SAP" style="text-align: left;width:200px">
+
+									<button class="btn btn-block btn-primary" style="margin:0px; margin-bottom:3px;border-radius:2px;padding:5px" onClick="javascript:ListSAP()">
+										<span class="glyphicon glyphicon-search"></span> Search
+									</button>
+
+									<button class="btn btn-block btn-danger" style="margin:0px; margin-bottom:3px;border-radius:2px;padding:5px" data-dismiss="modal">
+										<span class="glyphicon glyphicon-remove"></span> Close
+									</button>
+
+									<button class="btn btn-block btn-success" style="margin:0px; margin-bottom:3px;border-radius:2px;padding:5px" onClick="javascript:AddSAP()">
+										<span class="glyphicon glyphicon-plus"></span> Project
+									</button>
+								</span>
+								<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+								</span>
+							</div>							
+							<div class="table-responsive mailbox-messages" >									
+								<div class="tampil_SAP"></div>
+							</div>
+							<br>
+						</div>		
+					</div>		
+				</div>	
+			</div>
+		</div>	
+    </div>
+
+	<!-- ----------------- MODAL SEARCH SO UP TO SAP ----------------- -->
+		<div class="modal fade" id="DaftarUpSAP"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="display:flex;align-items:center;justify-content:space-between; font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;margin-bottom:1px">
+									<div style="text-align:left;">
+										<b><i class="fa fa-list"></i>&nbsp;Data Up to SAP</b>
+									</div>
+									<button class="btn btn-danger btn-sm" style="border-radius:2px;padding:3px 6px;" data-dismiss="modal">
+										<span class="glyphicon glyphicon-remove"></span>
+									</button>
+								</div>
+								<br>
+								<div style="width:100%" class="input-group" style="background:none !important;">
+									<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+									</span>
+								</div>							
+								<div class="table-responsive mailbox-messages">									
+									<form id="formUpSAP">
+										<div class="tampil_UpSAP"></div>
+									</form>
+								</div>
+
+								<br>
+								<div style="text-align:right;">
+									<button type="button" id="btnSaveSAP" class="btn btn-success" style="margin:0;border-radius:2px;">
+										<span class="fa fa-plus-square"></span>
+										<b>Save to SAP</b>
+									</button>	
+								</div>
+
+							</div>		
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
+
+	<!-- ----------------- MODAL SEARCH AR UP TO AR ----------------- -->
+		<div class="modal fade" id="DaftarUpAR"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="display:flex;align-items:center;justify-content:space-between; font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;margin-bottom:1px">
+									<div style="text-align:left;">
+										<b><i class="fa fa-list"></i>&nbsp;Data Up to AR</b>
+									</div>
+									<button class="btn btn-danger btn-sm" style="border-radius:2px;padding:3px 6px;" data-dismiss="modal">
+										<span class="glyphicon glyphicon-remove"></span>
+									</button>
+								</div>
+								<br>
+								<div style="width:100%" class="input-group" style="background:none !important;">
+									<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+									</span>
+								</div>							
+								<div class="table-responsive mailbox-messages">									
+									<form id="formUpAR">
+										<div class="tampil_UpAR"></div>
+									</form>
+								</div>
+
+								<br>
+								<div style="text-align:right;">
+									<button type="button" id="btnSaveAR" class="btn btn-success" style="margin:0;border-radius:2px;">
+										<span class="fa fa-plus-square"></span>
+										<b>Save to AR</b>
+									</button>	
+								</div>
+
+							</div>		
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
 	
 	<div class="modal fade" id="DaftarCust"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
@@ -1329,7 +1921,8 @@
 		</div>	
     </div>
 	
-	<div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
+	<!-- ----------------- EDIT JO ----------------- -->
+	<div class="modal fade" id="ModelEdit"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">	
 				<div class="modal-body">						
@@ -1347,42 +1940,40 @@
 								<input type="hidden" id="id_detil"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
 							</div>						
 							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Project Code :</b></span>
+								<input type="text"  id ="project_codex" style="text-align: center;width:22%" readonly>
+							</div>	
+							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
 								<input type="text"  id ="tanggal" style="text-align: center;width:22%" readonly  >
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. DO/PO :</b></span>
-								<input type="text" id="no_do" value="" style="text-transform: uppercase;text-align: left;width:80%;">	
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>NO PO :</b></span>
+								<input type="text"  id ="no_po" style="text-align: left;width:80%" readonly>
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Receiver :</b></span>
-								<textarea id="penerima"
-								style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; 
-								border: 1px solid #444; padding: 5px;"  ></textarea>	
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Project :</b></span>
+								<input type="text"  id ="sap_projectx" style="text-align: left;width:80%" readonly>
 							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Item Name :</b></span>								
-								<input type="text" id="barang" value="" style="text-transform: uppercase;text-align: left;width:80%;"   >	
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. SQ :</b></span>
+								<input type="text" id ="no_sqx" style="text-align: left;width:80%" readonly>
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>DO/SJ Cust :</b></span>
+								<input type="text" id ="sj_custx" style="text-align: left;width:80%">
 							</div>
 							
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Weight :</b></span>
-								<input type="text" id="berat" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  > &nbsp;<b>KG</b>	
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Container :</b></span>
+								<input type="text" id ="cont_edit" style="text-align: left;width:80%">	
 							</div>
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Vol :</b></span>
-								<input type="text" id="vol" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  > &nbsp;<b>M3</b>	
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Receiver :</b></span>
+								<textarea id="penerima" style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; border: 1px solid #444; padding: 5px;"  ></textarea>	
 							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Container :</b></span>
-								<input type="text"  id ="no_cont" style="text-transform: uppercase;text-align: center;width:22%"  >														
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Seal :</b></span>
-								<input type="text"  id ="no_seal" style="text-transform: uppercase;text-align: center;width:22%"  >														
-							</div>
+					
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
 								<input type="hidden" id="id_asal"   value=""  />
@@ -1396,31 +1987,8 @@
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
 								<input type="text" id="jenis_mobil" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
-							</div>							
-							<div style="width:100%;" class="input-group">
-									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Police :</b></span>
-									<select id="id_mobil"  style="width: 80%;padding:4px">
-										<?php
-										$t1="select * from m_mobil_tr where status = '1' order by no_polisi  ";
-										$h1=mysqli_query($koneksi, $t1);       
-										while ($d1=mysqli_fetch_array($h1)){?>
-										<option value="<?php echo $d1['id_mobil'];?>" ><?php echo $d1['no_polisi'];?></option>
-										<?php }?>
-									</select>
-							</div>
-						
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Driver :</b></span>
-								<select id="id_supir"  style="width: 80%;padding:4px">
-									<?php
-									$t1="select * from m_supir_tr where status = '1' order by nama_supir  ";
-									$h1=mysqli_query($koneksi, $t1);       
-									while ($d1=mysqli_fetch_array($h1)){?>
-									<option value="<?php echo $d1['id_supir'];?>" ><?php echo $d1['nama_supir'];?></option>
-									<?php }?>
-								</select>
-							</div>
-							
+							</div>	
+
 							<div  id="tampil_ujx" style="display:none;">
 								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Deliv. Cost :</b></span>								
@@ -1430,12 +1998,12 @@
 								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Travel Expense:</b></span>								
 									<input type="text" id="uj" value="0" style="text-align: right;width:22%;" 
-									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
+									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>	
 								</div>
 								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ritase :</b></span>								
 									<input type="text" id="ritase" value="0" style="text-align: right;width:22%;" 
-									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  readonly>	
+									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>	
 								</div>
 							</div>
 							<div style="width:100%;" class="input-group">
@@ -1460,7 +2028,7 @@
 				</div>
 			</div>
 		</div>	
-    </div>
+	</div>
 	
 	<div class="modal fade" id="DaftarBiayaLain"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document" style="width:750px;">
@@ -1512,7 +2080,7 @@
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Cost Name :</b></span>
 								<select id="id_cost_biaya" style="width: 80%;padding:4px">
 									<?php
-									$t1="select * from m_cost_tr where status = '1' and id_cost <> '1' order by nama_cost  ";
+									$t1="SELECT * FROM m_cost_tr WHERE `status` = '1' AND id_cost <> '1' AND itemcode IS NOT NULL ORDER BY nama_cost  ";
 									$h1=mysqli_query($koneksi, $t1);       
 									while ($d1=mysqli_fetch_array($h1)){?>
 									<option value="<?php echo $d1['id_cost'];?>" ><?php echo $d1['nama_cost'];?></option>
@@ -1521,21 +2089,28 @@
 								<input type="hidden" id="id_biaya_lain"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
 								<input type="hidden" id="mode_biaya_lain"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
 							</div>	
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Cost :</b></span>
-								<input type="text" id="biaya_lain" style="text-align: right;width:20%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  >
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Remark :</b></span>
+								<textarea id="remark_cost"style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; border: 1px solid #444; padding: 5px;"></textarea>
 							</div>
+							
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>PPN :</b></span>
 								<input type="text" id="pph" style="text-align: right;width:20%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  >
+								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" value="0">
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>WTAX :</b></span>
 								<input type="text" id="wtax" style="text-align: right;width:20%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  >
+								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  value="0">
 							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Cost :</b></span>
+								<input type="text" id="biaya_lain" style="text-align: right;width:20%;" 
+								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  value="0">
+							</div>
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
 								<button type="button" class="btn btn-success"  onclick="AddBiayaLain()">
@@ -1751,9 +2326,75 @@
 		</div>
 	</div>
 
+	<!-- ----------------- MODAL PRINT AR ----------------- -->
+	<div class="modal fade" id="ModalPrint" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-body">
+					<div class="col-md-12" style="padding: 0;">
+						<div class="box box-success box-solid" style="padding: 5px; border: 1px solid #ccc;">
+							<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;">
+								<b><i class="fa fa-list"></i>&nbsp;Print Approval</b>
+							</div>
+							<form id="form_approval" enctype="multipart/form-data" style="margin-top: 2rem;">
+								<input type="text" id="no_ar" name="no_ar">
+								
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Username :</b></span>
+									<input type="text" id="username" value="" style="width:70%;border:1px solid rgb(169, 169, 169)" /> 
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Password :</b></span>
+									<input type="password" id="password" value="" style="width:70%;border:1px solid rgb(169, 169, 169)" /> 
+								</div>
+
+								<div class="form-group text-right" style="margin-top: 1rem;">
+									<button type="button" class="btn btn-success" onclick="btnPrint()">
+										<span class="fa fa-save"></span>&nbsp;<b>Print</b>
+									</button>
+									<button type="button" class="btn btn-danger" data-dismiss="modal">
+										<span class="fa fa-close"></span>&nbsp;<b>Cancel</b>
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>
-	
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			const vendorCb   = document.getElementById("is_vendor");
+			const ptlCb      = document.getElementById("is_ptl");
+			const vendorRow  = document.getElementById("trucking_row");
+			const ptlRow     = document.getElementById("ptl_row");
+
+			function toggleRows() {
+				if (vendorCb.checked) {
+					vendorRow.style.display = "flex";
+					ptlRow.style.display = "none";
+					ptlCb.checked = false;
+				} else if (ptlCb.checked) {
+					ptlRow.style.display = "flex";
+					vendorRow.style.display = "none";
+					vendorCb.checked = false;
+				} else {
+					vendorRow.style.display = "none";
+					ptlRow.style.display = "none";
+				}
+			}
+
+			vendorCb.addEventListener("change", toggleRows);
+			ptlCb.addEventListener("change", toggleRows);
+
+			toggleRows();
+		});
+	</script>
+
   </body>
 </html>

@@ -5,7 +5,7 @@ include("../koneksi.php");
 include "../lib.php";
 
 
-$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='25' ");
+$pq = mysqli_query($koneksi, "SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='25' ");
 $rq=mysqli_fetch_array($pq);	
 $m_edit = $rq['m_edit'];
 $m_add = $rq['m_add'];
@@ -13,8 +13,7 @@ $m_del = $rq['m_del'];
 $m_view = $rq['m_view'];
 $m_exe = $rq['m_exe'];
 
-if ($_GET['type'] == "Read")
-{
+if ($_GET['type'] == "Read"){
 	$cari1 = trim($_GET['cari1']);
 	$cari2 = trim($_GET['cari2']);
 	$field1 = trim($_GET['field1']);
@@ -75,7 +74,7 @@ if ($_GET['type'] == "Read")
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 	
 
-	$SQL = "select 
+	$q_data = "SELECT 
 				m_rate_tr.*, 
 				m_kota_tr.nama_kota as asal, 
 				m_kota_tr1.nama_kota as tujuan 
@@ -84,7 +83,10 @@ if ($_GET['type'] == "Read")
 			left join m_kota_tr as m_kota_tr1 on m_rate_tr.id_tujuan = m_kota_tr1.id_kota	
 			where $f1 LIKE '%$cari1%' and $f2 LIKE '%$cari2%' 
 			order by m_kota_tr.nama_kota asc, m_kota_tr1.nama_kota, m_rate_tr.jenis_mobil LIMIT $offset, $jmlperhalaman";	
-	$query = mysqli_query($koneksi, $SQL);	
+
+	// echo $q_data;
+	// die();
+	$query = mysqli_query($koneksi, $q_data);	
 
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
@@ -199,8 +201,11 @@ if ($_GET['type'] == "Read")
 }
 // --------------------- ADD DATA  ---------------------
 else if ($_POST['type'] == "Add_Data"){		
-	if($_POST['mode'] != '' )
-	{	
+	// echo "<pre>";
+	// print_r($_POST);
+	// echo "</pre>";
+	// die();
+	if($_POST['mode'] != '' ){	
 		$id = $_POST['id'];
 		$id_asal = $_POST['id_asal'];
 		$id_tujuan = $_POST['id_tujuan'];
@@ -234,8 +239,7 @@ else if ($_POST['type'] == "Add_Data"){
 		
 		if ($mode == 'Add') {
 
-			$cek_sql = "
-				SELECT id_rate FROM m_rate_tr 
+			$cek_sql = "SELECT id_rate FROM m_rate_tr 
 				WHERE id_asal = '$id_asal' 
 				AND id_tujuan = '$id_tujuan' 
 				AND jenis_mobil = '$jenis_mobil' 
@@ -304,25 +308,23 @@ else if ($_POST['type'] == "Add_Data"){
 		}
 		else
 		{
-			$sql = "update m_rate_tr set 
-				id_asal = '$id_asal',
-				id_tujuan = '$id_tujuan',
-				jenis_mobil = '$jenis_mobil',
-				origin_address = '$origin_address',
-				origin_lon = '$origin_lon',
-				origin_lat = '$origin_lat',
-				destination_address = '$destination_address',
-				destination_lon = '$destination_lon',
-				destination_lat = '$destination_lat',
-				km = '$km',
-				max_price = '$max_price',
-				min_price = '$min_price',
-				uj = '$uj',
-				ritase = '$ritase',
-				price_type = '$price_type',
-				status = '$stat',
-				created = '$id_user'
-				where id_rate = '$id'	";
+			$sql = "UPDATE m_rate_tr SET
+					origin_address = '$origin_address',
+					origin_lon = '$origin_lon',
+					origin_lat = '$origin_lat',
+					destination_address = '$destination_address',
+					destination_lon = '$destination_lon',
+					destination_lat = '$destination_lat',
+					jenis_mobil = '$jenis_mobil',
+					max_price = '$max_price',
+					min_price = '$min_price',
+					uj = '$uj',
+					km = '$km',
+					ritase = '$ritase',
+					price_type = '$price_type',
+					`status` = '$stat',
+					created = '$id_user'
+				WHERE id_rate = '$id' ";
 			$hasil=mysqli_query($koneksi, $sql);
 		}
 		if (!$hasil) {	
@@ -353,8 +355,9 @@ else if ($_POST['type'] == "Add_Data"){
     echo json_encode($response);
 
 
-}else if ($_GET['type'] == "ListCost")
-{	
+}
+else if ($_GET['type'] == "ListCost")
+{
 	$cari = $_GET['cari'];
 	$data = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">

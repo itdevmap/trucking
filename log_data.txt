@@ -1,0 +1,37 @@
+Array
+(
+    [id] => 7430
+    [jenis_permintaan] => borong_driver
+    [jo_number] => 
+    [no_transaksi] => BRD.20250715.09.001
+    [so] => SJ-2500028
+    [image_so] => foto_so_1752216509_RHMAN4321.jpeg
+    [attachment] => 
+    [project] => TRC/250006
+    [driver] => RAJIMAN
+    [kode_customer] => CST-0001
+    [customer] => AGRO MANDIRI ABADI, PT
+    [tgl_order] => 2025-07-10
+    [tgl_pemakaian] => 
+    [penerima] => ROHMAN EDIT
+    [digunakan_oleh] => 
+    [kontainer] => GCXU2145156
+    [nopol] => L 8079 UUE
+    [surat_jalan] => surat_jalan_1752216509_RHMAN4321.jpeg
+    [debit] => 
+    [kredit] => 
+    [total] => 1350000.00
+    [ritase] => 25000
+    [stapel] => 0
+    [feet] => 
+    [status_pembayaran] => terbayar
+    [created_by] => 0
+    [company] => 7000
+    [site] => 9
+    [keterangan] => TEST ADD SO DARI DQ
+    [status_selected] => 0
+    [status_dokumen] => 0
+    [status_approval] => 0
+    [created_at] => 2025-07-15 17:03:19
+    [updated_at] => 
+)

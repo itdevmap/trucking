@@ -4,8 +4,14 @@
 	include("../koneksi.php");
 	include "../lib.php";
 
+	use PHPMailer\PHPMailer\PHPMailer;
+	use PHPMailer\PHPMailer\Exception;
 
-	$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'  and id_menu = '7' ");
+	include("../PHPMailer/src/Exception.php"); 
+	include("../PHPMailer/src/PHPMailer.php"); 
+	include("../PHPMailer/src/SMTP.php");
+
+	$pq = mysqli_query($koneksi, "SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu = '7' ");
 	$rq=mysqli_fetch_array($pq);	
 	$m_edit = $rq['m_edit'];
 	$m_add = $rq['m_add'];
@@ -13,8 +19,7 @@
 	$m_view = $rq['m_view'];
 	$m_exe = $rq['m_exe'];
 
-	if ($_GET['type'] == "Read")
-	{
+	if ($_GET['type'] == "Read") {
 		$cari = trim($_GET['cari']);
 		$hal = $_GET['hal'];
 		$paging = $_GET['paging'];
@@ -85,7 +90,7 @@
 					<tr>
 						<th width="2%" style="text-align: center;">EDIT</th>
 						<th width="2%" style="text-align: center;">DEL</th>	
-						<th width="2%" style="text-align: center;">EXEC</th>	
+						<th width="2%" style="text-align: center;">EXEC</th>						
 						<th width="2%" style="text-align: center;">ADD ORDER</th>						
 					</tr>
 				</thead>';			
@@ -101,38 +106,52 @@
 		
 		if($stat == 'All')
 		{
-			$SQL = "select tr_quo.*, tr_quo_data.harga, tr_quo_data.jenis_mobil, tr_quo_data.id_detil,
-				m_kota_tr.nama_kota as asal,	m_kota1.nama_kota as tujuan, m_cust_tr.nama_cust
-				from 
-				tr_quo left join tr_quo_data on tr_quo.id_quo = tr_quo_data.id_quo
-				left join m_cust_tr on tr_quo.id_cust = m_cust_tr.id_cust
-				left join m_kota_tr on tr_quo_data.id_asal = m_kota_tr.id_kota
-				left join m_kota_tr as m_kota1 on tr_quo_data.id_tujuan = m_kota1.id_kota
-				where tr_quo.quo_date between '$tgl1x' and '$tgl2x'   and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%'
-				order by tr_quo.quo_date desc, tr_quo.quo_no desc
+			$SQL = "SELECT 
+					tr_quo.*, 
+					tr_quo_data.harga, 
+					tr_quo_data.jenis_mobil, 
+					tr_quo_data.id_detil, 
+					m_kota_tr.nama_kota AS asal, 
+					m_kota1.nama_kota AS tujuan,
+					 m_cust_tr.nama_cust
+				FROM tr_quo 
+				LEFT JOIN tr_quo_data ON tr_quo.id_quo = tr_quo_data.id_quo
+				LEFT JOIN m_cust_tr ON tr_quo.id_cust = m_cust_tr.id_cust
+				LEFT JOIN m_kota_tr ON tr_quo_data.id_asal = m_kota_tr.id_kota
+				LEFT JOIN m_kota_tr AS m_kota1 ON tr_quo_data.id_tujuan = m_kota1.id_kota
+				WHERE tr_quo.quo_date BETWEEN '$tgl1x' AND '$tgl2x'
+					AND $f LIKE '%$cari%' 
+					AND $f1 LIKE '%$cari1%'
+				ORDER BY tr_quo.quo_date DESC, tr_quo.quo_no DESC
 				LIMIT $offset, $jmlperhalaman";
 		}else{
 			
-			$SQL = "select tr_quo.*, tr_quo_data.harga, tr_quo_data.jenis_mobil, tr_quo_data.id_detil,
-				m_kota_tr.nama_kota as asal,	m_kota1.nama_kota as tujuan, m_cust_tr.nama_cust
-				from 
-				tr_quo left join tr_quo_data on tr_quo.id_quo = tr_quo_data.id_quo
-				left join m_cust_tr on tr_quo.id_cust = m_cust_tr.id_cust
-				left join m_kota_tr on tr_quo_data.id_asal = m_kota_tr.id_kota
-				left join m_kota_tr as m_kota1 on tr_quo_data.id_tujuan = m_kota1.id_kota
-				where tr_quo.quo_date between '$tgl1x' and '$tgl2x'   and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' and tr_quo.status = '$stat'
-				order by tr_quo.quo_date desc, tr_quo.quo_no desc
+			$SQL = "SELECT 
+					tr_quo.*, 
+					tr_quo_data.harga, 
+					tr_quo_data.jenis_mobil, 
+					tr_quo_data.id_detil,
+					m_kota_tr.nama_kota AS asal, 
+					m_kota1.nama_kota AS tujuan, 
+					m_cust_tr.nama_cust
+				FROM tr_quo 
+				LEFT JOIN tr_quo_data ON tr_quo.id_quo = tr_quo_data.id_quo
+				LEFT JOIN m_cust_tr ON tr_quo.id_cust = m_cust_tr.id_cust
+				LEFT JOIN m_kota_tr ON tr_quo_data.id_asal = m_kota_tr.id_kota
+				LEFT JOIN m_kota_tr AS m_kota1 ON tr_quo_data.id_tujuan = m_kota1.id_kota
+				WHERE tr_quo.quo_date BETWEEN '$tgl1x' AND '$tgl2x'
+					AND $f LIKE '%$cari%' 
+					AND $f1 LIKE '%$cari1%' 
+					AND tr_quo.status = '$stat'
+				ORDER BY tr_quo.quo_date DESC, tr_quo.quo_no DESC
 				LIMIT $offset, $jmlperhalaman";
 		}
-		
-		
 				
 		$query = mysqli_query($koneksi, $SQL);	
 		if (!$result = $query) {
 			exit(mysqli_error($koneksi));
 		}
-		if(mysqli_num_rows($result) > 0)
-		{
+		if(mysqli_num_rows($result) > 0) {
 			while($row = mysqli_fetch_assoc($result))
 			{	
 				$tanggal = ConverTgl($row['quo_date']);
@@ -141,16 +160,20 @@
 				$xy1="View|$row[id_quo]";
 				$xy1=base64_encode($xy1);
 				$link = "quo_data.php?id=$xy1";
-				if($row['status'] == '0')
-				{
+
+				if($row['status'] == '0'){
 					$label = 'danger';
 					$status = 'In Progress';
 				}
-				else if($row['status'] == '1')
-				{
+				else if($row['status'] == '1'){
 					$label = 'success';
 					$status = 'Executed';
-				}
+				} 
+				else if($row['status'] == '2'){
+					$label = 'warning';
+					$status = 'Draft';
+				} 
+
 				$xy1="$row[id_sj]";
 				$xy1=base64_encode($xy1);
 				$link_sj = "cetak_sj_fcl.php?id=$xy1";
@@ -169,7 +192,7 @@
 						<button type="button" class="btn btn-'.$label.'" style="width:100%;padding:1px;margin:-3px">'.$status.'</button>
 					</td>';
 				
-					if($m_edit == '1' && $row['status'] == '0' ) {
+					if($m_edit == '1' && $row['status'] != '1' ) {
 						$xy1="Edit|$row[id_quo]";
 						$xy1=base64_encode($xy1);
 						$link = "'quo_data.php?id=$xy1'";
@@ -179,10 +202,8 @@
 										onClick="window.location.href = '.$link.' "  >
 										<span class="fa fa-edit " ></span>
 									</button></td>';
-					}
-					else
-					{					
-							$data .='<td></td>';
+					} else {					
+						$data .='<td></td>';
 					}
 					
 					if($m_del == '1' && $row['status'] == '0') 	
@@ -235,12 +256,17 @@
 					
 					if($row['status'] == '1' )
 					{
-						$data .= '<td>
-									<button class="btn btn-block btn-default"  title="Add Order"
-										style="margin:-3px;border-radius:0px" type="button" 
-										onClick="javascript:GetOrder('.$row['id_detil'].')" >
-										<span class="fa  fa-plus-square" ></span>
-									</button></td>';
+						$xy1	= "Add|$row[id_quo]";
+						$xy1	=base64_encode($xy1);
+						$link 	= "'so_data.php?id=$xy1'";
+			
+						$data  .= '<td>
+									<button class="btn btn-block btn-default"
+										style="margin:-3px;border-radius:0px" type="button" 									
+										onClick="window.open('.$link.') ">
+										<span class="fa fa-plus-square"></span>
+										</button>
+								</td>';
 					}else{
 						$data .='<td></td>';
 					}	
@@ -249,8 +275,7 @@
 				$number++;
 			}		
 		}
-		else
-		{
+		else {
 			$data .= '<tr><td colspan="7">Records not found!</td></tr>';
 		}
 		$data .= '</table>';
@@ -317,8 +342,8 @@
 					}
 					$data .= '</ul></div>';				
 		echo $data;
-
-	}else if ($_POST['type'] == "Executed"){		
+	}
+	else if ($_POST['type'] == "Executed") {
 		if($_POST['id'] != '' )
 		{	
 			$id = $_POST['id'];
@@ -338,7 +363,8 @@
 			}
 		}	
 		
-	}else if ($_POST['type'] == "Del_Quo"){
+	}
+	else if ($_POST['type'] == "Del_Quo") {
 		$id = $_POST['id']; 	
 		
 		$query = "DELETE FROM tr_quo WHERE id_quo = '$id' ";
@@ -346,8 +372,8 @@
 			exit(mysqli_error($koneksi));
 		}	
 
-	}else if($_GET['type'] == "Read_Detil")
-	{
+	}
+	else if($_GET['type'] == "Read_Detil") {
 		$id_quo = $_GET['id_quo'];
 		$mode = $_GET['mode'];
 		
@@ -435,7 +461,8 @@
 		
 		echo $data;	
 		
-	}else if ($_POST['type'] == "Del_Detil"){
+	}
+	else if ($_POST['type'] == "Del_Detil") {
 		$id = $_POST['id']; 
 
 		$query = "DELETE FROM tr_quo_data WHERE id_detil = '$id' ";
@@ -443,7 +470,8 @@
 			exit(mysqli_error($koneksi));
 		}	
 		
-	}else if ($_POST['type'] == "Detil_Data"){
+	}
+	else if ($_POST['type'] == "Detil_Data") {
 		$id = $_POST['id'];	
 		$query = "select tr_quo_data.*, 
 				m_kota_tr.nama_kota as asal, 
@@ -470,43 +498,140 @@
 			$response['message'] = "Data not found!";
 		}
 		echo json_encode($response);
-	}else if ($_POST['type'] == "Add_Detil"){		
-		if($_POST['mode'] != '' )
-		{	
-			$id = $_POST['id'];
-			$id_quo = $_POST['id_quo'];
-			$mode = $_POST['mode'];
-			$id_asal = $_POST['id_asal'];
-			$id_tujuan = $_POST['id_tujuan'];
-			$jenis = $_POST['jenis'];
-			$biaya_kirim = $_POST['biaya_kirim'];
-			$biaya_kirim = str_replace(",","", $biaya_kirim);
-			$penerima = addslashes(trim(strtoupper($_POST['penerima'])));
-			$no_cont = addslashes(trim(strtoupper($_POST['no_cont'])));
+	}
+
+	if ($_POST['type'] == "Add_Detil") {
+		if ($_POST['mode'] != '' ) {	
+			$id 		 = $_POST['id'];
+			$id_quo 	 = $_POST['id_quo'];
+			$mode 		 = $_POST['mode'];
+			$id_asal 	 = $_POST['id_asal'];
+			$id_tujuan 	 = $_POST['id_tujuan'];
+			$jenis 		 = $_POST['jenis'];
+			$biaya_kirim = str_replace(",","", $_POST['biaya_kirim']);
+			$penerima 	 = addslashes(trim(strtoupper($_POST['penerima'])));
+			$no_cont 	 = addslashes(trim(strtoupper($_POST['no_cont'])));
+			$sts 		 = $_POST['sts'];
 
 			$origin_address = $_POST['origin_address'];
-			$origin_lat = $_POST['origin_lat'];
-			$origin_lon = $_POST['origin_lon'];
+			$origin_lat 	= $_POST['origin_lat'];
+			$origin_lon 	= $_POST['origin_lon'];
 
 			$destination_address = $_POST['destination_address'];
-			$destination_lat = $_POST['destination_lat'];
-			$destination_lon = $_POST['destination_lon'];
+			$destination_lat 	  = $_POST['destination_lat'];
+			$destination_lon 	  = $_POST['destination_lon'];
 
-			$distance = $_POST['distance'];
-			$km = $_POST['km'];
-			$price_type = $_POST['price_type'];
-			
-			if($mode == 'Add')
-			{			
-				$sql = "INSERT INTO  tr_quo_data 
-				(id_quo, id_asal, id_tujuan, jenis_mobil, harga, origin_address,origin_lon,origin_lat, destination_address,destination_lon,destination_lat, distance, price_type ) 
-				values
-				('$id_quo', '$id_asal', '$id_tujuan', '$jenis', '$biaya_kirim', '$origin_address','$origin_lon','$origin_lat','$destination_address','$destination_lon','$destination_lat', '$distance', '$price_type')";
-				$hasil= mysqli_query($koneksi, $sql);
-			}
-			else
-			{
-				$sql = "update tr_quo_data set 
+			$distance 	 = $_POST['distance'];
+			$km 		 = $_POST['km'];
+			$price_type  = $_POST['price_type'];
+
+			if ($mode == 'Add') {
+				$sql_insert = "INSERT INTO tr_quo_data 
+					(id_quo, id_asal, id_tujuan, jenis_mobil, harga, origin_address, origin_lon, origin_lat, destination_address, destination_lon, destination_lat, distance, price_type) 
+					VALUES
+					('$id_quo', '$id_asal', '$id_tujuan', '$jenis', '$biaya_kirim', '$origin_address','$origin_lon','$origin_lat','$destination_address','$destination_lon','$destination_lat', '$distance', '$price_type')";
+				
+				$result_insert = mysqli_query($koneksi, $sql_insert);
+				$last_id = mysqli_insert_id($koneksi);
+
+				$sql_update = "UPDATE tr_quo SET `status` = '$sts' WHERE id_quo = '$id_quo'";
+				mysqli_query($koneksi, $sql_update);
+
+				$sql_quo = "SELECT 
+						tr_quo.quo_no,
+						tr_quo.quo_date,
+						tr_quo_data.harga
+					FROM tr_quo 
+					LEFT JOIN tr_quo_data ON tr_quo_data.id_quo = tr_quo.id_quo
+					WHERE tr_quo.id_quo = '$id_quo'
+					AND tr_quo_data.id_detil = '$last_id'";
+				$query_data = mysqli_query($koneksi, $sql_quo);
+				$data_quo = mysqli_fetch_assoc($query_data);
+
+				$quo_code = $data_quo['quo_no'];
+				$quo_date = $data_quo['quo_date'];
+				$harga = $data_quo['harga'];
+
+				if ($sts === 2 || $sts === "2") {
+					$mail = new PHPMailer(true);
+					try {
+						$mail->isSMTP();
+						$mail->Host       = 'smtp.gmail.com';
+						$mail->SMTPAuth   = true;
+						$mail->Username   = 'itdivision.map@gmail.com';
+						$mail->Password   = 'glpykeqqsaulnhxd'; 
+						$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+						$mail->Port       = 587;
+	
+						$mail->setFrom('itdivision.map@gmail.com', 'Approval PETJ');
+						$mail->addAddress('itdev2.staff.map@gmail.com');
+	
+						$mail->isHTML(true);
+						$mail->Subject = "Approval Quotation Trucking " . $quo_code;
+	
+						$mail->Body = '
+							<table cellspacing="0" cellpadding="4">
+								<tr>
+									<td><b>No Quotation</b></td>
+									<td>: ' . $quo_code . '</td>
+								</tr>
+								<tr>
+									<td><b>Tanggal Kebutuhan</b></td>
+									<td>: ' . $quo_date . '</td>
+								</tr>
+								<tr>
+									<td><b>Yang Mengajukan</b></td>
+									<td>: HAMDAN</td>
+								</tr>
+								<tr>
+									<td><b>Tujuan Approval</b></td>
+									<td>: Approval Harga Quotation Trucking</td>
+								</tr>
+								<tr>
+									<td><b>Perusahaan</b></td>
+									<td>: PETJ</td>
+								</tr>
+								<tr>
+									<td><b>Harga</b></td>
+									<td>: Rp ' . number_format($harga, 0, ",", ".") . '</td>
+								</tr>
+							</table>
+							<br><br>
+							<a href="http://127.0.0.1/trucking-local/quo_approve.php/' . $id_quo . '" 
+								style="display:inline-block;
+									padding:10px 16px;
+									background-color:#28a745;
+									color:#fff;
+									text-decoration:none;
+									border-radius:4px;
+									font-weight:bold;">
+								Approve Quo
+							</a>
+							&nbsp;&nbsp;
+							<a href="http://127.0.0.1/trucking-local/quo_reject.php/' . $id_quo . '" 
+								style="display:inline-block;
+									padding:10px 16px;
+									background-color:#dc3545;
+									color:#fff;
+									text-decoration:none;
+									border-radius:4px;
+									font-weight:bold;">
+								Reject Quo
+							</a>
+						';
+	
+						if ($mail->send()) {
+							echo "✅ Email terkirim<br>";
+						} else {
+							echo "❌ Email gagal: " . $mail->ErrorInfo . "<br>";
+						}
+	
+					} catch (Exception $e) {
+						echo "❌ Exception: {$mail->ErrorInfo}<br>";
+					}
+				}
+			} else {
+				$sql_update_detail = "UPDATE tr_quo_data SET 
 						id_asal = '$id_asal',
 						id_tujuan = '$id_tujuan',
 						jenis_mobil = '$jenis',
@@ -518,25 +643,39 @@
 						destination_lat = '$destination_lat',
 						distance = '$distance',
 						harga = '$biaya_kirim'
-						where id_detil = '$id'	";
-				$hasil=mysqli_query($koneksi,$sql);
+					WHERE id_detil = '$id'";
+
+				$hasil = mysqli_query($koneksi, $sql_update_detail);
+
+				if (!$hasil) {
+					echo "Data Error...!";
+				} else {	
+					echo "Data saved!";
+				}
 			}
-			if (!$hasil) {
-			
-				echo "Data Error...!";
-			}
-			else
-			{	
-				
-				echo "Data saved!";
-			}
-		}		
-	}else if ($_POST['type'] == "Cek_Rate_Cust"){
+		}
+	}
+	
+	else if ($_POST['type'] == "Cek_Rate_Cust") {
+		// echo "<pre>";
+		// print_r($_POST);
+		// echo "</pre>";
+		// die();
+
 		$id_asal = $_POST['id_asal'];	
 		$id_cust = $_POST['id_cust'];	
 		$id_tujuan = $_POST['id_tujuan'];	
 		$jenis_mobil = $_POST['jenis_mobil'];	
-		$query = "select * from m_cust_rate_tr where id_asal  = '$id_asal' and id_tujuan = '$id_tujuan' and jenis_mobil = '$jenis_mobil' and id_cust = '$id_cust' ";
+
+		$query = "SELECT 
+					m_rate_tr.*
+				FROM m_rate_tr
+				WHERE id_asal = '$id_asal' 
+					AND id_tujuan = '$id_tujuan' 
+					AND jenis_mobil = '$jenis_mobil'";
+
+		// echo $query;
+		// return;
 
 		if (!$result = mysqli_query($koneksi, $query)) {
 			exit(mysqli_error($koneksi));
@@ -554,122 +693,149 @@
 		echo json_encode($response);	
 		
 	}
-	else if ($_POST['type'] == "Cek_Rate"){
-		// die("TEST");
+	else if ($_POST['type'] == "Cek_Rate") {
+
 		$id_asal = $_POST['id_asal'];	
 		$id_tujuan = $_POST['id_tujuan'];	
 		$jenis_mobil = $_POST['jenis_mobil'];	
 		$price_type = !empty($_POST['price_type']) ? $_POST['price_type'] : 'high';
-		$query = "select * from m_rate_tr where id_asal  = '$id_asal' and id_tujuan = '$id_tujuan' and jenis_mobil = '$jenis_mobil' AND price_type = '$price_type'";
+		
+		$query = "SELECT * 
+				FROM m_rate_tr 
+				WHERE id_asal  = '$id_asal' 
+					AND id_tujuan = '$id_tujuan' 
+					AND jenis_mobil = '$jenis_mobil' 
+					AND price_type = '$price_type'";
 
 		if (!$result = mysqli_query($koneksi, $query)) {
 			exit(mysqli_error($koneksi));
 		}
-		$response = array();
+
 		if(mysqli_num_rows($result) > 0) {
-			while ($row = mysqli_fetch_assoc($result)) {
-				$response = $row;
-			}
+			$response = mysqli_fetch_assoc($result);
+			$response['status'] = 200;
+		} else {
+			$response = [
+				"status" => 404,
+				"km" => 0,
+				"max_price" => 0,
+				"min_price" => 0
+			];
 		}
-		else
-		{
-			echo "Data not found!";
-		}
-		echo json_encode($response);	
+
+		echo json_encode($response);
+		exit;
 	}
 
-	else if ($_POST['type'] == "AddOrder"){		
+	else if ($_POST['type'] == "AddOrder") {
 		if($_POST['id_detil'] != '' )
 		{	
-			$id_detil = $_POST['id_detil'];
-			$id_cust = $_POST['id_cust'];
-			$tanggal = $_POST['tanggal'];
-			$no_do = addslashes(trim(strtoupper($_POST['no_do'])));
-			$penerima = addslashes(trim($_POST['penerima']));
-			$barang = addslashes(trim(strtoupper($_POST['barang'])));
-			$berat = $_POST['berat'];
-			$vol = $_POST['vol'];
-			$no_cont = trim(addslashes(strtoupper($_POST['no_cont'])));
-			$no_seal = trim(addslashes(strtoupper($_POST['no_seal'])));
-			$id_asal = $_POST['id_asal'];
-			$id_tujuan = $_POST['id_tujuan'];
-			$jenis_mobil = $_POST['jenis_mobil'];	
-			$id_mobil = $_POST['id_mobil'];
-			$id_supir = $_POST['id_supir'];		
-			$biaya = $_POST['biaya'];
-			$uj = $_POST['uj'];
-			$ritase = $_POST['ritase'];
-			$ket = trim(addslashes($_POST['ket']));
-			$biaya = str_replace(",","", $biaya);
-			$uj = str_replace(",","", $uj);
-			$ritase = str_replace(",","", $ritase);
-			$berat = str_replace(",","", $berat);
-			$vol = str_replace(",","", $vol);
-			$tanggalx = ConverTglSql($tanggal);
+			$id_detil 		= $_POST['id_detil'];
+			$id_cust 		= $_POST['id_cust'];
+			$tanggal 		= $_POST['tanggal'];
+			$no_do 			= addslashes(trim(strtoupper($_POST['no_do'])));
+			$penerima 		= addslashes(trim($_POST['penerima']));
+			$id_asal 		= $_POST['id_asal'];
+			$id_tujuan 		= $_POST['id_tujuan'];
+			$jenis_mobil	= $_POST['jenis_mobil'];	
+			$biaya 			= $_POST['biaya'];
+			$uj 			= $_POST['uj'];
+			$ritase 		= $_POST['ritase'];
+			$sap_project 	= $_POST['sap_project'];
+			$ket 			= trim(addslashes($_POST['ket']));
+			$biaya 			= str_replace(",","", $biaya);
+			$uj 			= str_replace(",","", $uj);
+			$ritase 		= str_replace(",","", $ritase);
+			$tanggalx 		= ConverTglSql($tanggal);
 			
-			
-			$ptgl = explode("-", $tanggal);
-			$tg = $ptgl[0];
-			$bl = $ptgl[1];
-			$th = $ptgl[2];	
-			$query = "SELECT max(right(no_jo,5)) as maxID FROM tr_jo where  year(tgl_jo) = '$th'  ";
-			$hasil = mysqli_query($koneksi, $query);    
-			$data  = mysqli_fetch_array($hasil);
-			$idMax = $data['maxID'];
-			if ($idMax == '99999'){
-				$idMax='00000';
-			}
-			$noUrut = (int) $idMax;   
-			$noUrut++;  
-			if(strlen($noUrut)=='1'){
-				$noUrut="0000$noUrut";
-				}elseif(strlen($noUrut)=='2'){
-				$noUrut="000$noUrut";
-				}elseif(strlen($noUrut)=='3'){
-				$noUrut="00$noUrut";
-				}elseif(strlen($noUrut)=='4'){
-				$noUrut="0$noUrut";
-			}   
-			$year = substr($th,2,2);
-			$no_sj = "SJ-$year$noUrut";
-
-			// PEMBUATAN PROJECT CODE
-			$year_PC = date('y');
-			$sql = "SELECT project_code FROM tr_jo ORDER BY id_jo DESC LIMIT 1";
-			$result = mysqli_query($koneksi, $sql);
-
-			if (!$result) {
-				die("Query error: " . mysqli_error($koneksi));
-			}
-
-			if (mysqli_num_rows($result) == 0) {
-				$project_code = "TRC/$year_PC" . "0001";
-			} else {
-				$row = mysqli_fetch_assoc($result);
-				$lastProjectCode = $row['project_code'];
-				$lastYear = substr($lastProjectCode, 4, 2);
-
-				if ($lastYear !== $year) {
-					$project_code = "TRC/$year" . "0001";
-				} else {
-					$lastNum = (int)substr($lastProjectCode, -4);
-					$newNum = str_pad($lastNum + 1, 4, "0", STR_PAD_LEFT);
-					$project_code = "TRC/$year$newNum";
+			// ------------ BUILD JO ------------
+				$ptgl 		= explode("-", $tanggal);
+				$tg 		= $ptgl[0];
+				$bl 		= $ptgl[1];
+				$th 		= $ptgl[2];	
+				$query 		= "SELECT max(right(no_jo,5)) AS maxID FROM tr_jo WHERE year(tgl_jo) = '$th'";
+				$hasil 		= mysqli_query($koneksi, $query);    
+				$data  		= mysqli_fetch_array($hasil);
+				$idMax 		= $data['maxID'];
+				if ($idMax == '99999'){
+					$idMax='00000';
 				}
-			}
+				$noUrut 	= (int) $idMax;   
+				$noUrut++;  
+				if(strlen($noUrut)=='1'){
+					$noUrut="0000$noUrut";
+					}elseif(strlen($noUrut)=='2'){
+					$noUrut="000$noUrut";
+					}elseif(strlen($noUrut)=='3'){
+					$noUrut="00$noUrut";
+					}elseif(strlen($noUrut)=='4'){
+					$noUrut="0$noUrut";
+				}   
+				$year 		= substr($th,2,2);
+				$no_sj 		= "SO-$year$noUrut";
+				
 
-			// die($project_code);
-			
-			// $sql = "INSERT INTO  tr_jo (id_cust, id_detil_quo, no_jo, tgl_jo, no_do, penerima, barang, berat, vol, no_cont, no_seal, id_asal, id_tujuan, jenis_mobil, id_mobil, id_supir, biaya_kirim, uj, ritase, ket, created) 
-			// values
-			// 	('$id_cust','$id_detil', '$no_sj', '$tanggalx', '$no_do', '$penerima', '$barang', '$berat', '$vol', '$no_cont', '$no_seal',
-			// 	'$id_asal', '$id_tujuan', '$jenis_mobil', '$id_mobil', '$id_supir', '$biaya', '$uj', '$ritase', '$ket', '$id_user')";
-			$sql = "INSERT INTO  tr_jo (project_code, id_cust, id_detil_quo, no_jo, tgl_jo, no_do, penerima, barang, berat, vol, no_cont, no_seal, id_asal, id_tujuan, jenis_mobil, id_mobil, id_supir, biaya_kirim, uj, ritase, ket, created) 
-			values
-				('$project_code','$id_cust','$id_detil', '$no_sj', '$tanggalx', '$no_do', '$penerima', '$barang', '$berat', '$vol', '$no_cont', '$no_seal',
-				'$id_asal', '$id_tujuan', '$jenis_mobil', '$id_mobil', '$id_supir', '$biaya', '$uj', '$ritase', '$ket', '$id_user')";
+			// ------------ PEMBUATAN PROJECT CODE ------------
+				$year_PC = date('y');
+				$sql = "SELECT project_code FROM tr_jo ORDER BY id_jo DESC LIMIT 1";
+				$result = mysqli_query($koneksi, $sql);
 
-			// die($sql);
+				if (!$result) {
+					die("Query error: " . mysqli_error($koneksi));
+				}
+
+				if (mysqli_num_rows($result) == 0) {
+					$project_code = "TRC/$year_PC" . "0001";
+				} else {
+					$row = mysqli_fetch_assoc($result);
+					$lastProjectCode = $row['project_code'];
+					$lastYear = substr($lastProjectCode, 4, 2);
+
+					if ($lastYear !== $year) {
+						$project_code = "TRC/$year" . "0001";
+					} else {
+						$lastNum = (int)substr($lastProjectCode, -4);
+						$newNum = str_pad($lastNum + 1, 4, "0", STR_PAD_LEFT);
+						$project_code = "TRC/$year$newNum";
+					}
+				}
+
+			$sql = "INSERT INTO  tr_jo (
+				sap_project, 
+				project_code, 
+				id_cust, 
+				id_detil_quo, 
+				no_jo, 
+				tgl_jo, 
+				no_do, 
+				penerima, 
+				id_asal, 
+				id_tujuan, 
+				jenis_mobil, 
+				biaya_kirim, 
+				uj, 
+				ritase, 
+				ket, 
+				created) 
+			VALUES (
+					'$sap_project',
+					'$project_code',
+					'$id_cust',
+					'$id_detil',
+					'$no_sj', 
+					'$tanggalx',
+					'$no_do',
+					'$penerima',
+					'$id_asal', 
+					'$id_tujuan', 
+					'$jenis_mobil', 
+					'$biaya', 
+					'$uj', 
+					'$ritase', 
+					'$ket', 
+					'$id_user'
+				)";
+
 			$hasil= mysqli_query($koneksi, $sql);
 				
 			if (!$hasil) {

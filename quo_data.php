@@ -1,114 +1,113 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	include "lib.php";
 
-if(!isset($_SESSION['id_user'])  ){
- header('location:logout.php'); 
-}
-
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{		
-	
-	$mode = $_POST['mode'];
-	$id_quo = $_POST['id_quo'];	
-	$quo_date = $_POST['quo_date'];	
-	$id_cust = $_POST['id_cust'];
-	$no_po = trim(addslashes(strtoupper($_POST['no_po'])));
-	$ket = addslashes(trim($_POST['ket']));
-	$quo_datex = ConverTglSql($quo_date);
-	$sales = $_POST['sales'];
-	
-	if($mode == 'Add' )
-	{
-
-		$ptgl = explode("-", $quo_date);
-		$tg = $ptgl[0];
-		$bl = $ptgl[1];
-		$th = $ptgl[2];	
-		$query = "SELECT max(right(quo_no,5)) as maxID FROM tr_quo where  year(quo_date) = '$th'  ";
-		$hasil = mysqli_query($koneksi, $query);    
-		$data  = mysqli_fetch_array($hasil);
-		$idMax = $data['maxID'];
-		if ($idMax == '99999'){
-			$idMax='00000';
-		}
-		$noUrut = (int) $idMax;   
-		$noUrut++;  
-		if(strlen($noUrut)=='1'){
-			$noUrut="0000$noUrut";
-			}elseif(strlen($noUrut)=='2'){
-			$noUrut="000$noUrut";
-			}elseif(strlen($noUrut)=='3'){
-			$noUrut="00$noUrut";
-			}elseif(strlen($noUrut)=='4'){
-			$noUrut="0$noUrut";
-		}   
-		$year = substr($th,2,2);
-		$quo_no = "QTR-$year$noUrut";
-		
-		$sql = "INSERT INTO  tr_quo (quo_date, quo_no, id_cust, ket, created, sales) values
-				('$quo_datex', '$quo_no', '$id_cust', '$ket', '$id_user', '$sales')";
-		$hasil= mysqli_query($koneksi, $sql);
-		
-		$sql = mysqli_query($koneksi, "select max(id_quo)as id from tr_quo ");			
-		$row = mysqli_fetch_array($sql);
-		$id_quo = $row['id'];
-
-	}else{
-		$sql = "update tr_quo set 
-					id_cust = '$id_cust',
-					ket = '$ket',
-					sales = '$sales'
-					where id_quo = '$id_quo'	";
-		$hasil=mysqli_query($koneksi,$sql);
+	if(!isset($_SESSION['id_user'])  ){
+	header('location:logout.php'); 
 	}
-	
-	$cat ="Data saved...";
-	$xy1="Edit|$id_quo|$cat";
-	$xy1=base64_encode($xy1);
-	header("Location: quo_data.php?id=$xy1");
-}
-else
-{	
-	$idx = $_GET['id'];	
-	$x=base64_decode($idx);
-	$pecah = explode("|", $x);
-	$mode= $pecah[0];
-	$id_quo = $pecah[1];
-	$cat = $pecah[2];
-}
 
-if($mode == 'Add')
-{
-	$quo_no = '-- Auto -- ';
-	$quo_date = date('d-m-Y');
-	
-}else{
-	
-	$pq = mysqli_query($koneksi, "select tr_quo.*, m_cust_tr.nama_cust
-		  from 
-		  tr_quo left join m_cust_tr on tr_quo.id_cust = m_cust_tr.id_cust
-		  where tr_quo.id_quo = '$id_quo'  ");
-	$rq=mysqli_fetch_array($pq);	
-	$quo_no = $rq['quo_no'];
-	$quo_date = ConverTgl($rq['quo_date']);
-	$id_cust = $rq['id_cust'];
-	$nama_cust = $rq['nama_cust'];
-	$no_po = $rq['no_po'];
-	$ket = $rq['ket'];
-	$sales = $rq['sales'];
-	$disx = 'Disabled';
-}
+	if($_SERVER['REQUEST_METHOD'] == "POST")
+	{		
+		
+		$mode = $_POST['mode'];
+		$id_quo = $_POST['id_quo'];	
+		$quo_date = $_POST['quo_date'];	
+		$id_cust = $_POST['id_cust'];
+		$no_po = trim(addslashes(strtoupper($_POST['no_po'])));
+		$ket = addslashes(trim($_POST['ket']));
+		$quo_datex = ConverTglSql($quo_date);
+		$sales = $_POST['sales'];
+		
+		if($mode == 'Add' )
+		{
 
-if($mode == 'View')
-{
-	$dis = "Disabled";
-}
+			$ptgl = explode("-", $quo_date);
+			$tg = $ptgl[0];
+			$bl = $ptgl[1];
+			$th = $ptgl[2];	
+			$query = "SELECT max(right(quo_no,5)) as maxID FROM tr_quo where  year(quo_date) = '$th'  ";
+			$hasil = mysqli_query($koneksi, $query);    
+			$data  = mysqli_fetch_array($hasil);
+			$idMax = $data['maxID'];
+			if ($idMax == '99999'){
+				$idMax='00000';
+			}
+			$noUrut = (int) $idMax;   
+			$noUrut++;  
+			if(strlen($noUrut)=='1'){
+				$noUrut="0000$noUrut";
+				}elseif(strlen($noUrut)=='2'){
+				$noUrut="000$noUrut";
+				}elseif(strlen($noUrut)=='3'){
+				$noUrut="00$noUrut";
+				}elseif(strlen($noUrut)=='4'){
+				$noUrut="0$noUrut";
+			}   
+			$year = substr($th,2,2);
+			$quo_no = "QTR-$year$noUrut";
+			
+			$sql = "INSERT INTO  tr_quo (quo_date, quo_no, id_cust, ket, created, sales) values
+					('$quo_datex', '$quo_no', '$id_cust', '$ket', '$id_user', '$sales')";
+			$hasil= mysqli_query($koneksi, $sql);
+			
+			$sql = mysqli_query($koneksi, "select max(id_quo)as id from tr_quo ");			
+			$row = mysqli_fetch_array($sql);
+			$id_quo = $row['id'];
+
+		}else{
+			$sql = "update tr_quo set 
+						id_cust = '$id_cust',
+						ket = '$ket',
+						sales = '$sales'
+						where id_quo = '$id_quo'	";
+			$hasil=mysqli_query($koneksi,$sql);
+		}
+		
+		$cat ="Data saved...";
+		$xy1="Edit|$id_quo|$cat";
+		$xy1=base64_encode($xy1);
+		header("Location: quo_data.php?id=$xy1");
+	}
+	else
+	{	
+		$idx = $_GET['id'];	
+		$x=base64_decode($idx);
+		$pecah = explode("|", $x);
+		$mode= $pecah[0];
+		$id_quo = $pecah[1];
+		$cat = $pecah[2];
+	}
+
+	if($mode == 'Add')
+	{
+		$quo_no = '-- Auto -- ';
+		$quo_date = date('d-m-Y');
+		
+	}else{
+		
+		$pq = mysqli_query($koneksi, "select tr_quo.*, m_cust_tr.nama_cust
+			from 
+			tr_quo left join m_cust_tr on tr_quo.id_cust = m_cust_tr.id_cust
+			where tr_quo.id_quo = '$id_quo'  ");
+		$rq=mysqli_fetch_array($pq);	
+		$quo_no = $rq['quo_no'];
+		$quo_date = ConverTgl($rq['quo_date']);
+		$id_cust = $rq['id_cust'];
+		$nama_cust = $rq['nama_cust'];
+		$no_po = $rq['no_po'];
+		$ket = $rq['ket'];
+		$sales = $rq['sales'];
+		$disx = 'Disabled';
+	}
+
+	if($mode == 'View')
+	{
+		$dis = "Disabled";
+	}
 
 ?>
-
 
 <html>
   <head>
@@ -187,19 +186,19 @@ if($mode == 'View')
 			}
 			return true;
 		}
-		function TampilCust(){	
+		function TampilCust(){
 			$("#cari").val('');
 			ListCust();
 			$('#DaftarCust').modal('show');
 		}
-		function ListCust() {	
+		function ListCust() {
 			var cari = $("#cari").val();
 			$.get("ajax/cust_crud.php", {cari:cari,  type:"ListCust" }, function (data, status) {
 				$(".tampil_cust").html(data);
 				$("#hal").val(hal);
 			});
 		}
-		function PilihCust(id) {	
+		function PilihCust(id) {
 			$.post("ajax/cust_crud.php", {
 					id: id, type:"DetilData"
 				},
@@ -231,33 +230,8 @@ if($mode == 'View')
 			// $("#biaya_kirim").val('');
 			$("#jenis").val('');
 			$("#modex").val('Add');
-			CekRate();
+			CekRate_Umum();
 			$('#Data').modal('show');
-		}
-
-		function CekRate()
-		{
-			var id_asal = $("#id_asal").val();
-			var id_tujuan = $("#id_tujuan").val();
-			var jenis_mobil = $("#jenis").val();
-			var id_cust = $("#id_cust").val();
-
-			// $("#biaya_kirim").val('0');	
-			$.post("ajax/quo_crud.php", {
-				id_cust:id_cust, id_asal: id_asal, id_tujuan:id_tujuan, jenis_mobil:jenis_mobil, type:"Cek_Rate_Cust"
-				},
-				function (data, status) {
-					var data = JSON.parse(data);	
-					if(data.status == 200)
-					{
-						CekRate_Umum();
-					}
-					else
-					{
-						// $("#biaya_kirim").val(Rupiah(data.rate));
-					}
-				}
-			);
 		}
 
 		function CekRate_Umum() {
@@ -266,7 +240,6 @@ if($mode == 'View')
 			var jenis_mobil = $("#jenis").val();
 			var price_type = $("#price_type").val();
 
-			// $("#biaya_kirim").val('');
 			$("#km").val('0');
 
 			$.post("ajax/quo_crud.php", {
@@ -284,12 +257,13 @@ if($mode == 'View')
 						
 						$("#max_price").val('0');
 						$("#min_price").val('0');
+						$("#biaya_kirim").val('0');
 
 					} else {
 						$("#km").val(data.km);
-						$("#max_price").val(data.max_price);
-						$("#min_price").val(data.min_price);
-
+						$("#max_price").val(Rupiah(data.max_price));
+						$("#min_price").val(Rupiah(data.min_price));
+						$("#biaya_kirim").val(Rupiah(data.max_price));
 					}
 				} catch (e) {
 					console.error("Gagal parsing JSON:", data);
@@ -299,37 +273,43 @@ if($mode == 'View')
 		}
 
 		function AddData() {
-			var id = $("#idx").val();
-			var id_quo = $("#id_quo").val();
-			var id_asal = $("#id_asal").val();
-			var id_tujuan = $("#id_tujuan").val();
-			var jenis = $("#jenis").val();
-			// var biaya_kirim = $("#biaya_kirim").val();
-			var mode = $("#modex").val();
+			var id 			= $("#idx").val();
+			var id_quo 		= $("#id_quo").val();
+			var id_asal 	= $("#id_asal").val();
+			var id_tujuan 	= $("#id_tujuan").val();
+			var jenis 		= $("#jenis").val();
+			var mode 		= $("#modex").val();
 
 			var origin_address = $("#origin_address").val();
-			var origin_lat = $("#origin_lat").val();
-			var origin_lon = $("#origin_lon").val();
+			var origin_lat 	= $("#origin_lat").val();
+			var origin_lon 	= $("#origin_lon").val();
 
 			var destination_address = $("#destination_address").val();
 			var destination_lat = $("#destination_lat").val();
 			var destination_lon = $("#destination_lon").val();
 
-			var distance = parseFloat($("#distance_result").val());
-			var km = parseFloat($("#km").val());
-			var price_type = $("#price_type").val();
+			var distance 	= parseFloat($("#distance_result").val());
+			var km 			= parseFloat($("#km").val());
+			var price_type 	= $("#price_type").val();
 
-			var max_price = parseFloat($("#max_price").val());
-			var min_price = parseFloat($("#min_price").val());
+			var max_price_raw 	= $("#max_price").val().replace(/,/g, '');
+			var max_price 		= parseFloat(max_price_raw);
+			
+			var min_price_raw 	= $("#min_price").val().replace(/,/g, '');
+			var min_price 		= parseFloat(min_price_raw);
 
-			// Hilangkan koma dari biaya_kirim dulu
 			var biaya_kirim_raw = $("#biaya_kirim").val().replace(/,/g, '');
-			var biaya_kirim = parseFloat(biaya_kirim_raw);
+			var biaya_kirim 	= parseFloat(biaya_kirim_raw);
 
-			if (biaya_kirim > max_price || biaya_kirim < min_price) {
-				alert("Biaya Kirim tidak boleh lebih dari " + max_price + " dan kurang dari " + min_price);
+			var sts 		= 0; 
+
+			if (biaya_kirim < min_price) {
+				alert("Shipping Cost di bawah harga minimal");
+				return;
+				// sts = 2;
 			}
-			else if (isNaN(distance) || distance <= 0) {
+
+			if (isNaN(distance) || distance <= 0) {
 				alert("Distance tidak boleh kosong atau nol.");
 			}
 			else if (isNaN(km)) {
@@ -362,6 +342,7 @@ if($mode == 'View')
 
 					distance: distance,
 					biaya_kirim: biaya_kirim,
+					sts: sts,
 					mode: mode,
 					price_type: price_type,
 					type: "Add_Detil"
@@ -369,6 +350,10 @@ if($mode == 'View')
 					alert(data);
 					$("#Data").modal("hide");
 					ReadData();
+
+					$("#Data").find("input[type=text], textarea").val("");
+					$("#id_asal, #id_tujuan, #jenis, #price_type").prop("selectedIndex", 0);
+					$("#origin_map, #destination_map").hide();
 				});
 			}
 		}
@@ -419,247 +404,247 @@ if($mode == 'View')
 		}
 		
 		// ------------------- FUNCTION CHECK LOCATION -------------------
-		let origin_lat = null;
-		let origin_lon = null;
-		let dest_lat = null;
-		let dest_lon = null;
+			let origin_lat = null;
+			let origin_lon = null;
+			let dest_lat = null;
+			let dest_lon = null;
 
-		$(document).ready(function () {
-			let lastOriginValue = '';
-			let lastDestinationValue = '';
+			$(document).ready(function () {
+				let lastOriginValue = '';
+				let lastDestinationValue = '';
 
-			// ORIGIN ADDRESS
-			$('#origin_address').on('keydown', function (event) {
-				if (event.key === "Enter") {
-					event.preventDefault();
+				// ORIGIN ADDRESS
+				$('#origin_address').on('keydown', function (event) {
+					if (event.key === "Enter") {
+						event.preventDefault();
+						const val = $(this).val().trim();
+						if (val.length > 5 && val !== lastOriginValue) {
+							lastOriginValue = val;
+							origin_address();
+						}
+					}
+				});
+				$('#origin_address').on('blur', function () {
 					const val = $(this).val().trim();
 					if (val.length > 5 && val !== lastOriginValue) {
 						lastOriginValue = val;
 						origin_address();
 					}
-				}
-			});
-			$('#origin_address').on('blur', function () {
-				const val = $(this).val().trim();
-				if (val.length > 5 && val !== lastOriginValue) {
-					lastOriginValue = val;
-					origin_address();
-				}
-			});
+				});
 
-			// DESTINATION ADDRESS
-			$('#destination_address').on('keydown', function (event) {
-				if (event.key === "Enter") {
-					event.preventDefault();
+				// DESTINATION ADDRESS
+				$('#destination_address').on('keydown', function (event) {
+					if (event.key === "Enter") {
+						event.preventDefault();
+						const val = $(this).val().trim();
+						if (val.length > 5 && val !== lastDestinationValue) {
+							lastDestinationValue = val;
+							destination_address();
+						}
+					}
+				});
+				$('#destination_address').on('blur', function () {
 					const val = $(this).val().trim();
 					if (val.length > 5 && val !== lastDestinationValue) {
 						lastDestinationValue = val;
 						destination_address();
 					}
-				}
+				});
 			});
-			$('#destination_address').on('blur', function () {
-				const val = $(this).val().trim();
-				if (val.length > 5 && val !== lastDestinationValue) {
-					lastDestinationValue = val;
-					destination_address();
-				}
-			});
-		});
 
-		function origin_address() {
-			const origin_address = $("#origin_address").val();
+			function origin_address() {
+				const origin_address = $("#origin_address").val();
 
-			$.post("ajax/geoapify.php", {
-				address: origin_address,
-				type: 'origin'
-			}, function (data) {
-				if (data.status !== "success") {
-					alert("Gagal mendapatkan lokasi: " + data.message);
-					origin_lat = null;
-					origin_lon = null;
-					$("#origin_lat").val('');
-					$("#origin_lon").val('');
-					$("#origin_map").hide();
+				$.post("ajax/geoapify.php", {
+					address: origin_address,
+					type: 'origin'
+				}, function (data) {
+					if (data.status !== "success") {
+						alert("Gagal mendapatkan lokasi: " + data.message);
+						origin_lat = null;
+						origin_lon = null;
+						$("#origin_lat").val('');
+						$("#origin_lon").val('');
+						$("#origin_map").hide();
+						if (window.originMap) window.originMap.remove();
+						return;
+					}
+
+					origin_lat = data.lat;
+					origin_lon = data.lon;
+					$("#origin_lat").val(origin_lat.toFixed(6));
+					$("#origin_lon").val(origin_lon.toFixed(6));
+					$('#origin_map').show();
+
 					if (window.originMap) window.originMap.remove();
-					return;
-				}
 
-				origin_lat = data.lat;
-				origin_lon = data.lon;
-				$("#origin_lat").val(origin_lat.toFixed(6));
-				$("#origin_lon").val(origin_lon.toFixed(6));
-				$('#origin_map').show();
+					window.originMap = L.map('origin_map').setView([origin_lat, origin_lon], 15);
+					L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+						attribution: '© OpenStreetMap contributors'
+					}).addTo(window.originMap);
 
-				if (window.originMap) window.originMap.remove();
+					let originInitialLat = origin_lat;
+					let originInitialLon = origin_lon;
 
-				window.originMap = L.map('origin_map').setView([origin_lat, origin_lon], 15);
-				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					attribution: '© OpenStreetMap contributors'
-				}).addTo(window.originMap);
+					let marker = L.marker([origin_lat, origin_lon], { draggable: true }).addTo(window.originMap)
+						.bindPopup("Klik di peta untuk pindahkan marker").openPopup();
 
-				let originInitialLat = origin_lat;
-				let originInitialLon = origin_lon;
-
-				let marker = L.marker([origin_lat, origin_lon], { draggable: true }).addTo(window.originMap)
-					.bindPopup("Klik di peta untuk pindahkan marker").openPopup();
-
-				marker.on('dragend', function (e) {
-					let pos = e.target.getLatLng();
-					let jarak = hitungJarak(originInitialLat, originInitialLon, pos.lat, pos.lng);
-					if (jarak > 1) {
-						alert("Marker asal tidak boleh dipindah lebih dari 1KM.");
-						marker.setLatLng([originInitialLat, originInitialLon]);
-						marker.openPopup();
-					} else {
-						updateLocation(pos.lat, pos.lng, marker);
-					}
-				});
-
-				window.originMap.on('click', function (e) {
-					let jarak = hitungJarak(originInitialLat, originInitialLon, e.latlng.lat, e.latlng.lng);
-					if (jarak > 1) {
-						alert("Marker asal tidak boleh dipindah lebih dari 1KM.");
-						marker.setLatLng([originInitialLat, originInitialLon]);
-						marker.openPopup();
-					} else {
-						marker.setLatLng([e.latlng.lat, e.latlng.lng]);
-						updateLocation(e.latlng.lat, e.latlng.lng, marker);
-					}
-				});
-
-				function updateLocation(lat, lon, markerRef) {
-					origin_lat = lat;
-					origin_lon = lon;
-					$("#origin_lat").val(lat.toFixed(6));
-					$("#origin_lon").val(lon.toFixed(6));
-
-					$.post("ajax/geoapify.php", {
-						lat: lat,
-						lon: lon
-					}, function (res) {
-						if (res.status === "success") {
-							$("#origin_address").val(res.formatted);
-							markerRef.bindPopup(`Lokasi baru:<br>${res.formatted}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+					marker.on('dragend', function (e) {
+						let pos = e.target.getLatLng();
+						let jarak = hitungJarak(originInitialLat, originInitialLon, pos.lat, pos.lng);
+						if (jarak > 1) {
+							alert("Marker asal tidak boleh dipindah lebih dari 1KM.");
+							marker.setLatLng([originInitialLat, originInitialLon]);
+							marker.openPopup();
 						} else {
-							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
+							updateLocation(pos.lat, pos.lng, marker);
 						}
-						if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
-					}, 'json');
-				}
+					});
 
-				if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
-			}, 'json');
-		}
+					window.originMap.on('click', function (e) {
+						let jarak = hitungJarak(originInitialLat, originInitialLon, e.latlng.lat, e.latlng.lng);
+						if (jarak > 1) {
+							alert("Marker asal tidak boleh dipindah lebih dari 1KM.");
+							marker.setLatLng([originInitialLat, originInitialLon]);
+							marker.openPopup();
+						} else {
+							marker.setLatLng([e.latlng.lat, e.latlng.lng]);
+							updateLocation(e.latlng.lat, e.latlng.lng, marker);
+						}
+					});
 
-		function destination_address() {
-			const destination_address = $("#destination_address").val();
+					function updateLocation(lat, lon, markerRef) {
+						origin_lat = lat;
+						origin_lon = lon;
+						$("#origin_lat").val(lat.toFixed(6));
+						$("#origin_lon").val(lon.toFixed(6));
 
-			$.post("ajax/geoapify.php", {
-				address: destination_address,
-				type: 'destination'
-			}, function (data) {
-				if (data.status !== "success") {
-					alert("Gagal mendapatkan lokasi tujuan: " + data.message);
-					dest_lat = null;
-					dest_lon = null;
-					$("#destination_lat").val('');
-					$("#destination_lon").val('');
-					$("#destination_map").hide();
+						$.post("ajax/geoapify.php", {
+							lat: lat,
+							lon: lon
+						}, function (res) {
+							if (res.status === "success") {
+								$("#origin_address").val(res.formatted);
+								markerRef.bindPopup(`Lokasi baru:<br>${res.formatted}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+							} else {
+								markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
+							}
+							if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
+						}, 'json');
+					}
+
+					if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
+				}, 'json');
+			}
+
+			function destination_address() {
+				const destination_address = $("#destination_address").val();
+
+				$.post("ajax/geoapify.php", {
+					address: destination_address,
+					type: 'destination'
+				}, function (data) {
+					if (data.status !== "success") {
+						alert("Gagal mendapatkan lokasi tujuan: " + data.message);
+						dest_lat = null;
+						dest_lon = null;
+						$("#destination_lat").val('');
+						$("#destination_lon").val('');
+						$("#destination_map").hide();
+						if (window.destinationMap) window.destinationMap.remove();
+						return;
+					}
+
+					dest_lat = data.lat;
+					dest_lon = data.lon;
+					$("#destination_lat").val(dest_lat.toFixed(6));
+					$("#destination_lon").val(dest_lon.toFixed(6));
+					$('#destination_map').show();
+
 					if (window.destinationMap) window.destinationMap.remove();
-					return;
-				}
 
-				dest_lat = data.lat;
-				dest_lon = data.lon;
-				$("#destination_lat").val(dest_lat.toFixed(6));
-				$("#destination_lon").val(dest_lon.toFixed(6));
-				$('#destination_map').show();
+					window.destinationMap = L.map('destination_map').setView([dest_lat, dest_lon], 15);
+					L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+						attribution: '© OpenStreetMap contributors'
+					}).addTo(window.destinationMap);
 
-				if (window.destinationMap) window.destinationMap.remove();
+					let destInitialLat = dest_lat;
+					let destInitialLon = dest_lon;
 
-				window.destinationMap = L.map('destination_map').setView([dest_lat, dest_lon], 15);
-				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					attribution: '© OpenStreetMap contributors'
-				}).addTo(window.destinationMap);
+					let marker = L.marker([dest_lat, dest_lon], { draggable: true }).addTo(window.destinationMap)
+						.bindPopup("Klik di peta untuk ubah titik tujuan").openPopup();
 
-				let destInitialLat = dest_lat;
-				let destInitialLon = dest_lon;
-
-				let marker = L.marker([dest_lat, dest_lon], { draggable: true }).addTo(window.destinationMap)
-					.bindPopup("Klik di peta untuk ubah titik tujuan").openPopup();
-
-				marker.on('dragend', function (e) {
-					let pos = e.target.getLatLng();
-					let jarak = hitungJarak(destInitialLat, destInitialLon, pos.lat, pos.lng);
-					if (jarak > 1) {
-						alert("Marker tujuan tidak boleh dipindah lebih dari 1KM.");
-						marker.setLatLng([destInitialLat, destInitialLon]);
-						marker.openPopup();
-					} else {
-						updateDestinationLocation(pos.lat, pos.lng, marker);
-					}
-				});
-
-				window.destinationMap.on('click', function (e) {
-					let jarak = hitungJarak(destInitialLat, destInitialLon, e.latlng.lat, e.latlng.lng);
-					if (jarak > 1) {
-						alert("Marker tujuan tidak boleh dipindah lebih dari 1KM.");
-						marker.setLatLng([destInitialLat, destInitialLon]);
-						marker.openPopup();
-					} else {
-						marker.setLatLng([e.latlng.lat, e.latlng.lng]);
-						updateDestinationLocation(e.latlng.lat, e.latlng.lng, marker);
-					}
-				});
-
-				function updateDestinationLocation(lat, lon, markerRef) {
-					dest_lat = lat;
-					dest_lon = lon;
-					$("#destination_lat").val(lat.toFixed(6));
-					$("#destination_lon").val(lon.toFixed(6));
-
-					$.post("ajax/geoapify.php", {
-						lat: lat,
-						lon: lon
-					}, function (res) {
-						if (res.status === "success") {
-							$("#destination_address").val(res.formatted);
-							markerRef.bindPopup(`Tujuan diperbarui:<br>${res.formatted}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+					marker.on('dragend', function (e) {
+						let pos = e.target.getLatLng();
+						let jarak = hitungJarak(destInitialLat, destInitialLon, pos.lat, pos.lng);
+						if (jarak > 1) {
+							alert("Marker tujuan tidak boleh dipindah lebih dari 1KM.");
+							marker.setLatLng([destInitialLat, destInitialLon]);
+							marker.openPopup();
 						} else {
-							markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
+							updateDestinationLocation(pos.lat, pos.lng, marker);
 						}
-						if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
-					}, 'json');
-				}
+					});
 
-				if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
-			}, 'json');
-		}
+					window.destinationMap.on('click', function (e) {
+						let jarak = hitungJarak(destInitialLat, destInitialLon, e.latlng.lat, e.latlng.lng);
+						if (jarak > 1) {
+							alert("Marker tujuan tidak boleh dipindah lebih dari 1KM.");
+							marker.setLatLng([destInitialLat, destInitialLon]);
+							marker.openPopup();
+						} else {
+							marker.setLatLng([e.latlng.lat, e.latlng.lng]);
+							updateDestinationLocation(e.latlng.lat, e.latlng.lng, marker);
+						}
+					});
 
-		function hitungJarakDanTampilkan() {
-			const jarak = hitungJarak(origin_lat, origin_lon, dest_lat, dest_lon);
-			$('#distance_result').val(jarak.toFixed(2));
-		}
+					function updateDestinationLocation(lat, lon, markerRef) {
+						dest_lat = lat;
+						dest_lon = lon;
+						$("#destination_lat").val(lat.toFixed(6));
+						$("#destination_lon").val(lon.toFixed(6));
 
-		function hitungJarak(lat1, lon1, lat2, lon2) {
-			const R = 6371;
-			const dLat = toRad(lat2 - lat1);
-			const dLon = toRad(lon2 - lon1);
-			const rLat1 = toRad(lat1);
-			const rLat2 = toRad(lat2);
+						$.post("ajax/geoapify.php", {
+							lat: lat,
+							lon: lon
+						}, function (res) {
+							if (res.status === "success") {
+								$("#destination_address").val(res.formatted);
+								markerRef.bindPopup(`Tujuan diperbarui:<br>${res.formatted}<br>Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}`).openPopup();
+							} else {
+								markerRef.bindPopup(`Lat: ${lat}<br>Lon: ${lon}<br>${res.message}`).openPopup();
+							}
+							if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
+						}, 'json');
+					}
 
-			const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-				Math.cos(rLat1) * Math.cos(rLat2) *
-				Math.sin(dLon / 2) * Math.sin(dLon / 2);
+					if (origin_lat && origin_lon && dest_lat && dest_lon) hitungJarakDanTampilkan();
+				}, 'json');
+			}
 
-			const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-			return R * c;
-		}
+			function hitungJarakDanTampilkan() {
+				const jarak = hitungJarak(origin_lat, origin_lon, dest_lat, dest_lon);
+				$('#distance_result').val(jarak.toFixed(2));
+			}
 
-		function toRad(value) {
-			return value * Math.PI / 180;
-		}
+			function hitungJarak(lat1, lon1, lat2, lon2) {
+				const R = 6371;
+				const dLat = toRad(lat2 - lat1);
+				const dLon = toRad(lon2 - lon1);
+				const rLat1 = toRad(lat1);
+				const rLat2 = toRad(lat2);
+
+				const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+					Math.cos(rLat1) * Math.cos(rLat2) *
+					Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+				const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+				return R * c;
+			}
+
+			function toRad(value) {
+				return value * Math.PI / 180;
+			}
 
     </script>
 	
@@ -697,14 +682,14 @@ if($mode == 'View')
 						<div style="width:100%;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"><b>#Quo No :</b></span>
 							<input type="text"  id ="quo_no" name="quo_no" value="<?php echo $quo_no; ?>" 
-							style="text-align: center;width:16%" readonly <?php echo $dis;?> >						
+							style="text-align: left;width:20%" readonly <?php echo $dis;?> >						
 							<input type="hidden"  id ="id_quo" name="id_quo" value="<?php echo $id_quo; ?>" >	
 							<input type="hidden"  id ="mode" name="mode" value="<?php echo $mode; ?>" >
 						</div>
 						<div style="width:100%;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
 							<input type="text"  id ="quo_date" name="quo_date" value="<?php echo $quo_date; ?>" 
-							style="text-align: center;width:16%" readonly <?php echo $dis;?>  >
+							style="text-align: left;width:20%" readonly <?php echo $dis;?>  >
 						</div>				
 						<div style="width:100%;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Customer :</b></span>
@@ -719,16 +704,16 @@ if($mode == 'View')
 						</div>
 						<div style="width:100%;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Sales :</b></span>
-								<select id="sales" name="sales" style="width: 70%;padding:4px">
-									<?php
-									$t1="select * from m_sales_tr where status = '1' order by nama  ";
-									$h1=mysqli_query($koneksi, $t1);       
-									while ($d1=mysqli_fetch_array($h1)){?>
-									<option value="<?php echo $d1['nama'];?>" ><?php echo $d1['nama'];?></option>
-									<?php }?>
-									<option value="<?php echo $sales;?>" selected><?php echo $sales;?></option>
-								</select>
-							</div>		
+							<select id="sales" name="sales" style="width: 70%;padding:4px">
+								<?php
+								$t1="select * from m_sales_tr where status = '1' order by nama  ";
+								$h1=mysqli_query($koneksi, $t1);       
+								while ($d1=mysqli_fetch_array($h1)){?>
+								<option value="<?php echo $d1['nama'];?>" ><?php echo $d1['nama'];?></option>
+								<?php }?>
+								<option value="<?php echo $sales;?>" selected><?php echo $sales;?></option>
+							</select>
+						</div>		
 						<br>	
 					</div>
 				</div>
@@ -830,7 +815,6 @@ if($mode == 'View')
 								<br>
 							</div>
 
-
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
 								<select id="id_tujuan" name="id_tujuan" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
@@ -855,9 +839,9 @@ if($mode == 'View')
 
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Container Type :</b></span>
-								<select id="jenis" name="jenis" onchange="CekRate()" <?php echo $dis;?> style="width: 80%;padding:4px">
+								<select id="jenis" name="jenis" onchange="CekRate_Umum()" <?php echo $dis;?> style="width: 80%;padding:4px">
 									<?php
-									$t1="select * from m_jenis_mobil_tr where status = '1' order by nama   ";
+									$t1="SELECT * from m_jenis_mobil_tr where status = '1' order by nama   ";
 									$h1=mysqli_query($koneksi, $t1);       
 									while ($d1=mysqli_fetch_array($h1)){?>
 									<option value="<?php echo $d1['nama'];?>" ><?php echo $d1['nama'];?></option>
@@ -868,7 +852,7 @@ if($mode == 'View')
 								<span class="input-group-addon" style="text-align:right; background:none; min-width:150px;">
 									<b>Price Type :</b>
 								</span>
-								<select id="price_type" class="form-select" style="width:40%;" onchange="CekRate()" >
+								<select id="price_type" class="form-select" style="width:40%;" onchange="CekRate_Umum()" >
 									<option value="low">Low</option>
 									<option value="middle">Middle</option>
 									<option value="high" selected>High</option>
@@ -885,6 +869,14 @@ if($mode == 'View')
 								
 							</div>
 							
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Max Price:</b></span>
+								<input type="text" id="max_price" style="text-align: right;width:40%;"  value="0" readonly>
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Min Price:</b></span>
+								<input type="text" id="min_price" style="text-align: right;width:40%;" value="0"  readonly>
+							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Shipping Cost :</b></span>
 								<input type="text" id="biaya_kirim" style="text-align: right;width:40%;" 
@@ -957,6 +949,5 @@ if($mode == 'View')
 	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>
-	
   </body>
 </html>

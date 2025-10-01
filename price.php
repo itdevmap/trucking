@@ -106,6 +106,43 @@ else
 			});
 		}
 
+		// function GetData(id) {
+		// 	$("#id").val(id);	
+		// 	$.post("ajax/price_crud.php", {
+		// 			id: id, type:"Detil_Data"
+		// 		},
+		// 		function (data, status) {
+		// 			var data = JSON.parse(data);
+					
+		// 			$("#id_asal").val(data.id_asal);
+		// 			$("#id_tujuan").val(data.id_tujuan);
+		// 			$("#origin_address").val(data.origin_address);
+		// 			$("#origin_lon").val(data.origin_lon);
+		// 			$("#origin_lat").val(data.origin_lat);
+		// 			$("#destination_address").val(data.destination_address);
+		// 			$("#destination_lon").val(data.destination_lon);
+		// 			$("#destination_lat").val(data.destination_lat);
+		// 			$("#distance_result").val(data.km);
+		// 			$("#price_type").val(data.price_type && data.price_type !== "" ? data.price_type : "high");
+
+		// 			$("#jenis_mobil").val(data.jenis_mobil);
+		// 			$("#km").val(data.km);
+		// 			$("#max_price").val(Desimal(data.max_price));
+		// 			$("#min_price").val(Desimal(data.min_price));
+		// 			$("#uj").val(Desimal(data.uj));
+		// 			$("#ritase").val(Desimal(data.ritase));
+		// 			$("#stat").val(data.status);
+		// 			$("#mode").val('Edit');
+
+		// 			setTimeout(() => {
+		// 				origin_address();
+		// 				destination_address();
+		// 			}, 200);
+		// 		}
+		// 	);
+		// 	$("#Data").modal("show");
+		// }
+
 		function GetData(id) {
 			$("#id").val(id);	
 			$.post("ajax/price_crud.php", {
@@ -132,9 +169,21 @@ else
 					$("#uj").val(Desimal(data.uj));
 					$("#ritase").val(Desimal(data.ritase));
 					$("#stat").val(data.status);
+
 					$("#mode").val('Edit');
 
-					// 🧠 Kasih delay sedikit biar DOM update dulu
+					$("#id_asal").prop("disabled", true);
+					// $("#origin_address").prop("readonly", true);
+					$("#origin_lat").prop("readonly", true);
+					$("#origin_lon").prop("readonly", true);
+					$("#origin_map").hide();
+
+					$("#id_tujuan").prop("disabled", true);
+					// $("#destination_address").prop("readonly", true);
+					$("#destination_lat").prop("readonly", true);
+					$("#destination_lon").prop("readonly", true);
+					$("#destination_map").hide();
+
 					setTimeout(() => {
 						origin_address();
 						destination_address();
@@ -144,8 +193,7 @@ else
 			$("#Data").modal("show");
 		}
 
-
-		function add() {	
+		function add() {
 			var r = confirm("Are you sure ?...");
 			if (r == true) {	
 				var id = $("#id").val();
@@ -209,8 +257,7 @@ else
 		function Tampil(){	
 			ReadData('1');
 		}
-		function TampilData() 
-		{
+		function TampilData() {
 			$("#rate").val('');
 			$("#uj").val('');
 			$("#ritase").val('');
@@ -598,19 +645,21 @@ else
 							</div>
 							<br>
 
+							<input type="hidden" id="id"/>	
+							<input type="hidden" id="mode"/>	
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
 								<select size="1" id="id_asal"  style="padding:4px;margin-right:2px;width:80%">
+									<option value="" hidden selected></option>
 									<?php 
-									$t1="select * from m_kota_tr where status = '1'  order by nama_kota";
+									$t1="SELECT * FROM m_kota_tr WHERE `status` = '1' ORDER BY nama_kota";
 									$h1=mysqli_query($koneksi, $t1);       
 									while ($d1=mysqli_fetch_array($h1)){  
 									?>
 									<option value="<?php echo $d1['id_kota'];?>"><?php echo $d1['nama_kota'];?></option>
 									<?php }?>
-								</select>	
-								<input type="hidden" id="id"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
-								<input type="hidden" id="mode"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
+								</select>
 							</div>	
 							<!-- -------------- ORIGIN CHECK LOCATION -------------- -->
 							<div style="width:100%;" class="input-group">
@@ -626,7 +675,7 @@ else
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
 								<select size="1" id="id_tujuan"  style="padding:4px;margin-right:2px;width:80%">
 									<?php 
-									$t1="select * from m_kota_tr where status = '1'  order by nama_kota";
+									$t1="SELECT * from m_kota_tr where status = '1'  order by nama_kota";
 									$h1=mysqli_query($koneksi, $t1);       
 									while ($d1=mysqli_fetch_array($h1)){  
 									?>

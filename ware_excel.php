@@ -13,8 +13,7 @@ $cari= $pecah[4];
 $field1 = $pecah[5];
 $cari1 = $pecah[6];
 
-	if($field == 'Kode Barang')
-	{
+	if($field == 'Kode Barang'){
 		$f = 't_ware.kode';	
 	}else if($field == 'Nama Barang'){
 		$f = 't_ware.nama';	
@@ -26,8 +25,7 @@ $cari1 = $pecah[6];
 		$f = 't_ware.nama';	
 	}
 	
-	if($field1 == 'Kode Barang')
-	{
+	if($field1 == 'Kode Barang'){
 		$f1 = 't_ware.kode';	
 	}else if($field1 == 'Nama Barang'){
 		$f1 = 't_ware.nama';	
@@ -38,7 +36,6 @@ $cari1 = $pecah[6];
 	}else{
 		$f1 = 't_ware.nama';	
 	}
-	
 ?>
 
 <table border="0">
@@ -51,9 +48,7 @@ $cari1 = $pecah[6];
 	</tr>
 </table>
 
-
 <table border="1">
-	
 	<tr>
 		<th style="font-size:12; width:90px;text-align:center">NO</th>
 		<th style="font-size:12; width:90px;text-align:center">ITEM NUMBER</th>
@@ -72,9 +67,9 @@ $cari1 = $pecah[6];
 	</tr>
 	
 	<?php
-	$t1 = "select t_ware.*, t_ware_quo.quo_no,	m_cust_tr.nama_cust
-			from 
-		   	t_ware left join t_ware_quo on t_ware.id_quo = t_ware_quo.id_quo
+	$t1 = "SELECT t_ware.*, t_ware_quo.quo_no,	m_cust_tr.nama_cust
+			from t_ware 
+			left join t_ware_quo on t_ware.id_quo = t_ware_quo.id_quo
 		   	left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
 		   	where  t_ware_quo.status = '1' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' 
 			order by t_ware.nama";	
@@ -85,7 +80,6 @@ $cari1 = $pecah[6];
 	{
 		$n++;
 		$sisa  = $d1['masuk'] - $d1['keluar'];
-		
 	?>
 	
 		<tr>
@@ -106,7 +100,6 @@ $cari1 = $pecah[6];
 			<td style="text-align:center"><?php echo "$sisa";?></b></td>
 		</tr>
 
-		
 	<?php }
 	$t_sisa = $t_tag - $t_bayar;
 	?>

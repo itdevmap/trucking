@@ -939,21 +939,29 @@ else if ($_GET['type'] == "Read_In")
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 	
 	
-	if($stat == 'All')
-	{
-		$SQL = "select t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, 
-			t_ware_data_detil.masuk, t_ware_data_detil.keluar, t_ware.nama, t_ware.kode, 
-			t_ware.vol, t_ware.unit, m_cust_tr.nama_cust, m_lokasi_ware.nama as nama_lokasi
-			from  
-			t_ware_data left join t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data
-			left join t_ware on t_ware_data_detil.id_ware = t_ware.id_ware 
-			left join t_ware_quo on t_ware.id_quo = t_ware_quo.id_quo
-			left join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
-			left join m_lokasi_ware on t_ware_data_detil.id_lokasi = m_lokasi_ware.id_lokasi
-			where t_ware_data.tanggal between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' and t_ware_data.jenis = '0'
-			order  by t_ware_data.tanggal desc LIMIT $offset, $jmlperhalaman";
+	if($stat == 'All'){
+		$SQL = "SELECT 
+					t_ware_data.*, 
+					t_ware_data_detil.id_detil, 
+					t_ware_data_detil.no_cont, 
+					t_ware_data_detil.masuk, 
+					t_ware_data_detil.keluar, 
+					t_ware.nama, 
+					t_ware.kode, 
+					t_ware.vol, 
+					t_ware.unit, 
+					m_cust_tr.nama_cust, 
+					m_lokasi_ware.nama as nama_lokasi
+				from  t_ware_data 
+				left join t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data
+				left join t_ware on t_ware_data_detil.id_ware = t_ware.id_ware 
+				left join t_ware_quo on t_ware.id_quo = t_ware_quo.id_quo
+				left join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
+				left join m_lokasi_ware on t_ware_data_detil.id_lokasi = m_lokasi_ware.id_lokasi
+				where t_ware_data.tanggal between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' and t_ware_data.jenis = '0'
+				order  by t_ware_data.tanggal desc LIMIT $offset, $jmlperhalaman";
 	}else{
-		$SQL = "select t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, t_ware_data_detil.masuk, t_ware_data_detil.keluar, t_ware.nama, t_ware.kode, 
+		$SQL = "SELECT t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, t_ware_data_detil.masuk, t_ware_data_detil.keluar, t_ware.nama, t_ware.kode, 
 			t_ware.vol, t_ware.unit, m_cust_tr.nama_cust, m_lokasi_ware.nama as nama_lokasi
 			from  
 			t_ware_data left join t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data
@@ -965,6 +973,9 @@ else if ($_GET['type'] == "Read_In")
 			and t_ware_data.status = '$stat'
 			order  by t_ware_data.tanggal desc LIMIT $offset, $jmlperhalaman";
 	}
+
+	// echo $SQL;
+	// die();
 	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
@@ -1015,8 +1026,7 @@ else if ($_GET['type'] == "Read_In")
 					<button type="button" class="btn btn-'.$label.'" style="width:100%;padding:1px;margin:-3px">'.$status.'</button>
 				</td>';	
 				
-				if($row['status'] == '1')
-				{
+				if($row['status'] == '1') {
 					$data .= '<td style="text-align:right">
 					<button class="btn btn-block btn-primary"  
 						style="padding:1px;border-radius:0px;width:100%;text-align:center" type="button" 
@@ -1024,16 +1034,18 @@ else if ($_GET['type'] == "Read_In")
 						'.$row['masuk'].'
 					</button>
 					</td>';
+					
 					$data .= '<td style="text-align:right">
 						<button class="btn btn-block btn-warning"  
 							style="padding:1px;border-radius:0px;width:100%;text-align:center" type="button" 
-							onClick="javascript:DownloadData('.$row['id_detil'].')"  >
+							onClick="javascript:DownloadStok('.$row['id_detil'].')"  >
 							'.$row['keluar'].'
 						</button>
-					</td>';				
+					</td>';		
+
 					$data .= '<td style="text-align:right">
 						<button class="btn btn-block btn-success"  
-							style="padding:1px;border-radius:0px;width:100%;text-align:center" type="button"   >
+							style="padding:1px;border-radius:0px;width:100%;text-align:center" type="button">
 							'.$sisa.'
 						</button>
 						</td>';
@@ -1049,9 +1061,7 @@ else if ($_GET['type'] == "Read_In")
 					$data .='<td></td>';
 				}
 				
-				
-				
-				if($m_edit == '1' && $row['status'] =='0' ){
+				if($m_edit == '1' && $row['status'] =='0' ) {
 					$xy1="Edit|$row[id_data]";
 					$xy1=base64_encode($xy1);
 					$link = "'ware_in_data.php?id=$xy1'";
@@ -1062,13 +1072,11 @@ else if ($_GET['type'] == "Read_In")
 									<span class="fa fa-edit " ></span>
 								</button></td>';
 				}
-				else
-				{
+				else {
 					$data .='<td></td>';
 				}
 				
-				if($m_del == '1' && $row['status'] == '0') 	
-				{
+				if($m_del == '1' && $row['status'] == '0') {
 					if(empty($row['id_detil']))
 					{
 						$data .= '<td>
@@ -1086,8 +1094,7 @@ else if ($_GET['type'] == "Read_In")
 								</button></td>';
 					}
 				}
-				else
-				{
+				else {
 					$data .='<td></td>';
 				}
 				
@@ -1101,10 +1108,10 @@ else if ($_GET['type'] == "Read_In")
 								</button></td>';
 						
 				}
-				else
-				{
+				else {
 					$data .='<td></td>';
 				}
+
 				$xy1="$row[id_data]";
 				$xy1=base64_encode($xy1);
 				$link = "'cetak_po_masuk.php?id=$xy1'";
@@ -1119,8 +1126,7 @@ else if ($_GET['type'] == "Read_In")
     		$number++;
     	}		
     }
-    else
-    {
+    else {
     	$data .= '<tr><td colspan="7">Records not found!</td></tr>';
     }
     $data .= '</table>';
@@ -1487,7 +1493,6 @@ else if ($_GET['type'] == "List_Barang")
 
 
 }	
-
 
 else if ($_GET['type'] == "Read_Out")
 {

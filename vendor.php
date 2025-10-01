@@ -4,7 +4,7 @@ include "koneksi.php";
 include "session_log.php"; 
 include "lib.php";
 
-$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='9' ");
+$pq = mysqli_query($koneksi, "SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='9' ");
 $rq=mysqli_fetch_array($pq);	
 $m_edit = $rq['m_edit'];
 $m_add = $rq['m_add'];
@@ -175,7 +175,6 @@ else
 				for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++)
 					num = num.substring(0,num.length-(4*i+3))+','+
 					num.substring(num.length-(4*i+3));
-			//return (((sign)?'':'-') + '' + num + '.' + cents);
 			return (((sign)?'':'-') + '' + num);
 		}
 		function isNumber(evt) {
@@ -321,7 +320,7 @@ else
 								<span class="input-group-addon" style="text-align:right;"><b>Address :</b></span>
 								<textarea name="alamat" id="alamat"
 								style="resize:none;width: 80%; height: 84px; font-size: 11px; line-height: 12px; 
-								border: 1px solid #4; padding: 5px;" ></textarea>
+								border: 1px solid #444; padding: 5px;" ></textarea>
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Phone :</b></span>

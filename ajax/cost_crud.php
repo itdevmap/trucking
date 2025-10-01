@@ -23,12 +23,13 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="60%" style="text-align: center;">COST NAME</th>
+					<th rowspan="2" width="55%" style="text-align: center;">COST NAME</th>
 					<th rowspan="2" width="5%" style="text-align: center;">SAP CODE SIM</th>
 					<th rowspan="2" width="5%" style="text-align: center;">SAP CODE AMA</th>
 					<th rowspan="2" width="5%" style="text-align: center;">SAP CODE PTL</th>
 					<th rowspan="2" width="5%" style="text-align: center;">SAP CODE AA</th>
 					<th rowspan="2" width="9%" style="text-align: center;">CREATED</th>
+					<th rowspan="2" width="5%" style="text-align: center;">ITEM PPH</th>
 					<th rowspan="2" width="5%" style="text-align: center;">STATUS</th>
 					<th rowspan="2" width="3%" style="text-align: center;">EDIT</th>	
 				</tr>
@@ -42,7 +43,7 @@ if ($_GET['type'] == "Read")
 	$jmlperhalaman = $paging;
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 	
-	$SQL = "select * from m_cost_tr where nama_cost LIKE '%$cari%' order by nama_cost  LIMIT $offset, $jmlperhalaman";	
+	$SQL = "SELECT * from m_cost_tr where nama_cost LIKE '%$cari%' order by nama_cost  LIMIT $offset, $jmlperhalaman";	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
@@ -59,7 +60,9 @@ if ($_GET['type'] == "Read")
 				<td style="text-align:center">'.$row['sapitemcode_ama'].'</td>
 				<td style="text-align:center">'.$row['sapitemcode_ptl'].'</td>
 				<td style="text-align:center">'.$row['sapitemcode_aa'].'</td>
-				<td style="text-align:center">'.$row['id_user'].'</td>';					
+				<td style="text-align:center;text-transform:uppercase;">'.$row['id_user'].'</td>
+				<td style="text-align:center;text-transform:uppercase;">'.$row['item_pph'].'</td>
+				';					
 				if($row['status'] =='0'){
 				$data .= '<td style="text-align:center">
 					<span class="label label-danger" style="font-weight:normal;font-size:11px;text-shadow:none;padding:3px;">
@@ -73,12 +76,13 @@ if ($_GET['type'] == "Read")
 					</span>
 					</td>';
 				}
+
 				if($m_edit == '1' && $row['id_cost'] !='1' ){
 					$data .= '<td>
 								<button class="btn btn-block btn-default" title="Edit"
 									style="margin:-3px;margin-left:1px;border-radius:0px" type="button" 
 									onClick="javascript:GetData('.$row['id_cost'].')"  >
-									<span class="fa fa-edit " ></span>
+									<span class="fa fa-edit" ></span>
 								</button></td>';
 				}
 				else
@@ -143,33 +147,36 @@ if ($_GET['type'] == "Read")
 }else if ($_POST['type'] == "add"){		
 	if($_POST['mode'] != '' )
 	{	
-		$id = $_POST['id'];
-		$cost_name = addslashes(trim(strtoupper($_POST['cost_name'])));
-		$stat = $_POST['stat'];
-		$st = $_POST['st'];
-		$sim = addslashes(trim(strtoupper($_POST['sim'])));
-		$ama = addslashes(trim(strtoupper($_POST['ama'])));
-		$ptl = addslashes(trim(strtoupper($_POST['ptl'])));
-		$aa = addslashes(trim(strtoupper($_POST['aa'])));
-		$mode = $_POST['mode'];
+		$id 		= $_POST['id'];
+		$cost_name 	= addslashes(trim(strtoupper($_POST['cost_name'])));
+		$stat 		= $_POST['stat'];
+		$st 		= $_POST['st'];
+		$item_pph 	= $_POST['item_pph'];
+		$sim 		= addslashes(trim(strtoupper($_POST['sim'])));
+		$ama 		= addslashes(trim(strtoupper($_POST['ama'])));
+		$ptl 		= addslashes(trim(strtoupper($_POST['ptl'])));
+		$aa 		= addslashes(trim(strtoupper($_POST['aa'])));
+		$mode 		= $_POST['mode'];
+		
 		if($mode == 'Add')
 		{			
-			$sql = "INSERT INTO m_cost_tr (nama_cost,jenis,id_user,status, sapitemcode_sim, sapitemcode_ama, sapitemcode_ptl, sapitemcode_aa) values
-					('$cost_name','$st','$id_user','$stat', '$sim', '$ama', '$ptl', '$aa')";
+			$sql = "INSERT INTO m_cost_tr (nama_cost,jenis,id_user,item_pph, `status`, sapitemcode_sim, sapitemcode_ama, sapitemcode_ptl, sapitemcode_aa) values
+					('$cost_name','$st','$id_user', '$item_pph','$stat', '$sim', '$ama', '$ptl', '$aa')";
 			$hasil=mysqli_query($koneksi, $sql);
 		}
 		else
 		{
-			$sql = "update m_cost_tr set 
-					nama_cost = '$cost_name',
-					status = '$stat',
-					jenis = '$st',
-					id_user = '$id_user',
-					sapitemcode_sim = '$sim',
+			$sql = "UPDATE m_cost_tr set 
+					nama_cost 		= '$cost_name',
+					item_pph 		= '$item_pph',
+					`status` 		= '$stat',
+					jenis 			= '$st',
+					id_user 		= '$id_user',
+					sapitemcode_sim	= '$sim',
 					sapitemcode_ama = '$ama',
 					sapitemcode_ptl = '$ptl',
-					sapitemcode_aa = '$aa'
-					where id_cost = '$id'	";
+					sapitemcode_aa 	= '$aa'
+					where id_cost 	= '$id'	";
 			$hasil=mysqli_query($koneksi, $sql);
 		}
 		if (!$hasil) {

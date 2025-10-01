@@ -5,7 +5,7 @@ include("../koneksi.php");
 include "../lib.php";
 
 
-$sql = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='8' ");
+$sql = mysqli_query($koneksi,"SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='8' ");
 $data=mysqli_fetch_array($sql);
 $m_edit = $data['m_edit'];
 $m_add = $data['m_add'];
@@ -13,8 +13,7 @@ $m_del = $data['m_del'];
 $m_view = $data['m_view'];
 $m_exe = $data['m_exe'];
 
-if ($_GET['type'] == "read")
-{
+if ($_GET['type'] == "read"){
 	$hal = $_GET['hal'];
 	$paging = $_GET['paging'];
 	$search_name = $_GET['search_name'];
@@ -30,10 +29,11 @@ if ($_GET['type'] == "read")
 					<th rowspan="2" width="10%" style="text-align: center;">CONTACT PERSON</th>
 					<th rowspan="2" width="8%" style="text-align: center;">PHONE</th>
 					<th rowspan="2" width="16%" style="text-align: center;">EMAIL</th>
+					<th rowspan="2" width="2%" style="text-align: center;">TGL TEMPO</th>					
 					<th rowspan="2" width="7%" style="text-align: center;">CREATED</th>					
+					<th rowspan="2" width="6%" style="text-align: center;">ITEM PPH</th>
 					<th rowspan="2" width="6%" style="text-align: center;">STATUS</th>
-					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>		
-					<th rowspan="2" width="2%" style="text-align: center;">RATE</th>					
+					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>				
 				</tr>
 			</thead>';			
 	if(!isset($_GET['hal'])){ 
@@ -46,7 +46,7 @@ if ($_GET['type'] == "read")
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 
 	
-	$SQL = "select * from m_cust_tr where nama_cust LIKE '%$search_name%'  order by nama_cust LIMIT $offset, $jmlperhalaman";	
+	$SQL = "SELECT * FROM m_cust_tr WHERE nama_cust LIKE '%$search_name%'  ORDER BY nama_cust LIMIT $offset, $jmlperhalaman";	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
@@ -63,12 +63,15 @@ if ($_GET['type'] == "read")
 			$link = "cust_data.php?id=$xy1";
 			$data .= '<tr>							
 				<td style="text-align:center">'.$posisi.'.</td>	
-				<td style="text-align:left">'.$row['nama_cust'].'</td>
+				<td style="text-align:left; text-transform:uppercase;">'.$row['nama_cust'].'</td>
 				<td style="text-align:center">'.$row['caption'].'</td>
 				<td style="text-align:center">'.$row['kontak'].'</td> 	
 				<td style="text-align:center">'.$row['telp'].'</td> 
 				<td style="text-align:center">'.$row['email'].'</td>
-				<td style="text-align:center">'.$row['created'].'</td>';
+				<td style="text-align:center; text-transform:uppercase;">'.$row['tgl_tempo'].'</td>
+				<td style="text-align:center; text-transform:uppercase;">'.$row['created'].'</td>
+				<td style="text-align:center; text-transform:uppercase;">'.$row['pph'].'</td>
+				';	
 			
 			if($row['status'] =='0' ){
 					$data .= '<td style="text-align:center">
@@ -81,25 +84,29 @@ if ($_GET['type'] == "read")
 			}
 			
 			if($m_edit == '1' && $row['id_cust'] != '1'){
-				$data .= '<td>
-						<button class="btn btn-block btn-default" 
-						style="margin:-3px;border-radius:0px" type="button" 
-						onClick="javascript:GetData('.$row['id_cust'].')"   >
-						<span class="fa fa-edit " ></span>
-						</button></td>';					
-				}
-				else
-				{
-					$data .='<td></td>';
-				}	
-			$data .='<td   style="text-align:center">
-					<button class="btn btn-block btn-default" title="List Payment"
-						style="margin:-3px;margin-left:1px;border-radius:0px" type="button" 
-						onClick="javascript:ListRate('.$row['id_cust'].')"  >
-						<span class="glyphicon glyphicon-search" ></span>
-					</button>	
-				</td>';			
-				$data .='</tr>';
+				$data .= '
+				<td>
+					<button class="btn btn-block btn-default" 
+					style="margin:-3px;border-radius:0px" type="button" 
+					onClick="javascript:GetData('.$row['id_cust'].')"   >
+					<span class="fa fa-edit " ></span>
+					</button>
+				</td>';					
+			}
+			else
+			{
+				$data .='<td></td>';
+			}	
+	
+			// $data .='
+			// 	<td   style="text-align:center">
+			// 		<button class="btn btn-block btn-default" title="List Payment"
+			// 			style="margin:-3px;margin-left:1px;border-radius:0px" type="button" 
+			// 			onClick="javascript:ListRate('.$row['id_cust'].')"  >
+			// 			<span class="glyphicon glyphicon-search" ></span>
+			// 		</button>	
+			// 	</td>';			
+			// $data .='</tr>';
     		$number++;
     	}		
     }
@@ -156,44 +163,47 @@ if ($_GET['type'] == "read")
 				
     echo $data;
 
-	
-}else if ($_POST['type'] == "AddData"){		
+}
+else if ($_POST['type'] == "AddData"){		
 	if($_POST['mode'] != '' )
 	{	
-		$id_cust = $_POST['id_cust'];
-		$nama_cust = trim(addslashes($_POST['nama_cust']));
-		$caption = addslashes(strtoupper($_POST['caption']));
-		$kontak = addslashes($_POST['kontak']);
-		$alamat = addslashes($_POST['alamat']);	
-		$telp = addslashes($_POST['telp']);
-		$email = addslashes($_POST['email']);
-		$stat = $_POST['stat'];
-		$mode = $_POST['mode'];
-		$tanggal = ConverTglSql($_POST['tanggal']);
-		$batas = str_replace(",","", $batas);
+		$id_cust 	= $_POST['id_cust'];
+		$nama_cust 	= trim(addslashes($_POST['nama_cust']));
+		$caption 	= addslashes(strtoupper($_POST['caption']));
+		$kontak 	= addslashes($_POST['kontak']);
+		$alamat 	= addslashes($_POST['alamat']);	
+		$telp 		= addslashes($_POST['telp']);
+		$email 		= addslashes($_POST['email']);
+		$stat 		= $_POST['stat'];
+		$item_pph 	= $_POST['item_pph'];
+		$mode 		= $_POST['mode'];
+		$tgl_tempo 	= $_POST['tgl_tempo'];
+		$tanggal 	= ConverTglSql($_POST['tanggal']);
+		$batas 		= str_replace(",","", $batas);
 		
 		if($mode == 'Add')
 		{
-			$sql = "INSERT INTO m_cust_tr (nama_cust, caption, kontak, alamat, telp, email, status, created, tanggal) values
-					('$nama_cust','$caption','$kontak','$alamat','$telp','$email','$stat','$id_user',  '$tanggal')";
+			$sql = "INSERT INTO m_cust_tr (nama_cust, caption, kontak, alamat, telp, email, pph,`status`, created, tanggal, tgl_tempo) values
+					('$nama_cust','$caption','$kontak','$alamat','$telp','$email','$item_pph', '$stat','$id_user', '$tanggal', '$tgl_tempo')";
 			$hasil=mysqli_query($koneksi, $sql);
 		}
 		else
 		{
-			$sql = "update m_cust_tr set 
-					nama_cust = '$nama_cust',
-					caption = '$caption',
-					kontak= '$kontak',
-					alamat = '$alamat',
-					telp = '$telp',
-					status = '$stat',
-					email = '$email'
-					where id_cust = '$id_cust'	";
+			$sql = "UPDATE m_cust_tr set 
+					nama_cust 	= '$nama_cust',
+					caption 	= '$caption',
+					kontak		= '$kontak',
+					alamat 		= '$alamat',
+					telp 		= '$telp',
+					pph 		= '$item_pph',
+					`status` 	= '$stat',
+					email 		= '$email',
+					tgl_tempo 	= '$tgl_tempo'
+					where id_cust = '$id_cust'";
 			$hasil=mysqli_query($koneksi, $sql);
 		}
 		if (!$hasil) {
-	        			
-			//exit(mysql_error());
+	        		
 			echo "Partner Name has found...!";
 	    }
 		else
@@ -201,9 +211,10 @@ if ($_GET['type'] == "read")
 			echo "Data saved!";
 		}
 	}	
-}else if ($_POST['type'] == "DetilData"){
+}
+else if ($_POST['type'] == "DetilData"){
 	$id = $_POST['id'];	
-    $query = "select * from m_cust_tr where id_cust  = '$id'";
+    $query = "SELECT * from m_cust_tr where id_cust  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
         exit(mysqli_error($koneksi));
     }
@@ -221,8 +232,7 @@ if ($_GET['type'] == "read")
     echo json_encode($response);
 
 }
-else if($_GET['type'] == "List_Rate")
-{
+else if($_GET['type'] == "List_Rate"){
 	$id = $_GET['id'];
 	$data = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">
@@ -286,7 +296,8 @@ else if($_GET['type'] == "List_Rate")
     echo $data;	
 
 
-}else if ($_POST['type'] == "Add_Rate"){		
+}
+else if ($_POST['type'] == "Add_Rate"){		
 	if($_POST['mode'] != '' )
 	{	
 		$id_rate = $_POST['id_rate'];
@@ -326,7 +337,8 @@ else if($_GET['type'] == "List_Rate")
 		}
 	}	
 
-}else if ($_POST['type'] == "Detil_Rate"){
+}
+else if ($_POST['type'] == "Detil_Rate"){
 	$id = $_POST['id'];	
     $query = "select * from m_cust_rate_tr where id_rate  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
@@ -345,7 +357,8 @@ else if($_GET['type'] == "List_Rate")
     }
     echo json_encode($response);
 
-}else if ($_POST['type'] == "Del_Rate"){
+}
+else if ($_POST['type'] == "Del_Rate"){
 	$id = $_POST['id']; 
     $query = "DELETE FROM m_cust_rate_tr WHERE id_rate = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
@@ -353,8 +366,8 @@ else if($_GET['type'] == "List_Rate")
     }	
 
 	
-}else if ($_GET['type'] == "ListCust")
-{	
+}
+else if ($_GET['type'] == "ListCust"){
 	$cari = $_GET['cari'];
 	$data = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">
@@ -396,8 +409,8 @@ else if($_GET['type'] == "List_Rate")
     echo $data;		
 	
 
-}else if ($_GET['type'] == "ListCust_Quo")
-{	
+}
+else if ($_GET['type'] == "ListCust_Quo"){	
 	$cari = $_GET['cari'];
 	$data = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">
@@ -447,7 +460,8 @@ else if($_GET['type'] == "List_Rate")
     $data .= '</table>';
     echo $data;		
 
-}else if ($_POST['type'] == "DetilCust_Quo"){
+}
+else if ($_POST['type'] == "DetilCust_Quo"){
 	$id = $_POST['id_quo'];	
     $query = "select t_ware_quo.*, m_cust_tr.nama_cust from 
 		t_ware_quo left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust

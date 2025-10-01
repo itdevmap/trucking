@@ -297,7 +297,7 @@ else
 			$('#Data').modal('show');
 		}
 
-		function AddOrder() {	
+		function AddOrder() {
 			var tanggal = $("#tanggal").val();
 			var no_do = $("#no_do").val();
 
@@ -313,20 +313,21 @@ else
 					var tanggal = $("#tanggal").val();
 					var no_do = $("#no_do").val();
 					var penerima = $("#penerima").val();
+					var id_asal = $("#id_asal").val();
+					var id_tujuan = $("#id_tujuan").val();
+					var jenis_mobil = $("#jenis_mobil").val();
+					var biaya = $("#biaya").val();
+					var uj = $("#uj").val();
+					var ritase = $("#ritase").val();
+					var ket = $("#ket").val();
+					var sap_project = $("#sap_project").val();
 					var barang = $("#barang").val();
 					var berat = $("#berat").val();
 					var vol = $("#vol").val();
 					var no_cont = $("#no_cont").val();
 					var no_seal = $("#no_seal").val();
-					var id_asal = $("#id_asal").val();
-					var id_tujuan = $("#id_tujuan").val();
-					var jenis_mobil = $("#jenis_mobil").val();
 					var id_mobil = $("#id_mobil").val();
 					var id_supir = $("#id_supir").val();
-					var biaya = $("#biaya").val();
-					var uj = $("#uj").val();
-					var ritase = $("#ritase").val();
-					var ket = $("#ket").val();
 
 					$.post("ajax/quo_crud.php", {
 						id_detil: id_detil,
@@ -334,21 +335,22 @@ else
 						tanggal: tanggal,
 						no_do: no_do,
 						penerima: penerima,
+						id_asal: id_asal,
+						id_tujuan: id_tujuan,
+						jenis_mobil: jenis_mobil,						
+						biaya: biaya,
+						uj: uj,
+						ritase: ritase,
+						ket: ket,
+						sap_project: sap_project,
 						barang: barang,
 						berat: berat,
 						vol: vol,
 						no_cont: no_cont,						
 						no_seal: no_seal,						
-						id_asal: id_asal,
-						id_tujuan: id_tujuan,
-						jenis_mobil: jenis_mobil,						
 						id_mobil: id_mobil,						
 						id_supir: id_supir,
-						biaya: biaya,
-						uj: uj,
-						ritase: ritase,
-						ket: ket,
-						type: "AddOrder"
+						type: "AddOrder",
 					}, function (data, status) {
 						alert(data);
 						$("#Data").modal("hide");				
@@ -534,6 +536,18 @@ else
 								<input type="text"  id ="tanggal" style="text-align: center;width:22%" readonly  >
 							</div>
 							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Project :</b></span>
+								<select id="sap_project" <?php echo $dis;?> style="width: 80%;padding:4px">
+									<option value="" hidden></option>
+									<?php
+									$t1="SELECT * FROM sap_project ORDER BY kode_project";
+									$h1=mysqli_query($koneksi, $t1);       
+									while ($d1=mysqli_fetch_array($h1)){?>
+									<option value="<?php echo $d1['rowid'];?>" ><?php echo $d1['kode_project'];?></option>
+									<?php }?>
+								</select>
+							</div>
+							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. DO/PO :</b></span>
 								<input type="text" id="no_do" value="" style="text-transform: uppercase;text-align: left;width:80%;"   >	
 							</div>
@@ -543,49 +557,37 @@ else
 								style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; 
 								border: 1px solid #444; padding: 5px;"  ></textarea>	
 							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Itemname :</b></span>								
-								<input type="text" id="barang" value="" style="text-transform: uppercase;text-align: left;width:80%;"   >	
-							</div>
+
 							
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Weight :</b></span>
-								<input type="text" id="berat" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  > &nbsp;<b>KG</b>	
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Vol :</b></span>
-								<input type="text" id="vol" value="0" style="text-align: right;width:22%;" 
-								onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  > &nbsp;<b>M3</b>	
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Container :</b></span>
-								<input type="text"  id ="no_cont" style="text-transform: uppercase;text-align: center;width:22%"  >														
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Seal :</b></span>
-								<input type="text"  id ="no_seal" style="text-transform: uppercase;text-align: center;width:22%"  >														
-							</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Itemname :</b></span>								
+									<input type="text" id="barang" value="" style="text-transform: uppercase;text-align: left;width:80%;"   >	
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Weight :</b></span>
+									<input type="text" id="berat" value="0" style="text-align: right;width:22%;" 
+									onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  > &nbsp;<b>KG</b>	
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Vol :</b></span>
+									<input type="text" id="vol" value="0" style="text-align: right;width:22%;" 
+									onBlur ="this.value=Desimal(this.value);" onkeypress="return isNumber(event)"  > &nbsp;<b>M3</b>	
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Container :</b></span>
+									<input type="text"  id ="no_cont" style="text-transform: uppercase;text-align: center;width:22%"  >														
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Seal :</b></span>
+									<input type="text"  id ="no_seal" style="text-transform: uppercase;text-align: center;width:22%"  >														
+								</div> 
+							
 
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
 								<input type="hidden" id="id_asal"   value=""  />
 								<input type="text" id="nama_asal" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
 							</div>
-
-							<!-- -------------- ORIGIN CHECK LOCATION -------------- -->
-							<!-- <div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b></b></span>
-								<textarea id="origin_address" class="form-textarea" rows="3" style="width:80%" placeholder="Input Origin Address"></textarea>
-
-								<div id="origin_map" style="height: 200px; width: 80%;display: none;"></div>
-								<input type="text" id="origin_lat" readonly placeholder="Latitude" />
-								<input type="text" id="origin_lon" readonly placeholder="Longitude" />
-								<br>
-								<button type="button" class="btn btn-success" onclick="origin_address()" style="margin-top: 5px;">
-									<b>Check Origin</b>
-								</button>
-							</div> -->
 
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
@@ -596,30 +598,32 @@ else
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
 								<input type="text" id="jenis_mobil" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
-							</div>							
-							<div style="width:100%;" class="input-group">
-									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Police Num :</b></span>
-									<select id="id_mobil"  style="width: 80%;padding:4px">
+							</div>	
+							
+								<div style="width:100%;" class="input-group">
+										<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Police Num :</b></span>
+										<select id="id_mobil"  style="width: 80%;padding:4px">
+											<?php
+											$t1="select * from m_mobil_tr where status = '1' order by no_polisi  ";
+											$h1=mysqli_query($koneksi, $t1);       
+											while ($d1=mysqli_fetch_array($h1)){?>
+											<option value="<?php echo $d1['id_mobil'];?>" ><?php echo $d1['no_polisi'];?></option>
+											<?php }?>
+										</select>
+								</div>
+							
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Driver :</b></span>
+									<select id="id_supir"  style="width: 80%;padding:4px">
 										<?php
-										$t1="select * from m_mobil_tr where status = '1' order by no_polisi  ";
+										$t1="select * from m_supir_tr where status = '1' order by nama_supir  ";
 										$h1=mysqli_query($koneksi, $t1);       
 										while ($d1=mysqli_fetch_array($h1)){?>
-										<option value="<?php echo $d1['id_mobil'];?>" ><?php echo $d1['no_polisi'];?></option>
+										<option value="<?php echo $d1['id_supir'];?>" ><?php echo $d1['nama_supir'];?></option>
 										<?php }?>
 									</select>
-							</div>
-						
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Driver :</b></span>
-								<select id="id_supir"  style="width: 80%;padding:4px">
-									<?php
-									$t1="select * from m_supir_tr where status = '1' order by nama_supir  ";
-									$h1=mysqli_query($koneksi, $t1);       
-									while ($d1=mysqli_fetch_array($h1)){?>
-									<option value="<?php echo $d1['id_supir'];?>" ><?php echo $d1['nama_supir'];?></option>
-									<?php }?>
-								</select>
-							</div>
+								</div>
+							
 							<div  id="tampil_uj" style="display:none;">
 								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Deliv. Cost :</b></span>								
@@ -655,8 +659,6 @@ else
 			</div>
 		</div>	
     </div>
-	
-	
 	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>
