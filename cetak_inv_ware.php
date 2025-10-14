@@ -143,17 +143,30 @@ $pdf->Cell(20,10,"HANDLING",1,0,'C');
 $pdf->Cell(22,10,"JUMLAH",1,1,'C');
 
 $y=62;
-$t1 = "select t_ware_data_detil.*, t_ware_data_detil1.no_cont, t_ware_data.tanggal,
-			t_ware.nama, t_ware.kode, t_ware.vol, t_ware.unit, 
-			t_ware_data1.tanggal as tgl_sj, t_ware_quo.aging_sewa, t_ware_quo.harga_handling
-			from 
-			t_ware_data_detil inner join t_ware_data_detil as t_ware_data_detil1 on 
+$t1 = "SELECT 
+			t_ware_data_detil.*, 
+			t_ware_data_detil1.no_cont, 
+			t_ware_data.tanggal,
+			t_ware.nama, 
+			t_ware.kode, 
+			t_ware.vol, 
+			t_ware.unit, 
+			t_ware_data1.tanggal as tgl_sj, 
+			t_ware_quo.aging_sewa, 
+			t_ware_quo.harga_handling
+			from t_ware_data_detil 
+			inner join t_ware_data_detil as t_ware_data_detil1 on 
 			t_ware_data_detil.id_detil_masuk = t_ware_data_detil1.id_detil
 			left join t_ware_data on t_ware_data_detil1.id_data = t_ware_data.id_data
 			left join t_ware on t_ware_data_detil.id_ware = t_ware.id_ware
 			left join t_ware_data as t_ware_data1 on t_ware_data_detil.id_data = t_ware_data1.id_data
 			left join t_ware_quo on t_ware.id_quo = t_ware_quo.id_quo
-			where t_ware_data_detil.id_data = '$id_data'  order by  t_ware_data_detil.id_detil";			
+			where t_ware_data_detil.id_data = '$id_data'  order by  t_ware_data_detil.id_detil";	
+			
+
+// echo $t1;
+// exit;
+
 $h1 = mysqli_query($koneksi, $t1); 
 while ($d1=mysqli_fetch_array($h1))
 {
@@ -203,10 +216,6 @@ while ($d1=mysqli_fetch_array($h1))
 	$pdf->MultiCell(85,3.5,"$d1[nama]",0,'L');
 	
 	$y=$y+$tinggi;
-	
-	
-	
-	
 }
 
 $totalx = number_format($total,0);

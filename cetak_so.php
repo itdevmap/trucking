@@ -132,7 +132,9 @@ $pq = mysqli_query($koneksi,
 	tr_jo.no_jo,
 	tr_jo.tgl_jo,
 	tr_jo.penerima,
-	m_cust_tr.nama_cust
+	m_cust_tr.nama_cust,
+    tr_jo_detail.uj,
+    tr_jo_detail.ritase
 FROM tr_jo
 LEFT JOIN tr_quo ON tr_quo.id_quo = tr_jo.id_quo
 LEFT JOIN tr_jo_detail ON tr_jo_detail.id_so = tr_jo.id_jo
@@ -145,22 +147,22 @@ WHERE tr_jo.id_jo = '$id_jo'");
 
 $rq = mysqli_fetch_array($pq);
 
-$no_jo = $rq['no_jo'];
-$no_do = $rq['no_do'];
-$ppn = $rq['ppn'];
-$pph = $rq['pph'];
-$tgl_jo = ConverTgl($rq['tgl_jo']);
-$penerima = $rq['penerima'];
-$nama_cust = $rq['nama_cust'];
-$asal = $rq['asal'];
-$tujuan = $rq['tujuan'];
-$nama_supir = $rq['nama_supir'] ?? 'Driver';
-$jenis_mobil = $rq['jenis_mobil'];
-$harga = $rq['biaya_kirim'];
-$hargax = number_format($harga,0);
-$ujx = number_format($rq['uj'],0);	
-$ritasex = number_format($rq['ritase'],0);	
-$total = $total + $harga;
+$no_jo          = $rq['no_jo'];
+$no_do          = $rq['no_do'];
+$ppn            = $rq['ppn'];
+$pph            = $rq['pph'];
+$tgl_jo         = ConverTgl($rq['tgl_jo']);
+$penerima       = $rq['penerima'];
+$nama_cust      = $rq['nama_cust'];
+$asal           = $rq['asal'];
+$tujuan         = $rq['tujuan'];
+$nama_supir     = $rq['nama_supir'] ?? 'Driver';
+$jenis_mobil    = $rq['jenis_mobil'];
+$harga          = $rq['biaya_kirim'];
+$hargax         = number_format($harga,0);
+$ujx            = number_format($rq['uj'],0);	
+$ritasex        = number_format($rq['ritase'],0);	
+$total          = $total + $harga;
 
 $pdf = new PDF('P','mm','A4');
 $pdf->AliasNbPages();
@@ -259,6 +261,7 @@ $so_detail = "SELECT
     tr_jo_detail.uj,
     tr_jo_detail.ritase,
     tr_jo_detail.harga,
+    tr_jo_detail.pph AS wtax , 
     CONCAT(
         'TRUCKING 1X ', tr_jo_detail.jenis_mobil, 
         ' (', m_asal.nama_kota, '-', m_tujuan.nama_kota, ') ',
@@ -324,7 +327,6 @@ while ($d1 = mysqli_fetch_array($data_detail)) {
     ], $widths, $aligns);
 }
 
-// biaya tambahan
 $t1 = "SELECT 
             tr_jo_biaya.*, 
             tr_jo_biaya.pph AS pph_barang, 
@@ -334,7 +336,7 @@ $t1 = "SELECT
         WHERE tr_jo_biaya.id_jo = '$id_jo' 
         ORDER BY tr_jo_biaya.id_biaya";
 $h1 = mysqli_query($koneksi, $t1); 
-$total_wtax_rupiah = 0;
+// $total_wtax_rupiah = 0;
 
 while ($d1 = mysqli_fetch_array($h1)) {
     $n++;
@@ -393,8 +395,8 @@ $pdf->Cell(40, 5, "WTAX TOTAL", 1, 0, 'R');
 $pdf->Cell(23, 5, $wtax_total_text, 1, 1, 'R');
 
 // grand total
-$grand_total = $total + $total_ppn_rupiah;
-$totalx = number_format($grand_total, 0);
+$grand_total = $total - $total_ppn_rupiah - $total_wtax_rupiah;
+$totalx = number_format($grand_total, 0); 
 $pdf->setX(9);
 $pdf->Cell(127, 4, "", 0, 0, 'C');
 $pdf->Cell(40, 5, "TOTAL", 1, 0, 'R');

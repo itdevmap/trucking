@@ -14,28 +14,29 @@ $m_view = $data['m_view'];
 $m_exe = $data['m_exe'];
 
 if ($_GET['type'] == "read"){
-	$hal = $_GET['hal'];
-	$paging = $_GET['paging'];
-	$search_name = $_GET['search_name'];
-	$field = $_GET['field'];	
-	$tipe = $_GET['tipe'];
+	$hal 			= $_GET['hal'];
+	$paging 		= $_GET['paging'];
+	$search_name	= $_GET['search_name'];
+	$field 			= $_GET['field'];	
+	$tipe 			= $_GET['tipe'];
 	
 	$data = '<table class="table table-hover table-striped" style="width:100%">
-			<thead style="font-weight:500px !important">
-				<tr>	
-					<th rowspan="2" width="3%" style="text-align: center;">NO</th>		
-					<th rowspan="2" width="40%" style="text-align: center;">CUSTOMER NAME</th>
-					<th rowspan="2" width="6%" style="text-align: center;">CODE</th>
-					<th rowspan="2" width="10%" style="text-align: center;">CONTACT PERSON</th>
-					<th rowspan="2" width="8%" style="text-align: center;">PHONE</th>
-					<th rowspan="2" width="16%" style="text-align: center;">EMAIL</th>
-					<th rowspan="2" width="2%" style="text-align: center;">TGL TEMPO</th>					
-					<th rowspan="2" width="7%" style="text-align: center;">CREATED</th>					
-					<th rowspan="2" width="6%" style="text-align: center;">ITEM PPH</th>
-					<th rowspan="2" width="6%" style="text-align: center;">STATUS</th>
-					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>				
-				</tr>
-			</thead>';			
+		<thead style="font-weight:500px !important">
+			<tr>	
+				<th rowspan="2" width="3%" style="text-align: center;">NO</th>		
+				<th rowspan="2" width="30%" style="text-align: center;">CUSTOMER NAME</th>
+				<th rowspan="2" width="6%" style="text-align: center;">CODE</th>
+				<th rowspan="2" width="10%" style="text-align: center;">CONTACT PERSON</th>
+				<th rowspan="2" width="10%" style="text-align: center;">PHONE</th>
+				<th rowspan="2" width="16%" style="text-align: center;">EMAIL</th>
+				<th rowspan="2" width="2%" style="text-align: center;">TOP</th>					
+				<th rowspan="2" width="2%" style="text-align: center;">LIMIT</th>					
+				<th rowspan="2" width="7%" style="text-align: center;">CREATED</th>					
+				<th rowspan="2" width="6%" style="text-align: center;">ITEM PPH</th>
+				<th rowspan="2" width="6%" style="text-align: center;">STATUS</th>
+				<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>				
+			</tr>
+		</thead>';			
 	if(!isset($_GET['hal'])){ 
 		$page = 1;       
 		} else { 
@@ -57,7 +58,7 @@ if ($_GET['type'] == "read"){
     	{	
 			$posisi++;	
 			$tanggal = ConverTgl($row['tanggal']);
-			$batas = number_format($row['batas'],0);
+			$overlimit 		= number_format($row['overlimit'],0);
 			$xy1="View|$row[id_cust]";
 			$xy1=base64_encode($xy1);
 			$link = "cust_data.php?id=$xy1";
@@ -69,6 +70,7 @@ if ($_GET['type'] == "read"){
 				<td style="text-align:center">'.$row['telp'].'</td> 
 				<td style="text-align:center">'.$row['email'].'</td>
 				<td style="text-align:center; text-transform:uppercase;">'.$row['tgl_tempo'].'</td>
+				<td style="text-align:center; text-transform:uppercase;">'.$overlimit.'</td>
 				<td style="text-align:center; text-transform:uppercase;">'.$row['created'].'</td>
 				<td style="text-align:center; text-transform:uppercase;">'.$row['pph'].'</td>
 				';	
@@ -164,9 +166,14 @@ if ($_GET['type'] == "read"){
     echo $data;
 
 }
-else if ($_POST['type'] == "AddData"){		
-	if($_POST['mode'] != '' )
-	{	
+
+else if ($_POST['type'] == "AddData"){	
+	// echo "<pre>";
+	// print_r($_POST);
+	// echo "</pre>";
+	// die();
+	
+	if($_POST['mode'] != '' ){	
 		$id_cust 	= $_POST['id_cust'];
 		$nama_cust 	= trim(addslashes($_POST['nama_cust']));
 		$caption 	= addslashes(strtoupper($_POST['caption']));
@@ -180,38 +187,41 @@ else if ($_POST['type'] == "AddData"){
 		$tgl_tempo 	= $_POST['tgl_tempo'];
 		$tanggal 	= ConverTglSql($_POST['tanggal']);
 		$batas 		= str_replace(",","", $batas);
+
+		$raw_overlimit 	= $_POST['overlimit'];
+		$overlimit		= str_replace(",","", $raw_overlimit);
+
+		// echo $overlimit;
+		// die();
 		
-		if($mode == 'Add')
-		{
+		if($mode == 'Add') {
 			$sql = "INSERT INTO m_cust_tr (nama_cust, caption, kontak, alamat, telp, email, pph,`status`, created, tanggal, tgl_tempo) values
 					('$nama_cust','$caption','$kontak','$alamat','$telp','$email','$item_pph', '$stat','$id_user', '$tanggal', '$tgl_tempo')";
 			$hasil=mysqli_query($koneksi, $sql);
-		}
-		else
-		{
-			$sql = "UPDATE m_cust_tr set 
-					nama_cust 	= '$nama_cust',
-					caption 	= '$caption',
-					kontak		= '$kontak',
-					alamat 		= '$alamat',
-					telp 		= '$telp',
-					pph 		= '$item_pph',
-					`status` 	= '$stat',
-					email 		= '$email',
-					tgl_tempo 	= '$tgl_tempo'
-					where id_cust = '$id_cust'";
+		} else {
+			$sql = "UPDATE m_cust_tr SET 
+					nama_cust 		= '$nama_cust',
+					caption 		= '$caption',
+					kontak			= '$kontak',
+					alamat 			= '$alamat',
+					telp 			= '$telp',
+					pph 			= '$item_pph',
+					`status` 		= '$stat',
+					email 			= '$email',
+					tgl_tempo 		= '$tgl_tempo',
+					overlimit 		= '$overlimit'
+					WHERE id_cust 	= '$id_cust'";
 			$hasil=mysqli_query($koneksi, $sql);
 		}
+
 		if (!$hasil) {
-	        		
 			echo "Partner Name has found...!";
-	    }
-		else
-		{	
+	    } else {
 			echo "Data saved!";
 		}
 	}	
 }
+
 else if ($_POST['type'] == "DetilData"){
 	$id = $_POST['id'];	
     $query = "SELECT * from m_cust_tr where id_cust  = '$id'";

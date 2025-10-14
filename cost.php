@@ -1,35 +1,34 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-//include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	//include "lib.php";
 
-$pq = mysqli_query($koneksi,"SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='13' ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+	$pq = mysqli_query($koneksi,"SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='13' ");
+	$rq=mysqli_fetch_array($pq);	
+	$m_edit = $rq['m_edit'];
+	$m_add = $rq['m_add'];
+	$m_del = $rq['m_del'];
+	$m_view = $rq['m_view'];
+	$m_exe = $rq['m_exe'];
 
-if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
- header('location:logout.php'); 
-}
+	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
+	header('location:logout.php'); 
+	}
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{	
-	$hal = $_POST['hal'];
-	$search_name = $_POST['search_name'];
-	$paging = $_POST['paging'];
-}
-else
-{	
-	$paging='25';
-	$hal='1';
-}
+	if($_SERVER['REQUEST_METHOD'] == "POST")
+	{	
+		$hal = $_POST['hal'];
+		$search_name = $_POST['search_name'];
+		$paging = $_POST['paging'];
+	}
+	else
+	{	
+		$paging='25';
+		$hal='1';
+	}
 
 ?>
-
 
 <html>
   <head>
@@ -78,10 +77,13 @@ else
 					var data = JSON.parse(data);
 					$("#cost_name").val(data.nama_cost);
 					$("#stat").val(data.status);
-					$("#sim").val(data.sapitemcode_sim);
-					$("#ama").val(data.sapitemcode_ama);
-					$("#ptl").val(data.sapitemcode_ptl);
-					$("#aa").val(data.sapitemcode_aa);
+					$("#itemcode").val(data.itemcode);
+					$("#sap_coa").val(data.sap_coa);
+					$("#sap_corporate").val(data.sap_corporate);
+					$("#sap_divisi").val(data.sap_divisi);
+					$("#sap_dept").val(data.sap_dept);
+					$("#sap_activity").val(data.sap_activity);
+					$("#sap_location").val(data.sap_location);
 					$("#item_pph").val(data.item_pph);
 					$("#mode").val('Edit');
 				}
@@ -101,11 +103,14 @@ else
 					var cost_name = $("#cost_name").val();
 					var item_pph = $("#item_pph").val();
 					var stat = $("#stat").val();
-					var st = $("#st").val();
-					var sim = $("#sim").val();
-					var ama = $("#ama").val();
-					var ptl = $("#ptl").val();
-					var aa = $("#aa").val();
+
+					var sap_coa = $("#sap_coa").val();
+					var sap_corporate = $("#sap_corporate").val();
+					var sap_divisi = $("#sap_divisi").val();
+					var sap_dept = $("#sap_dept").val();
+					var sap_activity = $("#sap_activity").val();
+					var sap_location = $("#sap_location").val();
+
 					var mode = $("#mode").val();
 					var hal = $("#hal").val();
 					
@@ -114,12 +119,13 @@ else
 						cost_name:cost_name,
 						mode:mode,
 						item_pph:item_pph,
-						st:st,
 						stat:stat,
-						sim:sim,
-						ama:ama,
-						ptl:ptl,
-						aa:aa,
+						sap_coa:sap_coa,
+						sap_corporate:sap_corporate,
+						sap_divisi:sap_divisi,
+						sap_dept:sap_dept,
+						sap_activity:sap_activity,
+						sap_location:sap_location,
 						type : "add"
 						}, function (data, status) {
 						alert(data);
@@ -190,12 +196,12 @@ else
 					<div style="width:100%;background: #fff;" class="input-group" >
 						<span class="input-group-addon" style="width:50%;text-align:left;padding:0px">
 							<?php if ($m_add == '1'){?>
-							<button class="btn btn-block btn-success" 
+							<!-- <button class="btn btn-block btn-success" 
 								style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:2px" type="button" 
 								onClick="javascript:TampilData()">
 								<span class="fa  fa-plus-square"></span>
 								<b>Add New</b>
-							</button>	
+							</button>	 -->
 							<?php }?>								
 						</span>
 						<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
@@ -234,8 +240,6 @@ else
 		</form>
 	</div>	
 		
-	
-	
 	<div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">
@@ -246,33 +250,43 @@ else
 								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Cost</b>
 							</div>	
 							<br>
+							<input type="hidden" id="id"/>	
+							<input type="hidden" id="mode"/>	
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Cost Name :</b></span>
-								<input type="text" id="cost_name"  value="" style="text-transform: uppercase;
-								text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
-								<input type="hidden" id="id"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
-								<input type="hidden" id="mode"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Itemcode :</b></span>
+								<input type="text" id="itemcode"  value="" style="text-transform: uppercase;text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" readonly/>	
 							</div>	
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Code SIM :</b></span>
-								<input type="text" id="sim"  value="" style="text-transform: uppercase;
-								text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
-							</div>		
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Cost Name :</b></span>
+								<input type="text" id="cost_name"  value="" style="text-transform: uppercase;text-align: left;width:75%;border:1px solid rgb(169, 169, 169)"/>	
+							</div>	
+
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Code AMA :</b></span>
-								<input type="text" id="ama"  value="" style="text-transform: uppercase;
-								text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
-							</div>		
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP COA :</b></span>
+								<input type="text" id="sap_coa"  value="" style="text-transform: uppercase; text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
+							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Code PTL :</b></span>
-								<input type="text" id="ptl"  value="" style="text-transform: uppercase;
-								text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
-							</div>		
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Corporate :</b></span>
+								<input type="text" id="sap_corporate"  value="" style="text-transform: uppercase; text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
+							</div>
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Code AA :</b></span>
-								<input type="text" id="aa"  value="" style="text-transform: uppercase;
-								text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
-							</div>								
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Divisi :</b></span>
+								<input type="text" id="sap_divisi"  value="" style="text-transform: uppercase; text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Department :</b></span>
+								<input type="text" id="sap_dept"  value="" style="text-transform: uppercase; text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Activity :</b></span>
+								<input type="text" id="sap_activity"  value="" style="text-transform: uppercase; text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Location :</b></span>
+								<input type="text" id="sap_location"  value="" style="text-transform: uppercase; text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
+							</div>
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Item PPH :</b></span>
 								<select id="item_pph"  style="width: 20%;">

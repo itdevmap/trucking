@@ -1,100 +1,89 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	include "lib.php";
 
-if(!isset($_SESSION['id_user'])  ){
- header('location:logout.php'); 
-}
+	if(!isset($_SESSION['id_user'])  ){
+	header('location:logout.php'); 
+	}
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{		
-	$mode = $_POST['mode'];
-	$id_quo = $_POST['id_quo'];	
-	$quo_date = $_POST['quo_date'];	
-	$id_cust = $_POST['id_cust'];
-	$no_kontrak = trim(addslashes(strtoupper($_POST['no_kontrak'])));
-	$ket = addslashes(trim($_POST['ket']));
-	$quo_datex = ConverTglSql($quo_date);
-	$sales = $_POST['sales'];
-	$max_cbm = $_POST['max_cbm'];
-	$aging_sewa = $_POST['aging_sewa'];
-	$harga_sewa = $_POST['harga_sewa'];
-	$harga_handling = $_POST['harga_handling'];
-	$max_cbm = str_replace(",","", $max_cbm);
-	$harga_sewa = str_replace(",","", $harga_sewa);
-	$harga_handling = str_replace(",","", $harga_handling);
-	
-	if($mode == 'Add' )
-	{
+	if($_SERVER['REQUEST_METHOD'] == "POST"){		
+		$mode = $_POST['mode'];
+		$id_quo = $_POST['id_quo'];	
+		$quo_date = $_POST['quo_date'];	
+		$id_cust = $_POST['id_cust'];
+		$no_kontrak = trim(addslashes(strtoupper($_POST['no_kontrak'])));
+		$ket = addslashes(trim($_POST['ket']));
+		$quo_datex = ConverTglSql($quo_date);
+		$sales = $_POST['sales'];
+		$max_cbm = $_POST['max_cbm'];
+		$aging_sewa = $_POST['aging_sewa'];
+		$harga_sewa = $_POST['harga_sewa'];
+		$harga_handling = $_POST['harga_handling'];
+		$max_cbm = str_replace(",","", $max_cbm);
+		$harga_sewa = str_replace(",","", $harga_sewa);
+		$harga_handling = str_replace(",","", $harga_handling);
 		
+		if($mode == 'Add' )
+		{}else{
+			$sql = "UPDATE t_ware_quo set 
+						id_cust = '$id_cust',
+						ket = '$ket',
+						sales = '$sales',
+						max_cbm = '$max_cbm',
+						aging_sewa = '$aging_sewa',
+						harga_sewa = '$harga_sewa',
+						harga_handling = '$harga_handling',
+						no_kontrak = '$no_kontrak'
+						where id_quo = '$id_quo'";
+			$hasil=mysqli_query($koneksi,$sql);
+		}
+		
+		$cat ="Data saved...";
+		$xy1="Edit|$id_quo|$cat";
+		$xy1=base64_encode($xy1);
+		header("Location: ware_biaya.php?id=$xy1");
+	}
+	else{	
+		$idx = $_GET['id'];	
+		$x=base64_decode($idx);
+		$pecah = explode("|", $x);
+		$mode= $pecah[0];
+		$id_quo = $pecah[1];
+		$cat = $pecah[2];
+	}
+
+	if($mode == 'Add'){
+		$quo_no = '-- Auto -- ';
+		$quo_date = date('d-m-Y');
 		
 	}else{
 		
-		$sql = "update t_ware_quo set 
-					id_cust = '$id_cust',
-					ket = '$ket',
-					sales = '$sales',
-					max_cbm = '$max_cbm',
-					aging_sewa = '$aging_sewa',
-					harga_sewa = '$harga_sewa',
-					harga_handling = '$harga_handling',
-					no_kontrak = '$no_kontrak'
-					where id_quo = '$id_quo'	";
-		$hasil=mysqli_query($koneksi,$sql);
-	
-		
+		$pq = mysqli_query($koneksi, "select t_ware_quo.*, m_cust_tr.nama_cust
+			from 
+			t_ware_quo left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
+			where t_ware_quo.id_quo = '$id_quo'  ");
+		$rq=mysqli_fetch_array($pq);	
+		$quo_no = $rq['quo_no'];
+		$quo_date = ConverTgl($rq['quo_date']);
+		$id_cust = $rq['id_cust'];
+		$nama_cust = $rq['nama_cust'];
+		$no_po = $rq['no_po'];
+		$ket = $rq['ket'];
+		$sales = $rq['sales'];
+		$stat = $rq['status'];
+		$aging_sewa = $rq['aging_sewa'];
+		$no_kontrak = $rq['no_kontrak'];
+		$max_cbm  = number_format($rq['max_cbm'],2);
+		$harga_sewa  = number_format($rq['harga_sewa'],0);
+		$harga_handling  = number_format($rq['harga_handling'],0);
+		$disx = 'Disabled';
 	}
-	
-	$cat ="Data saved...";
-	$xy1="Edit|$id_quo|$cat";
-	$xy1=base64_encode($xy1);
-	header("Location: ware_biaya.php?id=$xy1");
-}
-else
-{	
-	$idx = $_GET['id'];	
-	$x=base64_decode($idx);
-	$pecah = explode("|", $x);
-	$mode= $pecah[0];
-	$id_quo = $pecah[1];
-	$cat = $pecah[2];
-}
 
-if($mode == 'Add')
-{
-	$quo_no = '-- Auto -- ';
-	$quo_date = date('d-m-Y');
-	
-}else{
-	
-	$pq = mysqli_query($koneksi, "select t_ware_quo.*, m_cust_tr.nama_cust
-		  from 
-		  t_ware_quo left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
-		  where t_ware_quo.id_quo = '$id_quo'  ");
-	$rq=mysqli_fetch_array($pq);	
-	$quo_no = $rq['quo_no'];
-	$quo_date = ConverTgl($rq['quo_date']);
-	$id_cust = $rq['id_cust'];
-	$nama_cust = $rq['nama_cust'];
-	$no_po = $rq['no_po'];
-	$ket = $rq['ket'];
-	$sales = $rq['sales'];
-	$stat = $rq['status'];
-	$aging_sewa = $rq['aging_sewa'];
-	$no_kontrak = $rq['no_kontrak'];
-	$max_cbm  = number_format($rq['max_cbm'],2);
-	$harga_sewa  = number_format($rq['harga_sewa'],0);
-	$harga_handling  = number_format($rq['harga_handling'],0);
-	$disx = 'Disabled';
-}
-
-if($mode == 'View')
-{
-	$dis = "Disabled";
-}
-
+	if($mode == 'View'){
+		$dis = "Disabled";
+	}
 ?>
 
 
@@ -426,8 +415,8 @@ if($mode == 'View')
 						?>
 						<div id="tabs5" >
 							<ul> 
-								<li ><?php echo "<a href=$link1>"; ?><span><b>Data Barang</b></span></a></li> 
-								<li id="current"><?php echo "<a href=$link2>"; ?><span><b>Data Biaya Jasa</b></span></a></li>
+								<li ><?php echo "<a href=$link1>"; ?><span><b>DATA ITEM</b></span></a></li> 
+								<li id="current"><?php echo "<a href=$link2>"; ?><span><b>DATA COST SERVICE</b></span></a></li>
 							</ul>
 						</div>	
 					</div>
@@ -440,7 +429,7 @@ if($mode == 'View')
 								style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px" type="button" 
 								onClick="javascript:TampilData()"  <?php echo $dis;?> <?php echo $dis_copy;?> >
 								<span class="fa  fa-plus-square"></span>
-								<b>Add Biaya</b>
+								<b>Add Cost</b>
 							</button>
 						<?php }?>
 						<div class="table-responsive mailbox-messages" style="min-height:10px">									
@@ -488,10 +477,10 @@ if($mode == 'View')
 							</div>	
 							<br>	
 							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Biaya :</b></span>
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>COST NAME :</b></span>
 								<select id="id_biaya" style="width: 80%;padding:4px">
 									<?php
-									$t1="select * from m_cost_tr where status = '1' and id_cost <> '1' order by nama_cost  ";
+									$t1="SELECT * FROM m_cost_tr WHERE `status` = '1' AND id_cost <> '1' ORDER BY nama_cost";
 									$h1=mysqli_query($koneksi, $t1);       
 									while ($d1=mysqli_fetch_array($h1)){?>
 									<option value="<?php echo $d1['id_cost'];?>" ><?php echo $d1['nama_cost'];?></option>

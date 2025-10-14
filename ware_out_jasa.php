@@ -9,22 +9,22 @@
 	}
 
 	if($_SERVER['REQUEST_METHOD'] == "POST"){		
-		$mode = $_POST['mode'];
-		$id_data = $_POST['id_data'];	
-		$id_quo = $_POST['id_quo'];
-		$tgl_sj = $_POST['tgl_sj'];	
-		$id_cust = $_POST['id_cust'];
-		$gudang = trim(addslashes(strtoupper($_POST['gudang'])));
-		$no_do = trim(addslashes(strtoupper($_POST['no_do'])));
-		$id_mobil = $_POST['id_mobil'];
-		$id_supir = $_POST['id_supir'];
-		$supir = trim(addslashes(strtoupper($_POST['supir'])));
-		$no_polisi = trim(addslashes(strtoupper($_POST['no_polisi'])));
-		$telp = trim(addslashes(strtoupper($_POST['telp'])));
-		$ket = addslashes(trim($_POST['ket']));
-		$tgl_sjx = ConverTglSql($tgl_sj);
-		$jenis_sj = $_POST['jenis_sj'];
-		
+		$mode 		= $_POST['mode'];
+		$id_data 	= $_POST['id_data'];	
+		$id_quo 	= $_POST['id_quo'];
+		$tgl_sj 	= $_POST['tgl_sj'];	
+		$id_cust 	= $_POST['id_cust'];
+		$gudang 	= trim(addslashes(strtoupper($_POST['gudang'])));
+		$no_do 		= trim(addslashes(strtoupper($_POST['no_do'])));
+		$id_mobil 	= $_POST['id_mobil'];
+		$id_supir 	= $_POST['id_supir'];
+		$supir 		= trim(addslashes(strtoupper($_POST['supir'])));
+		$no_polisi 	= trim(addslashes(strtoupper($_POST['no_polisi'])));
+		$telp 		= trim(addslashes(strtoupper($_POST['telp'])));
+		$ket 		= addslashes(trim($_POST['ket']));
+		$tgl_sjx 	= ConverTglSql($tgl_sj);
+		$jenis_sj 	= $_POST['jenis_sj'];
+		$rowid 		= $_POST['rowid'];
 		
 		$uj = str_replace(",","", $uj);
 		$ritase = str_replace(",","", $ritase);
@@ -34,10 +34,10 @@
 			$id_mobil = 0;
 			$id_supir = 0;
 		}else{
-			$pq = mysqli_query($koneksi, "select * from m_mobil_tr where id_mobil = '$id_mobil' ");
+			$pq = mysqli_query($koneksi, "SELECT * from m_mobil_tr where id_mobil = '$id_mobil' ");
 			$rq=mysqli_fetch_array($pq);
 			$no_polisi = $rq['no_polisi'];
-			$pq = mysqli_query($koneksi, "select * from m_supir_tr where id_supir = '$id_supir' ");
+			$pq = mysqli_query($koneksi, "SELECT * from m_supir_tr where id_supir = '$id_supir' ");
 			$rq=mysqli_fetch_array($pq);
 			$supir = $rq['nama_supir'];
 			$telp = $rq['telp'];
@@ -92,8 +92,8 @@
 			$year = substr($th,2,2);
 			$no_ref = "RF-$year$noUrut";
 			
-			$sql = "INSERT INTO  t_ware_data (jenis, tanggal, no_doc, id_cust, jenis_sj, gudang, id_mobil, id_supir, no_polisi, supir, telp, ket, created, no_do, jasa, id_quo, no_ref) values
-					('1', '$tgl_sjx', '$no_sj',  '$id_cust', '$jenis_sj', '$gudang', '$id_mobil', '$id_supir', '$no_polisi', '$supir', '$telp','$ket', '$id_user', '$no_do', '1', '$id_quo', '$no_ref')";
+			$sql = "INSERT INTO  t_ware_data (rowid, jenis, tanggal, no_doc, id_cust, jenis_sj, gudang, id_mobil, id_supir, no_polisi, supir, telp, ket, created, no_do, jasa, id_quo, no_ref) values
+					('$rowid','1', '$tgl_sjx', '$no_sj',  '$id_cust', '$jenis_sj', '$gudang', '$id_mobil', '$id_supir', '$no_polisi', '$supir', '$telp','$ket', '$id_user', '$no_do', '1', '$id_quo', '$no_ref')";
 				$hasil= mysqli_query($koneksi, $sql);
 			
 			$sql = mysqli_query($koneksi, "select max(id_data)as id from t_ware_data ");			
@@ -102,7 +102,7 @@
 			
 		}else{
 			
-			$sql = "update t_ware_data set 
+			$sql = "UPDATE t_ware_data set 
 						jenis_sj = '$jenis_sj',
 						tanggal = '$tgl_sjx',
 						id_cust = '$id_cust',
@@ -141,37 +141,51 @@
 		
 	}else{
 		
-		$pq = mysqli_query($koneksi, "select t_ware_data.*, m_cust_tr.nama_cust, t_ware_quo.quo_no
-			from 
-			t_ware_data left join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
+		$pq = mysqli_query($koneksi, "SELECT 
+				t_ware_data.*, 
+				m_cust_tr.nama_cust, 
+				t_ware_quo.quo_no,
+				sap_project.kode_project
+			from t_ware_data 
+			left join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
 			left join t_ware_quo on t_ware_data.id_quo = t_ware_quo.id_quo
+			LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
 			where t_ware_data.id_data = '$id_data'  ");
+
+			// echo $id_data;
+			// exit;
+
 		$rq=mysqli_fetch_array($pq);	
-		$no_sj = $rq['no_doc'];
-		$id_quo = $rq['id_quo'];
-		$quo_no = $rq['quo_no'];
-		$jenis_sj = $rq['jenis_sj'];
-		$jenis_cross = $rq['jenis_cross'];
-		$tgl_sj = ConverTgl($rq['tanggal']);
-		$id_cust = $rq['id_cust'];
-		$nama_cust = $rq['nama_cust'];
-		$gudang = $rq['gudang'];
-		$id_mobil = $rq['id_mobil'];
-		$no_polisi = $rq['no_polisi'];
-		$ket = str_replace("\'","'",$rq['ket']);
-		$id_supir = $rq['id_supir'];
-		$nama_supir = $rq['supir'];
-		$telp = $rq['telp'];
-		$supir = $rq['supir'];
-		$no_do = $rq['no_do'];
-		$no_ref = $rq['no_ref'];
-		$disx = 'Disabled';
-		if($jenis_sj == '1')
-		{
+		$no_sj 			= $rq['no_doc'];
+		$id_quo 		= $rq['id_quo'];
+		$quo_no 		= $rq['quo_no'];
+		$jenis_sj 		= $rq['jenis_sj'];
+		$jenis_cross 	= $rq['jenis_cross'];
+		$tgl_sj 		= ConverTgl($rq['tanggal']);
+		$id_cust 		= $rq['id_cust'];
+		$nama_cust 		= $rq['nama_cust'];
+		$gudang 		= $rq['gudang'];
+		$id_mobil 		= $rq['id_mobil'];
+		$no_polisi 		= $rq['no_polisi'];
+		$ket 			= str_replace("\'","'",$rq['ket']);
+		$id_supir 		= $rq['id_supir'];
+		$nama_supir 	= $rq['supir'];
+		$telp 			= $rq['telp'];
+		$supir 			= $rq['supir'];
+		$no_do 			= $rq['no_do'];
+		$no_ref 		= $rq['no_ref'];
+		$disx 			= 'Disabled';
+		$rowid 			= $rq['rowid'];
+		$kode_project 	= $rq['kode_project'];
+		
+
+		// echo $rowid;
+		// exit;
+		if($jenis_sj == '1'){
 			$ceklist = 'checked';
 		}
-		if($jenis_cross == '1')
-		{
+
+		if($jenis_cross == '1'){
 			$ceklistx = 'checked';
 		}
 	}
@@ -230,7 +244,7 @@
 			}
 			ReadData();
 		});	
-		function ReadData() {	
+		function ReadData() {
 			var id_data = $("#id_data").val();
 			var mode = $("#mode").val();
 			
@@ -264,19 +278,19 @@
 			}
 			return true;
 		}
-		function TampilCust(){	
+		function TampilCust(){
 			$("#cari").val('');
 			ListCust();
 			$('#DaftarCust').modal('show');
 		}
-		function ListCust() {	
+		function ListCust() {
 			var cari = $("#cari").val();
 			$.get("ajax/cust_crud.php", {cari:cari,  type:"ListCust_Quo" }, function (data, status) {
 				$(".tampil_cust").html(data);
 				$("#hal").val(hal);
 			});
 		}
-		function PilihCust(id_quo) {	
+		function PilihCust(id_quo) {
 		
 			$.post("ajax/cust_crud.php", {
 					id_quo: id_quo, type:"DetilCust_Quo"
@@ -339,14 +353,14 @@
 				return true;
 			}	
 		}
-		function TampilBiaya(){	
+		function TampilBiaya(){
 			var id_quo = $("#id_quo").val();
 			$.get("ajax/ware_crud.php", {id_quo:id_quo, type:"ListBiaya_Quo" }, function (data, status) {
 				$(".tampil_biaya").html(data);
 			});
 			$('#DataBiaya').modal('show');
 		}
-		function PilihBiaya(id) {	
+		function PilihBiaya(id) {
 			$("#id_biaya").val(id);
 			$.post("ajax/ware_crud.php", {
 					id: id, type:"Detil_Data_Quo_Biaya"
@@ -359,7 +373,7 @@
 			);
 			$("#DataBiaya").modal("hide");
 		}
-		function TampilData(){	
+		function TampilData(){
 			document.getElementById("tampil_ware").style.display = 'inline';
 			$("#modex").val('Add');
 			$("#qty").val('1');
@@ -369,7 +383,7 @@
 			$("#rem").val('');
 			$('#Data').modal('show');
 		}
-		function AddData() {	
+		function AddData() {
 			var qty = $("#qty").val();
 			if(!$("#id_biaya").val()){
 				alert("Nama Biaya harus diisi !..");
@@ -439,6 +453,31 @@
 				);
 			}
 		}
+
+	// ============ SAP PROJECT ============
+		function TampilSAP(){
+			$cari = $("#cari_SAP").val('');
+			ListSAP();
+			$('#DaftarSAP').modal('show');
+		}
+		function ListSAP() {
+			var cari = $("#cari_SAP").val();
+			$.get("ajax/jo_crud.php", {cari:cari,  type:"ListSAPWH" }, function (data, status) {
+				$(".tampil_SAP").html(data);
+			});
+		}
+		function PilihSAP(id) {
+			$.post("ajax/jo_crud.php", {
+					id: id, type:"DetilSAP"
+				},
+				function (data, status) {
+					var data = JSON.parse(data);	
+					$("#sap_project").val(data.kode_project);
+					$("#rowid").val(data.rowid);
+				}
+			);
+			$("#DaftarSAP").modal("hide");
+		}
     </script>
 	
   </head>
@@ -466,7 +505,7 @@
 			<?php }?>
 			
 			<div class="col-md-6" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:265px">					
+				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:300px">					
 					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;
 					text-align:left;padding:5px;margin-bottom:1px">							
 						<b><i class="fa fa-list"></i>&nbsp;Data SJ</b>
@@ -501,15 +540,21 @@
 					</div>				
 					<div style="width:100%;" class="input-group">
 						<span class="input-group-addon" style="text-align:right;"><b>Customer :</b></span>
-						<input type="text"  id ="nama_cust" name="nama_cust" value="<?php echo $nama_cust; ?>" 
-						style="text-align: left;width:75%;font-weight:bold" readonly <?php echo $dis;?> >
+						<input type="text"  id ="nama_cust" name="nama_cust" value="<?php echo $nama_cust; ?>" style="text-transform: uppercase;text-align: left;width:70%;" readonly <?php echo $dis;?> >
 						<input type="hidden"  id ="id_cust" name="id_cust" value="<?php echo $id_cust; ?>" >
 						
-						<button class="btn btn-block btn-primary"  <?php echo $disx;?>
-							style="padding:6px;margin-top:-4px;border-radius:0px;margin-left:-1px" type="button" 
-							onClick="javascript:TampilCust()">
+						<button class="btn btn-block btn-primary" id="po" style="padding:6px 12px 6px 12px; ;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilCust()">
 							<span class="glyphicon glyphicon-search"></span>
-						</button>	
+						</button>
+					</div>
+					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Project :</b></span>
+						<input type="hidden" name="rowid" id="rowid" value="<?php echo $rowid; ?>" >
+						<input type="text" name="sap_project" id="sap_project" style="text-transform: uppercase;text-align: left;width:70%;" value="<?php echo $kode_project; ?>"  readonly>
+							
+						<button class="btn btn-block btn-primary" id="po" style="padding:6px 12px 6px 12px; ;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilSAP()">
+							<span class="glyphicon glyphicon-search"></span>
+						</button>
 					</div>
 					<div style="width:100%;" class="input-group">
 						<span class="input-group-addon" style="text-align:right;"><b>No. DO :</b></span>
@@ -526,7 +571,7 @@
             </div>
 			
 			<div class="col-md-6" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:265px">					
+				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:300px">					
 					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
 						<b><i class="fa fa-list"></i>&nbsp;Description</b>
 					</div>
@@ -773,6 +818,48 @@
 			</div>
 		</div>	
     </div>
+
+	<!-- ============ MODAL SAP ============ -->
+		<div class="modal fade" id="DaftarSAP"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">
+
+								<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;text-align:left;padding:5px;">
+									<b><i class="fa fa-list"></i>&nbsp;Data SAP Project</b>
+								</div>
+
+								<div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+									<label style="margin:0;width: 100px;"><b>Search :</b></label>
+									<input type="text" id="cari_SAP" name="cari_SAP" value="<?php echo $cari; ?>" style="width:40%" onkeypress="ListSAP()">
+
+									<button class="btn btn-primary" style="padding:6px 10px;" onClick="ListSAP()">
+										<span class="glyphicon glyphicon-search"></span> Search
+									</button>
+									<button class="btn btn-success" style="padding:6px 10px;" onClick="AddSAP()">
+										<span class="glyphicon glyphicon-plus"></span> Project
+									</button>
+									<button class="btn btn-danger" style="padding:6px 10px;" data-dismiss="modal">
+										<span class="glyphicon glyphicon-remove"></span> Close
+									</button>
+								</div>
+
+								<input type="hidden" id="jenis_project" value="">
+
+								<div class="table-responsive mailbox-messages" style="margin-top:15px;">
+									<div class="tampil_SAP"></div>
+								</div>
+
+								<br>
+							</div>
+
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
 	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>

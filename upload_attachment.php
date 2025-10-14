@@ -6,7 +6,13 @@
     $smbPass   = "P@ssw0rd";
     $smbFolder = "/DOCO/petty_cash/";
 
-    $id_jo = mysqli_real_escape_string($koneksi, $_POST['id_jo']);
+    $id_jo = mysqli_real_escape_string($koneksi, $_POST['id_jo'] ?? '');
+
+    if ($id_jo === '') {
+        echo "❌ id_jo tidak dikirim.";
+        exit;
+    }
+
     $query = "SELECT no_cont FROM tr_jo WHERE id_jo = '$id_jo' LIMIT 1";
     $result = mysqli_query($koneksi, $query);
 
@@ -23,70 +29,153 @@
         'file_mutasi' => 'mutasi_rekening_'
     ];
 
-    $uploadDir = 'uploads/';
+    $uploadDir = __DIR__ . '/uploads/';
+
     if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
+        if (!mkdir($uploadDir, 0777, true)) {
+            die("❌ Gagal membuat folder upload: $uploadDir");
+        }
+    }
+    if (!is_writable($uploadDir)) {
+        die("❌ Folder tidak bisa ditulis: $uploadDir (cek permission)");
+    }
+
+    function upload_error_message($code) {
+        $errors = [
+            UPLOAD_ERR_OK => 'There is no error, the file uploaded with success.',
+            UPLOAD_ERR_INI_SIZE => 'The uploaded file exceeds the upload_max_filesize directive in php.ini.',
+            UPLOAD_ERR_FORM_SIZE => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.',
+            UPLOAD_ERR_PARTIAL => 'The uploaded file was only partially uploaded.',
+            UPLOAD_ERR_NO_FILE => 'No file was uploaded.',
+            UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder.',
+            UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk.',
+            UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the file upload.'
+        ];
+        return $errors[$code] ?? 'Unknown upload error code: ' . $code;
     }
 
     $successCount = 0;
+    $messages = [];
 
     foreach ($fileFields as $field => $prefix) {
-        if (isset($_FILES[$field]) && $_FILES[$field]['error'] === 0) {
-            $file      = $_FILES[$field];
-            $filename  = basename($file['name']);
-            $tmpPath   = $file['tmp_name'];
-            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-            $timestamp = time();
+        if (!isset($_FILES[$field])) {
+            $messages[] = "ℹ️ Field '$field' tidak dikirimkan.";
+            continue;
+        }
 
-            $imageName = $prefix . $timestamp . '_' . $kontainer . '.' . $extension;
-            $localPath = $uploadDir . $imageName;
+        $file = $_FILES[$field];
 
-            if (move_uploaded_file($tmpPath, $localPath)) {
-                $escapedLocalPath  = escapeshellarg($localPath);
-                $escapedRemotePath = escapeshellarg($smbFolder . $imageName);
+        $originalName = $file['name'] ?? '';
+        $tmpPath      = $file['tmp_name'] ?? '';
+        $errorCode    = $file['error'] ?? UPLOAD_ERR_NO_FILE;
+        $size         = $file['size'] ?? 0;
 
-                $command = "smbclient '{$smbHost}' -U '{$smbUser}%{$smbPass}' -c 'put {$escapedLocalPath} {$escapedRemotePath}'";
-                exec($command, $output, $return_var);
+        if ($errorCode !== UPLOAD_ERR_OK) {
+            $messages[] = "❌ Gagal upload untuk $field ($originalName): " . upload_error_message($errorCode) . " (code:$errorCode)";
+            continue;
+        }
 
-                if ($return_var === 0) {
-                    // Cek apakah ada file sebelumnya dengan prefix yang sama
-                    $check = mysqli_query($koneksi, "SELECT id, attachment FROM tr_jo_attachment 
-                        WHERE id_jo = '$id_jo' AND attachment LIKE '{$prefix}%' LIMIT 1");
+        if ($tmpPath === '' || !file_exists($tmpPath)) {
+            $messages[] = "❌ File sementara tidak ditemukan untuk $field ($originalName). tmp: '$tmpPath'. Pastikan form memakai enctype='multipart/form-data' dan PHP punya tmp folder yang valid.";
+            continue;
+        }
 
-                    if ($exist = mysqli_fetch_assoc($check)) {
-                        // Hapus file lama di SMB (opsional)
-                        $oldFile = escapeshellarg($smbFolder . $exist['attachment']);
-                        $deleteCmd = "smbclient '{$smbHost}' -U '{$smbUser}%{$smbPass}' -c 'del {$oldFile}'";
-                        exec($deleteCmd); // optional: tidak perlu dicek jika tak masalah
+        if (!is_uploaded_file($tmpPath)) {
+            $messages[] = "❌ File di tmp bukan hasil upload valid (is_uploaded_file=false) untuk $field ($originalName). tmp: '$tmpPath'";
+            continue;
+        }
 
-                        // Update file
-                        $sql = "UPDATE tr_jo_attachment SET attachment = '$imageName' WHERE id = '{$exist['id']}'";
-                    } else {
-                        // Insert baru
-                        $sql = "INSERT INTO tr_jo_attachment (id_jo, attachment) VALUES ('$id_jo', '$imageName')";
-                    }
+        $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        $timestamp = time();
+        $imageName = $prefix . $timestamp . '_' . $kontainer . ($extension ? '.' . $extension : '');
+        $localPath = $uploadDir . $imageName;
 
-                    $run = mysqli_query($koneksi, $sql);
-                    if ($run) {
-                        $successCount++;
-                        unlink($localPath);
-                    } else {
-                        echo "❌ Gagal simpan DB untuk $field: " . mysqli_error($koneksi) . "<br>";
-                    }
+        $ini_upload_max = ini_get('upload_max_filesize');
+        $ini_post_max = ini_get('post_max_size');
+        $messages[] = "ℹ️ Memproses $field ($originalName) — ukuran: {$size} bytes. PHP upload_max_filesize={$ini_upload_max}, post_max_size={$ini_post_max}.";
 
-                } else {
-                    echo "❌ Gagal kirim ke SMB untuk $field: $imageName<br>";
-                    echo "<pre>" . implode("\n", $output) . "</pre>";
-                }
+        $moved = @move_uploaded_file($tmpPath, $localPath);
+        if (!$moved) {
+            $errDetails = [];
+            $errDetails[] = "move_uploaded_file gagal untuk $field ($originalName). target: $localPath";
+            $errDetails[] = "is_writable(uploadDir): " . (is_writable($uploadDir) ? 'yes' : 'no');
+            $errDetails[] = "free_disk_space: " . disk_free_space($uploadDir) . " bytes";
+            $errDetails[] = "tmp_exists: " . (file_exists($tmpPath) ? 'yes' : 'no');
+            $errDetails[] = "tmp_perms: " . sprintf('%o', fileperms($tmpPath) & 0777);
+            $errDetails[] = "target_dir_perms: " . sprintf('%o', fileperms($uploadDir) & 0777);
+            $messages[] = "❌ " . implode(' | ', $errDetails);
+            continue;
+        }
 
+        $escapedLocalPath  = escapeshellarg($localPath);
+        $escapedRemotePath = escapeshellarg($smbFolder . $imageName);
+        $command = "smbclient '{$smbHost}' -U '{$smbUser}%{$smbPass}' -c 'put {$escapedLocalPath} {$escapedRemotePath}' 2>&1";
+        exec($command, $output, $return_var);
+
+        if ($return_var !== 0) {
+            $messages[] = "❌ Gagal kirim ke SMB untuk $field ($imageName). smbclient exit code: $return_var. Output:\n" . implode("\n", $output);
+            continue;
+        }
+
+        // $safePrefixLike = mysqli_real_escape_string($koneksi, $prefix . '%');
+        // $check = mysqli_query($koneksi, "SELECT id, attachment FROM tr_jo_attachment WHERE id_jo = '$id_jo' AND attachment LIKE '$safePrefixLike' LIMIT 1");
+
+        // if ($exist = mysqli_fetch_assoc($check)) {
+        //     $oldFileEsc = escapeshellarg($smbFolder . $exist['attachment']);
+        //     $deleteCmd = "smbclient '{$smbHost}' -U '{$smbUser}%{$smbPass}' -c 'del {$oldFileEsc}' 2>&1";
+        //     exec($deleteCmd, $delOutput, $delRet);
+        //     $imageNameEsc = mysqli_real_escape_string($koneksi, $imageName);
+        //     $sql = "UPDATE tr_jo_attachment SET attachment = '$imageNameEsc' WHERE id = '{$exist['id']}'";
+        // } else {
+        //     $imageNameEsc = mysqli_real_escape_string($koneksi, $imageName);
+        //     $sql = "INSERT INTO tr_jo_attachment (id_jo, attachment) VALUES ('$id_jo', '$imageNameEsc')";
+        // }
+        $imageNameEsc = mysqli_real_escape_string($koneksi, $imageName);
+        if ($field === 'file_sj') {
+
+            $q_jo = "SELECT no_jo FROM tr_jo WHERE id_jo = '$id_jo' LIMIT 1";
+            $r_jo = mysqli_query($koneksi, $q_jo);
+
+            if ($row_jo = mysqli_fetch_assoc($r_jo)) {
+                $no_jo = mysqli_real_escape_string($koneksi, $row_jo['no_jo']);
+
+                $sql = "UPDATE tr_sj 
+                        SET attach_sj = '$imageNameEsc'
+                        WHERE no_jo = '$no_jo'";
             } else {
-                echo "❌ Gagal upload lokal untuk $field: $filename<br>";
+                $messages[] = "❌ Tidak ditemukan no_jo untuk id_jo = $id_jo.";
+                continue;
             }
+
+        }
+
+        $safePrefixLike = mysqli_real_escape_string($koneksi, $prefix . '%');
+        $check = mysqli_query($koneksi, "SELECT id, attachment FROM tr_jo_attachment WHERE id_jo = '$id_jo' AND attachment LIKE '$safePrefixLike' LIMIT 1");
+
+        if ($exist = mysqli_fetch_assoc($check)) {
+            $oldFileEsc = escapeshellarg($smbFolder . $exist['attachment']);
+            $deleteCmd = "smbclient '{$smbHost}' -U '{$smbUser}%{$smbPass}' -c 'del {$oldFileEsc}' 2>&1";
+            exec($deleteCmd, $delOutput, $delRet);
+            $sql = "UPDATE tr_jo_attachment SET attachment = '$imageNameEsc' WHERE id = '{$exist['id']}'";
+        } else {
+            $sql = "INSERT INTO tr_jo_attachment (id_jo, attachment) VALUES ('$id_jo', '$imageNameEsc')";
+        }
+
+        if (mysqli_query($koneksi, $sql)) {
+            $successCount++;
+            @unlink($localPath);
+            $messages[] = "✅ Berhasil: $field -> $imageName (dikirim ke SMB dan disimpan di DB).";
+        } else {
+            $messages[] = "❌ Gagal simpan DB untuk $field ($imageName): " . mysqli_error($koneksi);
         }
     }
 
+    foreach ($messages as $m) {
+        echo nl2br(htmlspecialchars($m)) . "<br>";
+    }
+
     if ($successCount > 0) {
-        echo "✅ Berhasil upload dan kirim ke SMB: $successCount file.";
+        echo "✅ Total berhasil: $successCount file.";
     } else {
         echo "⚠️ Tidak ada file yang berhasil diproses.";
     }

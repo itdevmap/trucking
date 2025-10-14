@@ -306,8 +306,7 @@ else if ($_POST['type'] == "Add_Data"){
 			}
 			exit;
 		}
-		else
-		{
+		else {
 			$sql = "UPDATE m_rate_tr SET
 					origin_address = '$origin_address',
 					origin_lon = '$origin_lon',

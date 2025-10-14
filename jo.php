@@ -4,39 +4,36 @@
 	include "session_log.php"; 
 	//include "lib.php";
 
-	$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='3' ");
-	$rq=mysqli_fetch_array($pq);	
+	$pq = mysqli_query($koneksi,"SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='3' ");
+	$rq 	= mysqli_fetch_array($pq);	
 	$m_edit = $rq['m_edit'];
-	$m_add = $rq['m_add'];
-	$m_del = $rq['m_del'];
+	$m_add 	= $rq['m_add'];
+	$m_del 	= $rq['m_del'];
 	$m_view = $rq['m_view'];
-	$m_exe = $rq['m_exe'];
+	$m_exe  = $rq['m_exe'];
 
 	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
-	header('location:logout.php'); 
+		header('location:logout.php'); 
 	}
 
-	if($_SERVER['REQUEST_METHOD'] == "POST")
-	{	
-		$hal='1';	
-		$field = $_POST['field'];
+	if($_SERVER['REQUEST_METHOD'] == "POST"){	
+		$hal		 = '1';	
+		$field 		 = $_POST['field'];
 		$search_name = $_POST['search_name'];
-		$tgl1 = $_POST['tgl1'];
-		$tgl2 = $_POST['tgl2'];
-		$paging = $_POST['paging'];
-		$stat = $_POST['stat'];
-		$field1 = $_POST['field1'];
-		$search_name1 = $_POST['search_name1'];
-	}
-	else
-	{	
-		$tahun= date("Y") ;
-		$tgl1= date("01-01-$tahunx");
-		$tgl2= date("31-12-$tahun");
-		$paging='10';
-		$hal='1';
-		$stat = 'All';
-		$field = 'No Order';
+		$tgl1 		 = $_POST['tgl1'];
+		$tgl2 		 = $_POST['tgl2'];
+		$paging 	 = $_POST['paging'];
+		$stat 		 = $_POST['stat'];
+		$field1 	 = $_POST['field1'];
+		$search_name1= $_POST['search_name1'];
+	} else {	
+		$tahun	= date("Y") ;
+		$tgl1	= date("01-01-$tahunx");
+		$tgl2	= date("31-12-$tahun");
+		$paging	= '10';
+		$hal	= '1';
+		$stat 	= 'All';
+		$field 	= 'No Order';
 		$field1 = 'No DO';
 	}
 
@@ -151,7 +148,6 @@
 					num.substring(num.length-(4*i+3));
 			//return (((sign)?'':'-') + '' + num + '.' + cents);
 			return (((sign)?'':'-') + '' + num);
-			
 		}
 		function Desimal(num) {
 			num = num.toString().replace(/\$|\,/g,'');
@@ -237,6 +233,7 @@
 				$("#stapel").val(Rupiah(data.stapel));	
 				$("#cont_edit").val(data.container);		
 				$("#ket").val(data.ket);		
+				$("#pph").val(data.pph);		
 				$("#mode").val('Edit');		
 
 				if(data.jenis_po == '1'){
@@ -378,16 +375,17 @@
 		function ListBiaya_Lain(id, stat) {
 			$("#id_jo").val(id);
 			$("#stat_biaya").val(stat);
-			if(stat == '1')
-			{
+
+			if(stat == '1' || stat == '3'){
 				document.getElementById("btnBiaya").disabled = true;
-			}else{
+			} else{
 				document.getElementById("btnBiaya").disabled = false;
 			}
 			var mode = $("#mode").val();
 			$.get("ajax/jo_crud.php", {mode:mode, stat:stat, id:id,  type:"List_Biaya_Lain" }, function (data, status) {
 				$(".tampil_biaya_lain").html(data);
 				});
+
 			$("#DaftarBiayaLain").modal("show");
 		}
 
@@ -495,10 +493,9 @@
 			$("#id_jo").val(id);
 			$("#stat_uj").val(stat);
 
-			if(stat == '1')
-			{
+			if(stat == '1' || stat == '3'){
 				document.getElementById("btnUJ").disabled = true;
-			}else{
+			} else{
 				document.getElementById("btnUJ").disabled = false;
 			}
 			var mode = $("#mode").val();
@@ -622,13 +619,14 @@
 			CekRate();
 			$('#DataBaru').modal('show');
 		}
+
 		$(document).on('hidden.bs.modal', '.modal', function () {
 			if ($('.modal:visible').length) {
 				$('body').addClass('modal-open');
 			}
 		});
 
-		// ------------------- AJAX TAMPIL PO PTL -------------------
+		// ============== AJAX TAMPIL PO PTL ==============
 			function TampilPO(){
 				$("#cari_po").val('');
 				ListPO();
@@ -648,25 +646,19 @@
 					function (data, status) {
 						var data = JSON.parse(data);	
 						$("#no_dox").val(data.no_tagihan);
-						$("#id_detil_bc").val(id);
 						$("#id_contx").val(data.id_cont);
 						$("#id_cust").val('1');
 						$("#nama_cust").val('PLANET TRANS LOGISTIC, PT');
-						$("#penerimax").val(data.nama_cust+'\n'+data.alamat_ambil);
-						$("#barangx").val(data.ket);
-						$("#beratx").val(Desimal(data.berat));
-						$("#volx").val(Desimal(data.vol));
-						$("#no_contx").val(data.no_cont);
-						$("#id_asalx").val(data.id_asal);
-						$("#id_tujuanx").val(data.id_kota);
-						$("#jenisx").val(data.feet);
+						$("#penerimax").val(data.nama_cust);
+						$("#id_po").val(data.id_tagihan);
+						$("#pphx").val(data.pph || 0);
 						CekRate();
 					}
 				);
 				$("#DaftarPO").modal("hide");
 			}
 
-		// ------------------- AJAX TAMPIL SAP PROJECT -------------------
+		// ============== AJAX TAMPIL SAP PROJECT ==============
 			function TampilSAP(){
 				$cari = $("#cari_SAP").val('');
 				ListSAP();
@@ -686,12 +678,13 @@
 					function (data, status) {
 						var data = JSON.parse(data);	
 						$("#sap_project").val(data.kode_project);
+						$("#id_sap").val(data.rowid);
 					}
 				);
 				$("#DaftarSAP").modal("hide");
 			}
 
-		// ------------------- AJAX TAMPIL SQ -------------------
+		// ============== AJAX TAMPIL SQ ==============
 			function TampilSQ(){
 				$cari = $("#cari_SQ").val('');
 				ListSQ();
@@ -711,6 +704,7 @@
 					function (data, status) {
 						var data = JSON.parse(data);	
 						$("#no_sq").val(data.quo_no);
+						$("#id_quo").val(data.id_quo);
 						$("#jenisx").val(data.jenis_mobil).trigger("change");
 						$("#biayax").val(Rupiah(data.harga));
 						$("#ujx").val(0);
@@ -719,7 +713,7 @@
 				);
 				$("#DaftarSQ").modal("hide");
 			}
-		// ------------------- AJAX TAMPIL PO TR -------------------
+		// ============== AJAX TAMPIL PO TR ==============
 			function TampilPOTR(){
 				$cari = $("#cari_POTR").val('');
 				ListPOTR();
@@ -750,6 +744,7 @@
 						$("#id_tujuanx").val(data.id_destination).trigger("change");
 						$("#jenisx").val(data.jenis_mobil.toUpperCase()).trigger("change");
 						$("#biayax").val(Rupiah(data.harga));
+						$("#pphx").val(Rupiah(data.pph));
 						
 						$("#ujx").val(0);
 						$("#ritasex").val(0);
@@ -758,7 +753,7 @@
 				$("#DaftarPOTR").modal("hide");
 			}
 
-		// ------------------- UP SO TO SAP -------------------
+		// ============== UP SO TO SAP ==============
 			function TampilUpSAP(id_jo){
 				$cari = $("#cari_UpSAP").val('');
 				ListUpSAP(id_jo);
@@ -812,7 +807,7 @@
 				SaveUpSAP();
 			});
 
-		// ------------------- UP AR TO SAP -------------------
+		// ============== UP AR TO SAP ==============
 			function TampilUpAR(id_jo){
 				$cari = $("#cari_UpAR").val('');
 				ListUpAR(id_jo);
@@ -844,17 +839,20 @@
 					data: { type: "SaveUpAR", ids: selected },
 					dataType: "json",
 					success: function (res) {
+						let msg = res.message ?? "Berhasil UP AR ke SAP";
+
 						if (res.success === false) {
-							alert("Gagal: " + res.message);
+							alert("Gagal: " + msg);
 						} else {
-							alert("Data berhasil dikirim ke AR!");
+							alert("Sukses: " + msg);
 							console.log(res);
 							$('#DaftarUpAR').modal('hide');
 						}
 					},
 					error: function (xhr, status, err) {
-						console.error(xhr.responseText);
-						alert("Terjadi error: " + err);
+						let errMsg = xhr.responseText || err || "Unknown error";
+						console.error(errMsg);
+						alert("Terjadi error AJAX: " + errMsg);
 					},
 					complete: function () {
 						$("#btnSaveAR").prop("disabled", false).text("Save to AR");
@@ -866,7 +864,59 @@
 				SaveUpAR();
 			});
 
-		
+		// ============== UP KB TO SAP ==============
+			function TampilUpKB(id_jo){
+				$cari = $("#cari_UpKB").val('');
+				ListUpKB(id_jo);
+				$('#DaftarUpKB').modal('show');
+			}
+			function ListUpKB(id_jo) {
+				var cari = $("#cari_UpKB").val();
+				$.get("ajax/jo_crud.php", {cari:cari,id_jo:id_jo,  type:"ListUpKB" }, function (data, status) {
+					$(".tampil_UpKB").html(data);
+					$("#hal").val(hal);
+				});
+			}
+			$(document).on('click', '#btnSaveKB', function () {
+				CreateKB();
+			});
+			function CreateKB() {
+				let selected = [];
+				$('input[name="kb_selected[]"]:checked').each(function () {
+					selected.push($(this).val());
+				});
+
+				if (selected.length === 0) {
+					alert("Pilih minimal 1 data!");
+					return;
+				}
+
+				$("#btnSaveKB").prop("disabled", true).text("Processing...");
+
+				$.ajax({
+					url: "ajax/jo_crud.php",
+					type: "POST",
+					data: { type: "CreateKB", ids: selected },
+					dataType: "json",
+					success: function (res) {
+						if (res.success === false) {
+							alert("Gagal: " + res.message);
+						} else {
+							alert("Kontrabon Berhasil di buat");
+							console.log(res);
+							$('#DaftarUpKB').modal('hide');
+						}
+					},
+					error: function (xhr, status, err) {
+						console.error(xhr.responseText);
+						alert("Terjadi error: " + err);
+					},
+					complete: function () {
+						$("#btnSaveKB").prop("disabled", false).text("Create Kontrabon");
+						ReadData();
+					}
+				});
+			}
 
 		function TampilCust(){
 			$("#cari").val('');
@@ -903,9 +953,7 @@
 			var id_tujuan= $("#id_tujuanx").val();
 			var uj       = $("#ujx").val();
 			var ritase   = $("#ritasex").val();
-
-			// alert(uj);
-			// return;
+			var pph   	 = $("#pphx").val();
 
 			if (tanggal === '') {
 				alert("Tanggal harus diisi !..");	
@@ -932,12 +980,9 @@
 				return;				
 			}
 
-			// alert(uj);
-			// return;
-
 			// lanjutkan proses simpan
 			var id_cont  = $("#id_contx").val();
-			var cont_add = $("#cont_add").val();
+			
 			var penerima = $("#penerimax").val();
 			var jenis    = $("#jenisx").val();
 			var biaya    = $("#biayax").val();
@@ -959,9 +1004,9 @@
 				jenis:jenis,
 				biaya:biaya,
 				uj:uj,
+				pph:pph,
 				ritase:ritase,
 				ket:ket,
-				cont_add:cont_add,
 				type : "Add_Order"
 			}, function (data, status) {
 				alert(data);
@@ -981,17 +1026,13 @@
 				},
 				function (data, status) {
 					var data = JSON.parse(data);	
-					if(data.status == 200)
-					{
+					if(data.status == 200){
 						CekRate_Umum();
 					}
-					else
-					{
+					else{
 						$("#ujx").val(Rupiah(data.uj));
 						$("#ritasex").val(Rupiah(data.ritase));
 					}
-					
-					
 				}
 			);
 		}
@@ -1000,14 +1041,12 @@
 			var id_asal = $("#id_asalx").val();
 			var id_tujuan = $("#id_tujuanx").val();
 			var jenis_mobil = $("#jenisx").val();
-			//alert(id_asal+'-'+id_tujuan+'-'+jenis_mobil);
 			$("#biaya_kirimx").val('');	
 			$.post("ajax/quo_crud.php", {
 				id_asal: id_asal, id_tujuan:id_tujuan, jenis_mobil:jenis_mobil, type:"Cek_Rate"
 				},
 				function (data, status) {
-					var data = JSON.parse(data);					
-					// $("#biayax").val(Rupiah(data.rate));
+					var data = JSON.parse(data);
 					$("#ujx").val(Rupiah(data.uj));
 					$("#ritasex").val(Rupiah(data.ritase));
 				}
@@ -1067,9 +1106,14 @@
 			);
 		}
 
-		// ------------------- FITUR CLAIM -------------------
+		// ============== FITUR CLAIM ==============
 			function ListClaim(id, stat) {
 				$("#id_jo").val(id);
+				if(stat == '3'){
+					document.getElementById("btnClaim").disabled = true;
+				} else{
+					document.getElementById("btnClaim").disabled = false;
+				}
 				$("#DaftarClaim").modal("show");
 			}
 			function AddClaim() {
@@ -1093,7 +1137,7 @@
 				});
 			}
 
-		// ------------------- FUNCTION ADD ATTACHMENT -------------------
+		// ============== FUNCTION ADD ATTACHMENT ==============
 			function AddAttc(id_jo) {
 				$('#id_jo_attc').val(id_jo);
 				$('.view_so').attr('href', '#').text('-');
@@ -1153,13 +1197,14 @@
 				});
 			}
 
-		// ------------------- PRINT AR -------------------
+		// ============== PRINT AR ==============
 			function TampilPrint(no_ar){
 				$("#no_ar").val(no_ar);
-				btnPrint()
+				btnPrint(no_ar)
 			}
-			function btnPrint() {
-				var no_ar   = $("#no_ar").val();
+			function btnPrint(no_ar) {
+				// alert(no_ar);
+				// exit;
 
 				$.ajax({
 					url: "ajax/jo_crud.php",
@@ -1192,30 +1237,29 @@
 								// 		alert("Gagal ambil file cetak: " + err);
 								// 	});
 
-								// var printWindow = window.open(res.url, "_blank");
-								// printWindow.onload = function () {
-								// 	printWindow.focus();
-								// 	printWindow.print();
-								// };
-
 								var printWindow = window.open(res.url, "_blank");
-								var timer = setInterval(function() {
-									if (printWindow.document.readyState === "complete") {
-										clearInterval(timer);
+								printWindow.onload = function () {
+									printWindow.focus();
+									printWindow.print();
+								};
 
-										printWindow.focus();
-										printWindow.print();
+								// var printWindow = window.open(res.url, "_blank");
+								// var timer = setInterval(function() {
+								// 	if (printWindow.document.readyState === "complete") {
+								// 		clearInterval(timer);
 
-										setTimeout(function() {
-											printWindow.close();
-										}, 2000);
-									}
-								}, 500);
+								// 		printWindow.focus();
+								// 		printWindow.print();
+
+								// 		setTimeout(function() {
+								// 			printWindow.close();
+								// 		}, 2000);
+								// 	}
+								// }, 500);
 
 								$("#no_ar").val('');
 								$("#username").val('')
 								$("#password").val('')
-								$('#ModalPrint').modal('hide');
 								ReadData();
 							} else {
 								alert(res.msg);
@@ -1262,7 +1306,7 @@
 				});
 			}
 
-		// --------- ADD SAP ---------
+		// ============== ADD SAP ==============
 			function AddSAP() {
 				$.get("ajax/po_crud.php", { type: "AddProject" }, function (res) {
 					$("#sap_project").val(res.newKode);
@@ -1295,6 +1339,86 @@
 				});
 			}
 
+		// ============== PRINT KB ==============
+			function TampilPrintKB(no_kb){
+				$("#no_kb").val(no_kb);
+				btnPrintKB()
+			}
+			function btnPrintKB(no_kb) {
+				$("#no_kb").val(no_kb);
+
+				// alert(no_kb);
+				// return;
+
+				$.ajax({
+					url: "ajax/jo_crud.php",
+					method: "POST",
+					data: {
+						no_kb: no_kb,
+						type: "printKB"
+					},
+					success: function (data) {
+						try {
+							var res = JSON.parse(data);
+
+							if (res.status === "success") {
+								var printWindow = window.open(res.url, "_blank");
+								printWindow.onload = function () {
+									printWindow.focus();
+									printWindow.print();
+								};
+
+								// var printWindow = window.open(res.url, "_blank");
+								// var timer = setInterval(function() {
+								// 	if (printWindow.document.readyState === "complete") {
+								// 		clearInterval(timer);
+
+								// 		printWindow.focus();
+								// 		printWindow.print();
+
+								// 		setTimeout(function() {
+								// 			printWindow.close();
+								// 		}, 2000);
+								// 	}
+								// }, 500);
+
+								$("#no_ar").val('');
+								$("#username").val('')
+								$("#password").val('')
+								ReadData();
+							} else {
+								alert(res.msg);
+							}
+						} catch (e) {
+							alert("Response server tidak valid.");
+							console.log(data);
+						}
+					},
+					error: function (xhr, status, error) {
+						alert("AJAX Error: " + error);
+					}
+				});
+			}
+
+		// ============== CANCEL SO ==============
+			function Cancel(id_jo){
+				$('#id_jo_cancel').val(id_jo);
+				$('#ModalCancel').modal('show');
+			}
+			function CancelSO(){
+				var id_jo 		 = $('#id_jo_cancel').val();
+				var alasanCancel = $('#alasanCancel').val();
+
+				$.post("ajax/jo_crud.php", {
+					id_jo:id_jo,
+					alasanCancel:alasanCancel,
+					type : "CancelSO"
+				}, function (data, status) {
+					alert(data);
+					$("#ModalCancel").modal("hide");				
+					ReadData(1);
+				});
+			}
 
 	</script>	
 	
@@ -1441,7 +1565,7 @@
 		</form>
 	</div>	
 	
-	<!-- ----------------- MODAL NEW SO ----------------- -->
+	<!-- ============== MODAL NEW SO ============== -->
 		<div class="modal fade" id="DataBaru"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
@@ -1453,17 +1577,17 @@
 								</div>	
 								<br>	
 
-								<input type="hidden" id="id_po">  
-								<input type="hidden" id="id_sap">	
-								<input type="hidden" id="id_quo">  
-								<input type="hidden" id="id_cust"/>
+								<input type="hidden" id="id_po" placeholder="id_po">  
+								<input type="hidden" id="id_sap" placeholder="id_sap">	
+								<input type="hidden" id="id_quo" placeholder="id_quo">  
+								<input type="hidden" id="id_cust" placeholder="id_cust"/>
 
 								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Order :</b></span>
 									<input type="text"  id ="no_sjx" style="text-align: center;width:22%" readonly  >
-									<input type="hidden" id="id_sjx"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
+									<input type="hidden" id="id_sjx" value=""/>
 									&nbsp;
-									<input type="hidden" id="cek_ptl" style="margin-bottom:0px;" value="1"  onclick='CekPTL(this);' ></b>
+									<input type="hidden" id="cek_ptl" value="1"  onclick='CekPTL(this);' ></b>
 								</div>	
 								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Project Code :</b></span>
@@ -1537,10 +1661,10 @@
 									<input type="text"  id ="sj_cust" style="text-align: left;width:80%">
 								</div>
 
-								<div style="width:100%;" class="input-group">
+								<!-- <div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Container :</b></span>
 									<input type="text" id ="cont_add" style="text-align: left;width:80%">	
-								</div>
+								</div> -->
 								
 								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Customer :</b></span>
@@ -1619,6 +1743,11 @@
 								</div>
 
 								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>PPH :</b></span>								
+									<input type="text" id="pphx" style="text-align: right;width:22%;" readonly>	
+								</div>
+
+								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Remarks :</b></span>
 									<input type="text" id="ketx" value="" style="text-align: left;width:80%;"   >	
 								</div>
@@ -1637,7 +1766,7 @@
 			</div>	
 		</div>
 
-	<!-- ----------------- MODAL SEARCH POTR----------------- -->
+	<!-- ============== MODAL SEARCH POTR ============== -->
 		<div class="modal fade" id="DaftarPOTR"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
@@ -1677,7 +1806,7 @@
 			</div>	
 		</div>
 
-	<!-- ----------------- MODAL SEARCH SQ----------------- -->
+	<!-- ============== MODAL SEARCH SQ ============== -->
 		<div class="modal fade" id="DaftarSQ"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
@@ -1717,6 +1846,7 @@
 			</div>	
 		</div>
 	
+	<!-- ============== MODAL PO PTL ============== -->
 	<div class="modal fade" id="DaftarPO"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">	
@@ -1757,49 +1887,49 @@
 		</div>	
     </div>
 
-	<!-- ----------------- MODAL SEARCH SAP PROJECT ----------------- -->
-	<div class="modal fade" id="DaftarSAP"  role="dialog" aria-labelledby="myModalLabel">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content" style="background: none">	
-				<div class="modal-body">						
-					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
-						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
-							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data SAP Project</b>
-							</div>	
-							<br>
-							<div style="width:100%" class="input-group" style="background:none !important;">
-								<span class="input-group-addon" style="width:80%;text-align:left;padding:0px">
-									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Search :</b>&nbsp;&nbsp;
-									<input type="text" id ="cari_SAP" style="text-align: left;width:200px">
+	<!-- ============== MODAL SEARCH SAP PROJECT ============== -->
+		<div class="modal fade" id="DaftarSAP"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data SAP Project</b>
+								</div>	
+								<br>
+								<div style="width:100%" class="input-group" style="background:none !important;">
+									<span class="input-group-addon" style="width:80%;text-align:left;padding:0px">
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Search :</b>&nbsp;&nbsp;
+										<input type="text" id ="cari_SAP" style="text-align: left;width:200px">
 
-									<button class="btn btn-block btn-primary" style="margin:0px; margin-bottom:3px;border-radius:2px;padding:5px" onClick="javascript:ListSAP()">
-										<span class="glyphicon glyphicon-search"></span> Search
-									</button>
+										<button class="btn btn-block btn-primary" style="margin:0px; margin-bottom:3px;border-radius:2px;padding:5px" onClick="javascript:ListSAP()">
+											<span class="glyphicon glyphicon-search"></span> Search
+										</button>
 
-									<button class="btn btn-block btn-danger" style="margin:0px; margin-bottom:3px;border-radius:2px;padding:5px" data-dismiss="modal">
-										<span class="glyphicon glyphicon-remove"></span> Close
-									</button>
+										<button class="btn btn-block btn-danger" style="margin:0px; margin-bottom:3px;border-radius:2px;padding:5px" data-dismiss="modal">
+											<span class="glyphicon glyphicon-remove"></span> Close
+										</button>
 
-									<button class="btn btn-block btn-success" style="margin:0px; margin-bottom:3px;border-radius:2px;padding:5px" onClick="javascript:AddSAP()">
-										<span class="glyphicon glyphicon-plus"></span> Project
-									</button>
-								</span>
-								<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
-								</span>
-							</div>							
-							<div class="table-responsive mailbox-messages" >									
-								<div class="tampil_SAP"></div>
-							</div>
-							<br>
+										<button class="btn btn-block btn-success" style="margin:0px; margin-bottom:3px;border-radius:2px;padding:5px" onClick="javascript:AddSAP()">
+											<span class="glyphicon glyphicon-plus"></span> Project
+										</button>
+									</span>
+									<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+									</span>
+								</div>							
+								<div class="table-responsive mailbox-messages" >									
+									<div class="tampil_SAP"></div>
+								</div>
+								<br>
+							</div>		
 						</div>		
-					</div>		
-				</div>	
-			</div>
-		</div>	
-    </div>
+					</div>	
+				</div>
+			</div>	
+		</div>
 
-	<!-- ----------------- MODAL SEARCH SO UP TO SAP ----------------- -->
+	<!-- ============== MODAL SEARCH SO UP TO SAP ============== -->
 		<div class="modal fade" id="DaftarUpSAP"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
@@ -1840,7 +1970,7 @@
 			</div>	
 		</div>
 
-	<!-- ----------------- MODAL SEARCH AR UP TO AR ----------------- -->
+	<!-- ============== MODAL SEARCH AR UP TO AR ============== -->
 		<div class="modal fade" id="DaftarUpAR"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
@@ -1871,6 +2001,47 @@
 									<button type="button" id="btnSaveAR" class="btn btn-success" style="margin:0;border-radius:2px;">
 										<span class="fa fa-plus-square"></span>
 										<b>Save to AR</b>
+									</button>	
+								</div>
+
+							</div>		
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
+
+	<!-- ============== MODAL SEARCH AR UP TO AR ============== -->
+		<div class="modal fade" id="DaftarUpKB"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="display:flex;align-items:center;justify-content:space-between; font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;margin-bottom:1px">
+									<div style="text-align:left;">
+										<b><i class="fa fa-list"></i>&nbsp;Data Kontrabon</b>
+									</div>
+									<button class="btn btn-danger btn-sm" style="border-radius:2px;padding:3px 6px;" data-dismiss="modal">
+										<span class="glyphicon glyphicon-remove"></span>
+									</button>
+								</div>
+								<br>
+								<div style="width:100%" class="input-group" style="background:none !important;">
+									<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+									</span>
+								</div>							
+								<div class="table-responsive mailbox-messages">									
+									<form id="formUpAR">
+										<div class="tampil_UpKB"></div>
+									</form>
+								</div>
+
+								<br>
+								<div style="text-align:right;">
+									<button type="button" id="btnSaveKB" class="btn btn-success" style="margin:0;border-radius:2px;">
+										<span class="fa fa-plus-square"></span>
+										<b>Create Kontrabon</b>
 									</button>	
 								</div>
 
@@ -1921,114 +2092,118 @@
 		</div>	
     </div>
 	
-	<!-- ----------------- EDIT JO ----------------- -->
-	<div class="modal fade" id="ModelEdit"  role="dialog" aria-labelledby="myModalLabel">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content" style="background: none">	
-				<div class="modal-body">						
-					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">							
-						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
-							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Order</b>
-							</div>	
-							<br>	
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Order :</b></span>
-								<input type="text"  id ="no_jo" style="text-align: center;width:22%" readonly  >
-								<input type="hidden" id="id_jo"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
-								<input type="hidden" id="mode"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
-								<input type="hidden" id="id_detil"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
-							</div>						
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Project Code :</b></span>
-								<input type="text"  id ="project_codex" style="text-align: center;width:22%" readonly>
-							</div>	
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
-								<input type="text"  id ="tanggal" style="text-align: center;width:22%" readonly  >
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>NO PO :</b></span>
-								<input type="text"  id ="no_po" style="text-align: left;width:80%" readonly>
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Project :</b></span>
-								<input type="text"  id ="sap_projectx" style="text-align: left;width:80%" readonly>
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. SQ :</b></span>
-								<input type="text" id ="no_sqx" style="text-align: left;width:80%" readonly>
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>DO/SJ Cust :</b></span>
-								<input type="text" id ="sj_custx" style="text-align: left;width:80%">
-							</div>
-							
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Container :</b></span>
-								<input type="text" id ="cont_edit" style="text-align: left;width:80%">	
-							</div>
+	<!-- ============== EDIT JO ============== -->
+		<div class="modal fade" id="ModelEdit"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">							
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Order</b>
+								</div>	
+								<br>	
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Order :</b></span>
+									<input type="text"  id ="no_jo" style="text-align: center;width:22%" readonly  >
+									<input type="hidden" id="id_jo"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
+									<input type="hidden" id="mode"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
+									<input type="hidden" id="id_detil"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
+								</div>						
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Project Code :</b></span>
+									<input type="text"  id ="project_codex" style="text-align: center;width:22%" readonly>
+								</div>	
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Date :</b></span>
+									<input type="text"  id ="tanggal" style="text-align: center;width:22%" readonly  >
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>NO PO :</b></span>
+									<input type="text"  id ="no_po" style="text-align: left;width:80%" readonly>
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Project :</b></span>
+									<input type="text"  id ="sap_projectx" style="text-align: left;width:80%" readonly>
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. SQ :</b></span>
+									<input type="text" id ="no_sqx" style="text-align: left;width:80%" readonly>
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>DO/SJ Cust :</b></span>
+									<input type="text" id ="sj_custx" style="text-align: left;width:80%">
+								</div>
+								
+								<!-- <div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Container :</b></span>
+									<input type="text" id ="cont_edit" style="text-align: left;width:80%">	
+								</div> -->
 
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Receiver :</b></span>
-								<textarea id="penerima" style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; border: 1px solid #444; padding: 5px;"  ></textarea>	
-							</div>
-					
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
-								<input type="hidden" id="id_asal"   value=""  />
-								<input type="text" id="nama_asal" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
-								<input type="hidden" id="id_tujuan"   value=""  />
-								<input type="text" id="nama_tujuan" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
-								<input type="text" id="jenis_mobil" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
-							</div>	
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Receiver :</b></span>
+									<textarea id="penerima" style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; border: 1px solid #444; padding: 5px;"  ></textarea>	
+								</div>
+						
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Origin :</b></span>
+									<input type="hidden" id="id_asal"   value=""  />
+									<input type="text" id="nama_asal" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Destination :</b></span>
+									<input type="hidden" id="id_tujuan"   value=""  />
+									<input type="text" id="nama_tujuan" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Type :</b></span>
+									<input type="text" id="jenis_mobil" value="" style="text-transform: uppercase;text-align: left;width:80%;"  readonly >
+								</div>	
 
-							<div  id="tampil_ujx" style="display:none;">
-								<div style="width:100%;" class="input-group">
-									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Deliv. Cost :</b></span>								
-									<input type="text" id="biaya" value="0" style="text-align: right;width:22%;" 
-									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
+								<div  id="tampil_ujx" style="display:none;">
+									<div style="width:100%;" class="input-group">
+										<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Deliv. Cost :</b></span>								
+										<input type="text" id="biaya" value="0" style="text-align: right;width:22%;" 
+										onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly >	
+									</div>
+									<div style="width:100%;" class="input-group">
+										<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Travel Expense:</b></span>								
+										<input type="text" id="uj" value="0" style="text-align: right;width:22%;" 
+										onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>	
+									</div>
+									<div style="width:100%;" class="input-group">
+										<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ritase :</b></span>								
+										<input type="text" id="ritase" value="0" style="text-align: right;width:22%;" 
+										onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>	
+									</div>
 								</div>
 								<div style="width:100%;" class="input-group">
-									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Travel Expense:</b></span>								
-									<input type="text" id="uj" value="0" style="text-align: right;width:22%;" 
-									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>	
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>PPH :</b></span>								
+									<input type="text" id="pph" style="text-align: right;width:22%;" readonly>	
 								</div>
 								<div style="width:100%;" class="input-group">
-									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Ritase :</b></span>								
-									<input type="text" id="ritase" value="0" style="text-align: right;width:22%;" 
-									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" readonly>	
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>stapel :</b></span>								
+									<input type="text" id="stapel" style="text-align: right;width:22%;" >	
 								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Remarks :</b></span>
+									<input type="text" id="ket" value="" style="text-align: left;width:80%;"   >	
+								</div>
+								
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
+									<button type="button" class="btn btn-success"  onclick="AddOrder()">
+									<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
+									<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:1px">
+									<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Cancel</b></button>	
+								</div>
+								<br>
 							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>stapel :</b></span>								
-								<input type="text" id="stapel" style="text-align: right;width:22%;" >	
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Remarks :</b></span>
-								<input type="text" id="ket" value="" style="text-align: left;width:80%;"   >	
-							</div>
-							
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
-								<button type="button" class="btn btn-success"  onclick="AddOrder()">
-								<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
-								<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:1px">
-								<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Cancel</b></button>	
-							</div>
-							<br>
-						</div>
-					</div>								
+						</div>								
+					</div>
 				</div>
-			</div>
-		</div>	
-	</div>
+			</div>	
+		</div>
 	
 	<div class="modal fade" id="DaftarBiayaLain"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document" style="width:750px;">
@@ -2045,14 +2220,16 @@
 									<input type="hidden"  id ="stat_biaya" name="id" value=""   >
 								</span>								
 							</div>	
+
 							<?php if($m_add == '1'){?>
-							<button class="btn btn-block btn-success" id="btnBiaya"
-								style="margin-left:1px; margin-bottom:2px;padding:2px;padding-left:5px;padding-right:6px" type="button" 
-								onClick="javascript:TampilBiayaLain()"   >
-								<span class="fa  fa-plus-square"></span>
-								<b>Add Data</b>
-							</button>
+								<button class="btn btn-block btn-success" id="btnBiaya"
+									style="margin-left:1px; margin-bottom:2px;padding:2px;padding-left:5px;padding-right:6px" type="button" 
+									onClick="javascript:TampilBiayaLain()"   >
+									<span class="fa  fa-plus-square"></span>
+									<b>Add Data</b>
+								</button>
 							<?php }?>
+
 							<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:-1px; margin-bottom:2px;padding:2px;padding-left:5px;padding-right:6px">
 								<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Close</b></button>	
 							<div class="table-responsive mailbox-messages" >									
@@ -2080,7 +2257,7 @@
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Cost Name :</b></span>
 								<select id="id_cost_biaya" style="width: 80%;padding:4px">
 									<?php
-									$t1="SELECT * FROM m_cost_tr WHERE `status` = '1' AND id_cost <> '1' AND itemcode IS NOT NULL ORDER BY nama_cost  ";
+									$t1="SELECT * FROM m_cost_tr WHERE `status` = '1' AND id_cost <> '1' AND itemcode IS NOT NULL AND sap_ips LIKE '%S%' ORDER BY nama_cost  ";
 									$h1=mysqli_query($koneksi, $t1);       
 									while ($d1=mysqli_fetch_array($h1)){?>
 									<option value="<?php echo $d1['id_cost'];?>" ><?php echo $d1['nama_cost'];?></option>
@@ -2092,7 +2269,7 @@
 
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Remark :</b></span>
-								<textarea id="remark_cost"style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; border: 1px solid #444; padding: 5px;"></textarea>
+								<textarea id="remark_cost" style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; border: 1px solid #444; padding: 5px;"></textarea>
 							</div>
 							
 							<div style="width:100%;" class="input-group">
@@ -2184,8 +2361,12 @@
 
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
-								<button type="button" class="btn btn-success"  onclick="AddClaim()">
-								<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
+
+								<button type="button" id="btnClaim" class="btn btn-success" onclick="AddClaim()">
+									<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;
+								</button>
+
+
 								<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:1px">
 								<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Cancel</b></button>	
 							</div>
@@ -2211,7 +2392,7 @@
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Cost Name :</b></span>
 								<select id="id_cost_uj" style="width: 80%;padding:4px">
 									<?php
-									$t1="select * from m_cost_tr where status = '1' and id_cost <> '1' order by nama_cost  ";
+									$t1="SELECT * from m_cost_tr where status = '1' and id_cost <> '1' order by nama_cost  ";
 									$h1=mysqli_query($koneksi, $t1);       
 									while ($d1=mysqli_fetch_array($h1)){?>
 									<option value="<?php echo $d1['id_cost'];?>" ><?php echo $d1['nama_cost'];?></option>
@@ -2239,7 +2420,6 @@
 			</div>
 		</div>	
     </div>
-	
 	
 	<div class="modal fade" id="DataPPN"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
@@ -2278,92 +2458,84 @@
 		</div>	
     </div>
 
-	<!-- ----------------- MODAL ATTACHMENT ----------------- -->
-	<div class="modal fade" id="DataAttc" role="dialog" aria-labelledby="myModalLabel">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-body">
-					<div class="col-md-12" style="padding: 0;">
-						<div class="box box-success box-solid" style="padding: 5px; border: 1px solid #ccc;">
-							<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;">
-								<b><i class="fa fa-list"></i>&nbsp;Add Attachment</b>
+	<!-- ============== MODAL ATTACHMENT ============== -->
+		<div class="modal fade" id="DataAttc" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-body">
+						<div class="col-md-12" style="padding: 0;">
+							<div class="box box-success box-solid" style="padding: 5px; border: 1px solid #ccc;">
+								<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;">
+									<b><i class="fa fa-list"></i>&nbsp;Add Attachment</b>
+								</div>
+								<form id="form_attachment" enctype="multipart/form-data" style="margin-top: 2rem;">
+									<input type="hidden" id="id_jo_attc" name="id_jo">
+									<div class="form-group mt-3">
+										<label for=""><b>File SO:</b></label>
+										<input type="file" class="form-control" id="file_so" name="file_so">
+										<p><b>Lihat File SO: </b><a href="#" class="view_so" target="_blank"></a></p>
+									</div>
+									<!-- <div class="form-group mt-3">
+										<label for=""><b>File SJ:</b></label>
+										<input type="file" class="form-control" id="file_sj" name="file_sj">
+										<p><b>Lihat File SJ : </b><a href="#" class="view_sj" target="_blank"></a></p>
+									</div> -->
+									<div class="form-group mt-3">
+										<label for=""><b>File Mutasi:</b></label>
+										<input type="file" class="form-control" id="file_mutasi" name="file_mutasi">
+										<p><b>Lihat File Mutasi : </b><a href="#" class="view_mutasi" target="_blank"></a></p>
+									</div>
+
+									<div class="form-group mt-3 text-right">
+										<button type="button" class="btn btn-success" onclick="SaveAttc()">
+											<span class="fa fa-save"></span>&nbsp;<b>Save</b>
+										</button>
+										<button type="button" class="btn btn-danger" data-dismiss="modal">
+											<span class="fa fa-close"></span>&nbsp;<b>Cancel</b>
+										</button>
+									</div>
+								</form>
 							</div>
-							<form id="form_attachment" enctype="multipart/form-data" style="margin-top: 2rem;">
-								<input type="hidden" id="id_jo_attc" name="id_jo">
-								<div class="form-group mt-3">
-									<label for=""><b>File SO:</b></label>
-									<input type="file" class="form-control" id="file_so" name="file_so">
-									<p><b>Lihat File SO: </b><a href="#" class="view_so" target="_blank"></a></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-								</div>
-								<div class="form-group mt-3">
-									<label for=""><b>File SJ:</b></label>
-									<input type="file" class="form-control" id="file_sj" name="file_sj">
-									<!-- <p class=""><b>Berhasil Upload Berkas : </b><span class="view_sj"></span></p> -->
-									<p><b>Lihat File SJ : </b><a href="#" class="view_sj" target="_blank"></a></p>
-
-								</div>
-								<div class="form-group mt-3">
-									<label for=""><b>File Mutasi:</b></label>
-									<input type="file" class="form-control" id="file_mutasi" name="file_mutasi">
-									<!-- <p class=""><b>Berhasil Upload Berkas : </b><span class="view_mutasi"></span></p> -->
-									<p><b>Lihat File Mutasi : </b><a href="#" class="view_mutasi" target="_blank"></a></p>
+	<!-- ============== MODAL CANCEL SO ============== -->
+		<div class="modal fade" id="ModalCancel" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-body">
+						<div class="col-md-12" style="padding: 0;">
+							<div class="box box-success box-solid" style="padding: 5px; border: 1px solid #ccc;">
+								<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;">
+									<b><i class="fa fa-list"></i>&nbsp;Cancel SO</b>
 								</div>
 
+								<input type="hidden" id="id_jo_cancel" name="id_jo_cancel">
+
+								<div class="form-group" style="margin-top: 1rem;">
+									<label for="alasanCancel"><b>Alasan Cancel SO</b></label>
+									<textarea id="alasanCancel" name="alasanCancel" class="form-control" rows="3" placeholder="Tuliskan alasan pembatalan..."></textarea>
+								</div>
+
+				
 								<div class="form-group mt-3 text-right">
-									<button type="button" class="btn btn-success" onclick="SaveAttc()">
+									<button type="button" class="btn btn-success" onclick="CancelSO()">
 										<span class="fa fa-save"></span>&nbsp;<b>Save</b>
 									</button>
 									<button type="button" class="btn btn-danger" data-dismiss="modal">
 										<span class="fa fa-close"></span>&nbsp;<b>Cancel</b>
 									</button>
 								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- ----------------- MODAL PRINT AR ----------------- -->
-	<div class="modal fade" id="ModalPrint" role="dialog" aria-labelledby="myModalLabel">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-body">
-					<div class="col-md-12" style="padding: 0;">
-						<div class="box box-success box-solid" style="padding: 5px; border: 1px solid #ccc;">
-							<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;">
-								<b><i class="fa fa-list"></i>&nbsp;Print Approval</b>
 							</div>
-							<form id="form_approval" enctype="multipart/form-data" style="margin-top: 2rem;">
-								<input type="text" id="no_ar" name="no_ar">
-								
-								<div style="width:100%;" class="input-group">
-									<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Username :</b></span>
-									<input type="text" id="username" value="" style="width:70%;border:1px solid rgb(169, 169, 169)" /> 
-								</div>
-								<div style="width:100%;" class="input-group">
-									<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Password :</b></span>
-									<input type="password" id="password" value="" style="width:70%;border:1px solid rgb(169, 169, 169)" /> 
-								</div>
-
-								<div class="form-group text-right" style="margin-top: 1rem;">
-									<button type="button" class="btn btn-success" onclick="btnPrint()">
-										<span class="fa fa-save"></span>&nbsp;<b>Print</b>
-									</button>
-									<button type="button" class="btn btn-danger" data-dismiss="modal">
-										<span class="fa fa-close"></span>&nbsp;<b>Cancel</b>
-									</button>
-								</div>
-							</form>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-	
+
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>
 

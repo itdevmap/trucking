@@ -2,8 +2,6 @@
 ob_start(); 
 session_start();
 require('pdf/code128.php');
-require('pdf/viewpref.php');
-require('pdf/FPDF_Protection.php');
 include "koneksi.php"; 
 include "session_log.php"; 
 include "lib.php";
@@ -17,7 +15,7 @@ if (!function_exists('set_magic_quotes_runtime')) {
     }
 }
 
-class PDF extends FPDF_Protection {
+class PDF extends FPDF {
     
     function SetDash($black=null, $white=null)
     {
@@ -296,7 +294,7 @@ $subtotal_fmt = number_format($subtotal, 0, ',', '.');
 $dp_fmt       = number_format($dp, 0, ',', '.');
 $pph_fmt      = number_format($pph, 0, ',', '.');
 
-$total        = $subtotal;
+$total        = $subtotal - $pph;
 $total_fmt    = number_format($total, 0, ',', '.');
 
 // ================= AFTER TABLE =================
@@ -379,6 +377,6 @@ $pdf->setX($boxX + 2);
 $pdf->Cell(0, 5, "A/N PT.PLANET EXPRESS TRANSJAYA", 0, 1, 'L');
 $footerY += $boxH + 5;
 
+
 ob_end_clean();
-$pdf->SetProtection(['print', 'copy', 'modify']);
-$pdf->Output('cetak_ar.pdf', 'I'); 
+$pdf->Output();

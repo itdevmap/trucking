@@ -2,7 +2,7 @@
     session_start();
     include "koneksi.php"; 
     include "session_log.php";
-    $pq = mysqli_query($koneksi,"SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='66'");
+    $pq = mysqli_query($koneksi,"SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='69'");
 
     $rq=mysqli_fetch_array($pq);	
     $m_edit = $rq['m_edit'];
@@ -60,15 +60,14 @@
             function ReadData(hal) {
                 var cari = $("#search_name").val();
                 var paging = $("#paging").val();	
-                $.get("ajax/po_crud.php", {paging:paging,cari:cari,hal:hal, type:"Read" }, function (data, status) {
+                $.get("ajax/po_crud.php", {paging:paging,cari:cari,hal:hal, type:"ReadWH" }, function (data, status) {
                     $(".tampil_data").html(data);
                     $("#hal").val(hal);
                 });
             }
 
         // ============ SHOW MODAL ============
-            function TampilData() 
-            {
+            function TampilData() {
                 $("#mode").val('Add');
                 $('#Data').modal('show');
             }
@@ -151,7 +150,7 @@
                     });
                 }
             }
-        // ============ AJAX UP PO TO SAP ============
+        // ============ AJAX UP TO SAP ============
             function TampilUpSAP(id_po){
 				$cari = $("#cari_UpSAP").val('');
 				ListUpSAP(id_po);
@@ -204,6 +203,29 @@
 			$(document).on('click', '#btnSaveSAP', function () {
 				SaveUpSAP();
 			});
+
+        // ============ EXECUTE DATA ============
+            function Confirm(id) {
+                var hal = $("#hal").val();
+                var conf = confirm("Are you sure to Closed ?");
+                if (conf == true) {
+                    $.post("ajax/po_crud.php", {
+                            id: id,
+                            type: "Executed"
+                        },
+                        function (data, status) {
+                            if (data.includes("GAGAL")) {
+                                alert(data);
+                            } else {
+                                alert("Berhasil");
+                                ReadData(hal);
+                            }
+                        }
+                    ).fail(function(xhr, status, error) {
+                        alert("Request gagal: " + error);
+                    });
+                }
+            }
 
         // ============ AJAX UP AP TO SAP ============
             function TampilUpAP(id_po){
@@ -258,28 +280,6 @@
             $(document).on('click', '#btnSaveAP', function () {
 				SaveAP();
 			});
-        // ============ EXECUTE DATA ============
-            function Confirm(id) {
-                var hal = $("#hal").val();
-                var conf = confirm("Are you sure to Closed ?");
-                if (conf == true) {
-                    $.post("ajax/po_crud.php", {
-                            id: id,
-                            type: "Executed"
-                        },
-                        function (data, status) {
-                            if (data.includes("GAGAL")) {
-                                alert(data);
-                            } else {
-                                alert("Berhasil");
-                                ReadData(hal);
-                            }
-                        }
-                    ).fail(function(xhr, status, error) {
-                        alert("Request gagal: " + error);
-                    });
-                }
-            }
 
     </script>
 	
@@ -299,7 +299,7 @@
             <div class="content-wrapper" style="min-height:750px">
                 <br>
                 <ol class="breadcrumb">
-                    <li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data PO</b></font></h1></li>					
+                    <li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data PO WH</b></font></h1></li>					
                 </ol>
                 <br>
                 <div class="col-md-12" >
@@ -309,7 +309,7 @@
                         </div>
                         <br>					
                         <div style="width:100%" class="input-group">
-                            <span class="input-group-addon" style="text-align:right;"><b>Find Code PO :</b></span>
+                            <span class="input-group-addon" style="text-align:right;"><b>Find Code PO WH :</b></span>
                             <input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
                             style="text-align: left;width:200px" onkeypress="ReadData(1)" >
                             <input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
@@ -331,9 +331,9 @@
                                     $xy1=base64_encode($xy1);?>
                                     <button class="btn btn-block btn-success" 
                                     style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:2px" type="button" title = "Created Order"
-                                    onClick="window.location.href = 'po_data.php?id=<?php echo $xy1; ?>' ">
+                                    onClick="window.location.href = 'po_wh_data.php?id=<?php echo $xy1; ?>' ">
                                     <span class="fa  fa-plus-square"></span>
-                                    <b>Create PO</b>
+                                    <b>Create PO WH</b>
                                     </button>
                                 <?php }?>	
                             </span>
@@ -373,7 +373,7 @@
 		</form>
 	</div>
 
-    <!-- ============ MODAL PO TO SAP ============ -->
+    <!-- ============ MODAL SEARCH SO UP TO SAP ============ -->
 		<div class="modal fade" id="DaftarUpSAP"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
@@ -382,7 +382,7 @@
 							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 								<div class="small-box bg" style="display:flex;align-items:center;justify-content:space-between; font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;margin-bottom:1px">
 									<div style="text-align:left;">
-										<b><i class="fa fa-list"></i>&nbsp;Data Up to SAP</b>
+										<b><i class="fa fa-list"></i>&nbsp;Data PO to SAP</b>
 									</div>
 									<button class="btn btn-danger btn-sm" style="border-radius:2px;padding:3px 6px;" data-dismiss="modal">
 										<span class="glyphicon glyphicon-remove"></span>
@@ -454,7 +454,7 @@
 				</div>
 			</div>	
 		</div>
-
+	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>
 	

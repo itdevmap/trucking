@@ -1,47 +1,44 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-//include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	//include "lib.php";
 
-$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='15' ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+	$pq = mysqli_query($koneksi,"SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='15' ");
+	$rq=mysqli_fetch_array($pq);	
+	$m_edit = $rq['m_edit'];
+	$m_add = $rq['m_add'];
+	$m_del = $rq['m_del'];
+	$m_view = $rq['m_view'];
+	$m_exe = $rq['m_exe'];
 
-if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
- header('location:logout.php'); 
-}
+	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
+		header('location:logout.php'); 
+	}
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{	
-	$hal='1';	
-	$field = $_POST['field'];
-	$search_name = $_POST['search_name'];
-	$tgl1 = $_POST['tgl1'];
-	$tgl2 = $_POST['tgl2'];
-	$paging = $_POST['paging'];
-	$stat = $_POST['stat'];
-	$field1 = $_POST['field1'];
-	$search_name1 = $_POST['search_name1'];
-}
-else
-{	
-	$tahun= date("Y") ;
-	$tgl1= date("01-01-$tahunx");
-	$tgl2= date("31-12-$tahun");
-	$paging='15';
-	$hal='1';
-	$field = 'No Doc';
-	$field1 = 'Customer';
-	$stat = 'All';
-}
+	if($_SERVER['REQUEST_METHOD'] == "POST"){
+		$hal='1';	
+		$field = $_POST['field'];
+		$search_name = $_POST['search_name'];
+		$tgl1 = $_POST['tgl1'];
+		$tgl2 = $_POST['tgl2'];
+		$paging = $_POST['paging'];
+		$stat = $_POST['stat'];
+		$field1 = $_POST['field1'];
+		$search_name1 = $_POST['search_name1'];
+	}
+	else{
+		$tahun= date("Y") ;
+		$tgl1= date("01-01-$tahunx");
+		$tgl2= date("31-12-$tahun");
+		$paging='15';
+		$hal='1';
+		$field = 'No Doc';
+		$field1 = 'Customer';
+		$stat = 'All';
+	}
 
 ?>
-
 
 <html>
   <head>
@@ -90,8 +87,7 @@ else
 			ReadData(hal);
 		});	
 		
-		function ReadData(hal) 
-		{
+		function ReadData(hal) {
 			var tgl1 = $("#tgl1").val();
 			var tgl2 = $("#tgl2").val();				
 			var paging = $("#paging").val();	
@@ -100,6 +96,7 @@ else
 			var stat = $("#stat").val();
 			var field1 = $("#field1").val();
 			var cari1 = $("#search_name1").val();
+
 			$.get("ajax/ware_crud.php", {
 				tgl1:tgl1, 
 				tgl2:tgl2, 				
@@ -446,8 +443,6 @@ else
 		</form>
 	</div>	
 	
-	
-	
 	<div class="modal fade" id="DataLokasi"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">
@@ -533,7 +528,6 @@ else
 			</div>
 		</div>	
     </div>
-	
 
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>

@@ -13,8 +13,7 @@ $m_del = $rq['m_del'];
 $m_view = $rq['m_view'];
 $m_exe = $rq['m_exe'];
 
-if ($_GET['type'] == "Read")
-{
+if ($_GET['type'] == "Read"){
 	$cari = trim($_GET['cari']);
 	$hal = $_GET['hal'];
 	$paging = $_GET['paging'];
@@ -23,11 +22,14 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
+					<th rowspan="2" width="12%" style="text-align: center;">ITEM CODE</th>
 					<th rowspan="2" width="55%" style="text-align: center;">COST NAME</th>
-					<th rowspan="2" width="5%" style="text-align: center;">SAP CODE SIM</th>
-					<th rowspan="2" width="5%" style="text-align: center;">SAP CODE AMA</th>
-					<th rowspan="2" width="5%" style="text-align: center;">SAP CODE PTL</th>
-					<th rowspan="2" width="5%" style="text-align: center;">SAP CODE AA</th>
+					<th rowspan="2" width="10%" style="text-align: center;">COA</th>
+					<th rowspan="2" width="10%" style="text-align: center;">CORPORATE</th>
+					<th rowspan="2" width="10%" style="text-align: center;">DIVISI</th>
+					<th rowspan="2" width="10%" style="text-align: center;">DEPARTMENT</th>
+					<th rowspan="2" width="10%" style="text-align: center;">ACTIVITY</th>
+					<th rowspan="2" width="10%" style="text-align: center;">LOCATION</th>
 					<th rowspan="2" width="9%" style="text-align: center;">CREATED</th>
 					<th rowspan="2" width="5%" style="text-align: center;">ITEM PPH</th>
 					<th rowspan="2" width="5%" style="text-align: center;">STATUS</th>
@@ -55,11 +57,14 @@ if ($_GET['type'] == "Read")
 			$posisi++;		
 				$data .= '<tr>							
 				<td style="text-align:center">'.$posisi.'.</td>	
+				<td style="text-align:center">'.$row['itemcode'].'</td>
 				<td style="text-align:left">'.$row['nama_cost'].'</td>
-				<td style="text-align:center">'.$row['sapitemcode_sim'].'</td>
-				<td style="text-align:center">'.$row['sapitemcode_ama'].'</td>
-				<td style="text-align:center">'.$row['sapitemcode_ptl'].'</td>
-				<td style="text-align:center">'.$row['sapitemcode_aa'].'</td>
+				<td style="text-align:center">'.$row['sap_coa'].'</td>
+				<td style="text-align:center">'.$row['sap_corporate'].'</td>
+				<td style="text-align:center">'.$row['sap_divisi'].'</td>
+				<td style="text-align:center">'.$row['sap_dept'].'</td>
+				<td style="text-align:center">'.$row['sap_activity'].'</td>
+				<td style="text-align:center">'.$row['sap_location'].'</td>
 				<td style="text-align:center;text-transform:uppercase;">'.$row['id_user'].'</td>
 				<td style="text-align:center;text-transform:uppercase;">'.$row['item_pph'].'</td>
 				';					
@@ -144,44 +149,59 @@ if ($_GET['type'] == "Read")
 				
     echo $data;
 
-}else if ($_POST['type'] == "add"){		
-	if($_POST['mode'] != '' )
-	{	
-		$id 		= $_POST['id'];
-		$cost_name 	= addslashes(trim(strtoupper($_POST['cost_name'])));
-		$stat 		= $_POST['stat'];
-		$st 		= $_POST['st'];
-		$item_pph 	= $_POST['item_pph'];
-		$sim 		= addslashes(trim(strtoupper($_POST['sim'])));
-		$ama 		= addslashes(trim(strtoupper($_POST['ama'])));
-		$ptl 		= addslashes(trim(strtoupper($_POST['ptl'])));
-		$aa 		= addslashes(trim(strtoupper($_POST['aa'])));
-		$mode 		= $_POST['mode'];
+}
+else if ($_POST['type'] == "add"){
+	if($_POST['mode'] != '' ){	
+
+		// echo "<pre>";
+		// print_r($_POST);
+		// echo "</pre>";
+		// die();
+
+
+		$id 			= $_POST['id'];
+		$cost_name 		= addslashes(trim(strtoupper($_POST['cost_name'])));
+		$stat 			= $_POST['stat'];
 		
-		if($mode == 'Add')
-		{			
-			$sql = "INSERT INTO m_cost_tr (nama_cost,jenis,id_user,item_pph, `status`, sapitemcode_sim, sapitemcode_ama, sapitemcode_ptl, sapitemcode_aa) values
-					('$cost_name','$st','$id_user', '$item_pph','$stat', '$sim', '$ama', '$ptl', '$aa')";
-			$hasil=mysqli_query($koneksi, $sql);
+		$sap_coa 		= $_POST['sap_coa'];
+		$sap_corporate 	= $_POST['sap_corporate'];
+		$sap_divisi 	= $_POST['sap_divisi'];
+		$sap_dept 		= $_POST['sap_dept'];
+		$sap_activity	= $_POST['sap_activity'];
+		$sap_location 	= $_POST['sap_location'];
+		
+		$item_pph 		= $_POST['item_pph'];
+		$mode 			= $_POST['mode'];
+		
+		if($mode == 'Add') {			
+			$sql = "INSERT INTO m_cost_tr 
+					(nama_cost, id_user, item_pph, `status`, sap_coa, sap_corporate, sap_divisi, sap_divisi, sap_dept, sap_activity, sap_location) 
+				VALUES
+					('$cost_name','$id_user', '$item_pph','$stat', '$sap_coa', '$sap_corporate', '$sap_divisi', '$sap_dept', '$sap_activity', '$sap_location')";
 		}
-		else
-		{
-			$sql = "UPDATE m_cost_tr set 
+		else {
+			$sql = "UPDATE m_cost_tr SET 
 					nama_cost 		= '$cost_name',
 					item_pph 		= '$item_pph',
 					`status` 		= '$stat',
 					jenis 			= '$st',
 					id_user 		= '$id_user',
-					sapitemcode_sim	= '$sim',
-					sapitemcode_ama = '$ama',
-					sapitemcode_ptl = '$ptl',
-					sapitemcode_aa 	= '$aa'
-					where id_cost 	= '$id'	";
-			$hasil=mysqli_query($koneksi, $sql);
+					
+					sap_coa 		= '$sap_coa',
+					sap_corporate 	= '$sap_corporate',
+					sap_divisi 		= '$sap_divisi',
+					sap_dept 		= '$sap_dept',
+					sap_activity 	= '$sap_activity',
+					sap_location 	= '$sap_location'
+
+					WHERE id_cost 	= '$id'";
 		}
+
+		// echo $sql;
+		// die();
+		$hasil = mysqli_query($koneksi, $sql);
+
 		if (!$hasil) {
-	        			
-			//exit(mysqli_error($koneksi));
 			echo "Cost Name has found...!";
 	    }
 		else
@@ -190,9 +210,10 @@ if ($_GET['type'] == "Read")
 		}
 	}	
 	
-}else if ($_POST['type'] == "detil"){
+}
+else if ($_POST['type'] == "detil"){
 	$id = $_POST['id'];	
-    $query = "select * from m_cost_tr where id_cost  = '$id'";
+    $query = "SELECT * from m_cost_tr where id_cost  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
         exit(mysqli_error($koneksi));
     }
@@ -210,8 +231,8 @@ if ($_GET['type'] == "Read")
     echo json_encode($response);
 
 
-}else if ($_GET['type'] == "ListCost")
-{	
+}
+else if ($_GET['type'] == "ListCost"){
 	$cari = $_GET['cari'];
 	$data = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">

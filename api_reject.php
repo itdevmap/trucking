@@ -2,25 +2,21 @@
 include "koneksi.php";
 header("Content-Type: application/json");
 
-// Ambil input JSON
 $rawData = file_get_contents("php://input");
 $data = json_decode($rawData, true);
 
-// Validasi JSON
 if (json_last_error() !== JSON_ERROR_NONE) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Invalid JSON']);
     exit;
 }
 
-// Cek koneksi manual
 if (!$koneksi) {
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'DB Connection failed']);
     exit;
 }
 
-// Ambil nilai project_code
 $projectCode = $data['project'] ?? null;
 
 if (!$projectCode) {
@@ -29,7 +25,6 @@ if (!$projectCode) {
     exit;
 }
 
-// Ambil data JO berdasarkan project_code
 $stmt = mysqli_prepare($koneksi, "SELECT * FROM tr_jo WHERE project_code = ?");
 mysqli_stmt_bind_param($stmt, "s", $projectCode);
 mysqli_stmt_execute($stmt);

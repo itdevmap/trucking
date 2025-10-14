@@ -28,18 +28,18 @@
 				$bulan 		= date("m");
 				$q 			= "SELECT MAX(RIGHT(code_pr,4)) AS last_num 
 							FROM tr_pr 
-							WHERE SUBSTRING(code_pr,6,2) = '$tahun' 
-								AND code_pr LIKE '%PRTR%'";
+							WHERE SUBSTRING(code_pr,6,2) = '$tahun'
+								AND code_pr LIKE '%PRWH%'";
 
 				$res 		= mysqli_query($koneksi, $q);
 				$row 		= mysqli_fetch_assoc($res);
 				$nextNum 	= ($row['last_num'] ?? 0) + 1;
 				$urut 		= str_pad($nextNum, 4, "0", STR_PAD_LEFT);
 				$build_code = $tahun . $bulan . $urut;
-				$code_pr 	= "PRTR-" . $build_code;
+				$code_pr 	= "PRWH-" . $build_code;
 
 				// echo $code_pr;
-				// die();
+				// exit;
 			
 			$sql = "INSERT INTO  tr_pr (
 						code_pr,
@@ -72,7 +72,7 @@
 		$cat ="Data saved...";
 		$xy1="Edit|$id_pr|$cat";
 		$xy1=base64_encode($xy1);
-		header("Location: pr_data.php?id=$xy1");
+		header("Location: pr_wh_data.php?id=$xy1");
 	}else{
 
 		$idx 	= $_GET['id'];	
@@ -85,34 +85,35 @@
 	if($mode == 'Add') {
 		$tgl = date('d-m-Y');
 	}else{
-		$pq 		= mysqli_query($koneksi, 
+		$pq  = mysqli_query($koneksi, 
 						"SELECT 
 							tr_pr.*,
-							tr_quo.quo_no,
+							t_ware_quo.quo_no,
 							m_cust_tr.id_cust,
 							m_cust_tr.nama_cust,
 							sap_project.rowid,
 							sap_project.kode_project
 						FROM tr_pr 
 						LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = tr_pr.user_req
-						LEFT JOIN tr_quo ON tr_quo.id_quo = tr_pr.id_quo
+						LEFT JOIN t_ware_quo ON t_ware_quo.id_quo = tr_pr.id_quo
 						LEFT JOIN sap_project ON sap_project.rowid = tr_pr.sap_rowid
 						WHERE tr_pr.id_pr = '$id_pr'");
-		$rq			= mysqli_fetch_array($pq);
-		$id_pr 		= $rq['id_pr'];
-		$quo_no 	= $rq['quo_no'];
-		$id_quo 	= $rq['id_quo'];
-		$code_pr 	= $rq['code_pr'];
-		$id_user 	= $rq['id_cust'];
-		$user_req 	= $rq['nama_cust'];
-		$tgl 		= $rq['tgl'];
-		$tgl_pr 	= $rq['tgl_pr'];
-		$remark 	= $rq['remark'];
+
+		$rq			  = mysqli_fetch_array($pq);
+		$id_pr 		  = $rq['id_pr'];
+		$quo_no 	  = $rq['quo_no'];
+		$id_quo 	  = $rq['id_quo'];
+		$code_pr 	  = $rq['code_pr'];
+		$id_user 	  = $rq['id_cust'];
+		$user_req 	  = $rq['nama_cust'];
+		$tgl 		  = $rq['tgl'];
+		$tgl_pr 	  = $rq['tgl_pr'];
+		$remark 	  = $rq['remark'];
 		$rowid 		  = $rq['rowid'];
 		$kode_project  = $rq['kode_project'];
 	}
 
-	if($mode == 'View') {
+	if($mode != 'Add') {
 		$dis = "Disabled";
 	}
 
@@ -153,10 +154,11 @@
 					$("#desc").val(selectedName.toUpperCase());
 				});
 			});	
-			function ReadData(jenis) {
+			function ReadData() {
 				var code_pr = $("#code_pr").val();
 				var id_pr   = $("#id_pr").val();
 				var mode    = $("#mode").val();
+				var jenis   = 'item';
 
 				$("button[data-jenis]").removeClass("btn-warning").addClass("btn-primary");
 
@@ -210,29 +212,10 @@
 				$("#form-origin, #form-destination, #form-item, #form-service, #form-itemcode").hide();
 				$("#name-origin, #name-destination, #name-item, #name-service, #name-itemcode, #uom").val('');
 
-				if (jenis === "route") {
-					$("#form-origin").show();
-					$("#form-destination").show();
-					$("#form-itemcode").show();
-					
-					$("#id_asal").val(data.id_asal);
-					$("#id_tujuan").val(data.id_tujuan);
-					$("#name-origin").val(data.asal);
-					$("#name-destination").val(data.tujuan);
-					$("#name-itemcode").val('LJLOTO.0000BROTRUC');
-					$("#uom").val(data.jenis_mobil).prop("readonly", true);
-					$("#ket").html('Feet :');
-				} 
-				else if (jenis === "item") {
-					$("#form-item").show();
-					$("#uom").val('').prop("readonly", true);
-					$("#ket").html('UoM :');
-				} 
-				else if (jenis === "service") {
-					$("#form-service").show();
-					$("#uom").val('').prop("readonly", false);
-					$("#ket").html('UoM :');
-				}
+				$("#form-item").show();
+				$("#uom").val('').prop("readonly", true);
+				$("#ket").html('UoM :');
+
 			}, "json");
 			$('#Data').modal('show');
 		}
@@ -250,29 +233,15 @@
 			var name 		= "";
 			var origin 		= "";
 			var destination = "";
-
-			if (jenisx === "route") {
-				origin 		= $("#id_asal").val();
-				destination	= $("#id_tujuan").val();
-				itemcode 	= $("#name-itemcode").val().trim();
-			} else if (jenisx === "item") {
-				itemcode 	= $("#item_rowid").val().trim();
-				name 		= $("#item_rowid").val().trim();
-			}
-
+			itemcode 		= $("#item_rowid").val().trim();
+			name 			= $("#item_rowid").val().trim();
 			var qty_raw 	= $("#qty").val().replace(/,/g, '');
 			var qty 		= parseFloat(qty_raw);
 
-			if (jenisx === "route" && mode === 'Add') {
-				if (origin === "" && destination === "") {
-					alert("Origin dan Destination wajib di isi !");
-					return;
-				}
-			}else if (jenisx === "item"){
-				if (itemcode === "") {
-					alert("Itemcode wajib di isi !");
-					return;
-				}
+
+			if (itemcode === "") {
+				alert("Itemcode wajib di isi !");
+				return;
 			}
 
 			if (desc === "") {
@@ -286,8 +255,6 @@
 			
 			$.post("ajax/pr_crud.php", {
 				code_pr: code_pr,
-				origin: origin,
-				destination: destination,
 				name: name,
 				itemcode: itemcode,
 				desc: desc,
@@ -352,13 +319,13 @@
 			}
 			function ListSQ() {
 				var cari = $("#cari_SQ").val();
-				$.get("ajax/pr_crud.php", {cari:cari,  type:"ListSQ" }, function (data, status) {
+				$.get("ajax/pr_crud.php", {cari:cari,  type:"ListSQWH" }, function (data, status) {
 					$(".tampil_SQ").html(data);
 				});
 			}
 			function PilihSQ(id) {
 				$.post("ajax/pr_crud.php", {
-						id: id, type:"DetilSQ"
+						id: id, type:"DetilSQWH"
 					},
 					function (data, status) {
 						var data = JSON.parse(data);	
@@ -387,16 +354,16 @@
 					},
 					function (data, status) {
 						var data = JSON.parse(data);	
-						$("#item_rowid").val(data.rowid);
-						$("#name-item").val(data.sapitemcode);
-						$("#desc").val(data.sapitemname);
+						$("#item_rowid").val(data.id_cost);
+						$("#name-item").val(data.itemcode);
+						$("#desc").val(data.nama_cost);
 						$("#uom").val(data.uom);
 					}
 				);
 				$("#DaftarItem").modal("hide");
 			}
 
-		// ----------------- Edit DATA -----------------
+		// ========= Edit DATA =========
             function EditDetail(id_detail, jenis) {
 
 				$.post("ajax/pr_crud.php", {
@@ -408,42 +375,16 @@
 					$("#modex").val('Edit');
 					$("#jenisx").val(data.jenis);
 
-					$("#id_asal").val('');
-					$("#id_tujuan").val('');
-					$("#form-origin, #form-destination, #form-item, #form-service, #form-itemcode").hide();
-					$("#name-origin, #name-destination, #name-item, #name-service, #name-itemcode, #uom").val('');
-
-					if (jenis === "route") {
-						$("#form-origin").show();
-						$("#form-destination").show();
-						$("#form-itemcode").show();
-
-						$("#idx").val(data.id_detail);
-						$("#id_asal").val(data.id_asal);
-						$("#id_tujuan").val(data.id_tujuan);
-						$("#name-origin").val(data.asal);
-						$("#name-destination").val(data.tujuan);
-						$("#name-itemcode").val('LJLOTO.0000BROTRUC');
-						$("#uom").val(data.uom).prop("readonly", true);
-						$("#desc").val(data.description);
-						$("#qty").val(data.qty);
-					} 
-					else if (jenis === "item") {
+					if (jenis === "item") {
 						$("#form-item").show();
 
 						$("#idx").val(data.id_detail);
-						$("#name-item").val(data.rowid).trigger("change");
+						$("#item_rowid").val(data.rowid);
+						$("#name-item").val(data.itemcode);
+						$("#desc").val(data.description);
 						$("#uom").val(data.uom).prop("readonly", true);
 						$("#qty").val(data.qty);
 					} 
-					else if (jenis === "service") {
-						$("#form-service").show();
-
-						$("#idx").val(data.id_detail);
-						$("#desc").val(data.description);
-						$("#uom").val(data.uom);
-						$("#qty").val(data.qty);
-					}
 				}, "json");
 				$('#Data').modal('show');
             }
@@ -456,7 +397,7 @@
 			}
 			function ListSAP() {
 				var cari = $("#cari_SAP").val();
-				$.get("ajax/jo_crud.php", {cari:cari,  type:"ListSAP" }, function (data, status) {
+				$.get("ajax/jo_crud.php", {cari:cari,  type:"ListSAPWH" }, function (data, status) {
 					$(".tampil_SAP").html(data);
 				});
 			}
@@ -508,32 +449,37 @@
 				<?php }?>
 				
 				<div class="col-md-6" >
-					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc; min-height:190px">					
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc; min-height:230px">					
 						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;
 						text-align:left;padding:5px;margin-bottom:1px">							
 							<b><i class="fa fa-list"></i>&nbsp;Data Purchase Request</b>
 						</div>
 						<br>
 						<input type="hidden" id ="id_pr" name="id_pr" value="<?php echo $id_pr; ?>" >	
-						<input type="hidden" id ="code_pr" name="code_pr" value="<?php echo $code_pr; ?>" >	
 						<input type="hidden" id ="mode" name="mode" value="<?php echo $mode; ?>" >
 						<input type="hidden" id ="id_quo" name="id_quo" value="<?php echo $id_quo; ?>" >
 						<input type="hidden" id ="rowid" name="rowid" value="<?php echo $rowid; ?>" >
 
 						<div style="width:100%;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
-							<input type="text"  id ="tgl" name="tgl" value="<?php echo $tgl; ?>" style="text-align: center;width:20%" readonly>
+							<input type="text"  id ="tgl" name="tgl" value="<?php echo $tgl; ?>" style="text-align: left;width:25%" readonly>
 						</div>
 
 						<div style="width:100%;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"><b>Delivery Date :</b></span>
-							<input type="date"  id ="tgl_pr" name="tgl_pr" value="<?php echo $tgl_pr; ?>" style="text-align: left;width:70%">
+							<input type="date"  id ="tgl_pr" name="tgl_pr" value="<?php echo $tgl_pr; ?>" style="text-align: left;width:25%">
 						</div>
+
 						<div style="width:100%;" class="input-group">
-                            <span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No SQ :</b></span>
+							<span class="input-group-addon" style="text-align:right;"><b>Code PRWH :</b></span>
+							<input type="text"  id ="code_pr" name="code_pr" value="<?php echo $code_pr; ?>" style="text-align: left;width:25%" readonly>
+						</div>
+
+						<div style="width:100%;" class="input-group">
+                            <span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No Quo :</b></span>
                             <input type="text" name="no_sq" id="no_sq" style="text-transform: uppercase;text-align: left;width:70%;" value="<?php echo $quo_no; ?>" readonly>
                             	
-                            <button class="btn btn-block btn-primary" id="po" style="padding:6px 12px;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilSQ()">
+                            <button class="btn btn-block btn-primary" id="po" style="padding:6px 12px;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilSQ()" <?php echo $dis; ?>>
                                 <span class="glyphicon glyphicon-search"></span>
                             </button>
                         </div>
@@ -550,7 +496,7 @@
 				</div>
 				
 				<div class="col-md-6" >
-					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;min-height:190px">					
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;min-height:230px">					
 						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;
 						text-align:left;padding:5px;margin-bottom:1px">							
 							<b><i class="fa fa-list"></i>&nbsp;Remarks</b>
@@ -568,24 +514,10 @@
 								<button class="btn btn-primary" 
 										style="border-radius:2px" 
 										type="button" 
-										data-jenis="route"
-										onClick="ReadData('route')">
-									<b>PR Route</b>
-								</button>
-								<button class="btn btn-primary" 
-										style="border-radius:2px" 
-										type="button" 
 										data-jenis="item"
 										onClick="ReadData('item')">
 									<b>PR Item</b>
 								</button>
-								<!-- <button class="btn btn-primary" 
-										style="border-radius:2px" 
-										type="button" 
-										data-jenis="service"
-										onClick="ReadData('service')">
-									<b>PR Service</b>
-								</button> -->
 							</div>
 
 							<div class="table-responsive mailbox-messages" style="min-height:10px">									
@@ -596,7 +528,7 @@
 				<?php }?>	
 
 				<?php
-					$link = "pr.php?id=$xy1";
+					$link = "pr_wh.php";
 					$xy1="$id_pr";
 					$idx=base64_encode($xy1);
 				?>
@@ -639,39 +571,15 @@
 								<input type="hidden" id="idx" value=""/>
 								<input type="hidden" id="modex" value=""/>
 								<input type="hidden" id="jenisx" value=""/>
-								<input type="hidden" id="id_asal"/>
-								<input type="hidden" id="id_tujuan"/>
 								<input type="hidden" id="item_rowid"/>
 
-								<!-- ------------ Route ------------ -->
-									<div id="form-origin" class="input-group form-group-jenis" style="display:none;width:100%;">
-										<span class="input-group-addon" style="text-align: right;"><b>Origin :</b></span>
-										<input type="text" id="name-origin" style="text-transform:uppercase;width:80%" readonly>
-									</div>
-									<div id="form-destination" class="input-group form-group-jenis" style="display:none;width:100%;">
-										<span class="input-group-addon" style="text-align: right;"><b>Destination :</b></span>
-										<input type="text" id="name-destination" style="text-transform:uppercase;width:80%" readonly>
-									</div>
-
-									<div id="form-itemcode" class="input-group form-group-jenis" style="display:none;width:100%;">
-										<span class="input-group-addon" style="text-align: right;"><b>Itemcode :</b></span>
-										<input type="text" id="name-itemcode" style="text-transform:uppercase;width:80%" readonly>
-									</div>
-
-								<!-- ------------ Item ------------ -->
-									<div id="form-item" class="input-group form-group-jenis" style="display:none;width:100%;">
-										<span class="input-group-addon" style="text-align: right;"><b>Itemcode :</b></span>
-										<input type="text" name="name-item" id="name-item" style="text-transform: uppercase;text-align: left;width:70%;" readonly>
-										<button class="btn btn-block btn-primary" id="po" style="padding:6px 12px;margin-top:-3px;border-radius:2px;margin-left:2px" type="button" onClick="javascript:TampilItem()">
-											<span class="glyphicon glyphicon-search"></span>
-										</button>
-									</div>
-
-								<!-- ------------ Service ------------ -->
-									<!-- <div id="form-service" class="input-group form-group-jenis" style="display:none;width:100%;">
-										<span class="input-group-addon" style="text-align: right;"><b>Service :</b></span>
-										<input type="text" id="name-service" style="text-transform:uppercase;width:80%">
-									</div> -->
+								<div id="form-item" class="input-group form-group-jenis" style="display:none;width:100%;">
+									<span class="input-group-addon" style="text-align: right;"><b>Itemcode :</b></span>
+									<input type="text" name="name-item" id="name-item" style="text-transform: uppercase;text-align: left;width:70%;" readonly>
+									<button class="btn btn-block btn-primary" id="po" style="padding:6px 12px;margin-top:-3px;border-radius:2px;margin-left:2px" type="button" onClick="javascript:TampilItem()">
+										<span class="glyphicon glyphicon-search"></span>
+									</button>
+								</div>
 
 								<!-- ------------ INPUT BIASA ------------ -->
 								<div class="input-group" style="width:100%;">
@@ -715,7 +623,7 @@
 						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 								<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data SQ</b>
+									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Quo</b>
 								</div>	
 								<br>
 								<div style="width:100%" class="input-group" style="background:none !important;">

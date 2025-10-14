@@ -2,14 +2,14 @@
     session_start();
     include "koneksi.php"; 
     include "session_log.php";
-    $pq = mysqli_query($koneksi,"SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='65'");
+    $pq = mysqli_query($koneksi,"SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='68'");
 
     $rq=mysqli_fetch_array($pq);	
     $m_edit = $rq['m_edit'];
-    $m_add = $rq['m_add'];
-    $m_del = $rq['m_del'];
+    $m_add  = $rq['m_add'];
+    $m_del  = $rq['m_del'];
     $m_view = $rq['m_view'];
-    $m_exe = $rq['m_exe'];
+    $m_exe  = $rq['m_exe'];
 
     if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ) {
         header('location:logout.php'); 
@@ -52,7 +52,7 @@
 		.datepicker{z-index:1151 !important;}
 	</style>
 	<script>
-        // ========== READ DATA ==========
+        // ----------------- READ DATA -----------------
             $(document).ready(function () {
                 var hal = $("#hal").val();
                 ReadData(hal);
@@ -61,7 +61,7 @@
                 
                 var cari = $("#search_name").val();
                 var paging = $("#paging").val();	
-                $.get("ajax/pr_crud.php", {paging:paging,cari:cari,hal:hal, type:"Read" }, function (data, status) {
+                $.get("ajax/pr_crud.php", {paging:paging,cari:cari,hal:hal, type:"ReadWH" }, function (data, status) {
                     $(".tampil_data").html(data);
                     $("#hal").val(hal);
                 });
@@ -83,7 +83,7 @@
                             
             }
 
-        // ========== SHOW MODAL ==========
+        // ----------------- SHOW MODAL -----------------
             function TampilData() {
                 $("#mode").val('Add');
                 $('#Data').modal('show');
@@ -94,7 +94,7 @@
                 $("#code_pr").val('auto');
             }
 
-        // ========== FORMAT RUPIAH ==========
+        // ----------------- FORMAT RUPIAH -----------------
             function Desimal(num) {
                 num = num.toString().replace(/\$|\,/g,'');
                 if(isNaN(num))
@@ -119,7 +119,7 @@
                 return true;
             }
 
-        // ========== EDIT DATA ==========
+        // ----------------- EDIT DATA -----------------
             function GetData(id) {
                 $("#id").val(id);
                 $.post("ajax/pr_crud.php", { id: id, type: "Detil_Data" }, function (data, status) {
@@ -149,7 +149,8 @@
                 $("#Data").modal("show");
             }
 
-        // ========== STORE DATA ==========
+
+        // ----------------- STORE DATA -----------------
             function add() {
                 var r = confirm("Are you sure ?...");
                 if (r == true) {	
@@ -186,7 +187,7 @@
                 }
             }
 
-        // ========== EXECUTE DATA ==========
+        // ----------------- EXECUTE DATA -----------------
             function Confirm(id) {
                 var hal = $("#hal").val();
                 var conf = confirm("Are you sure to Closed ?");
@@ -208,11 +209,6 @@
                     });
                 }
             }
-
-        // ========== SEND AP ==========
-            function sendAP() {
-                
-            }
     </script>
 	
   </head>
@@ -226,22 +222,22 @@
 			<?php include "menu.php" ; ?>	
 		</aside>	
 
-		<!-- ========= CONTENT ========= -->
+		<!-- ------------ CONTENT----------- -->
 		<form method="post" name ="myform" action="pr.php" class="form-horizontal" > 
             <div class="content-wrapper" style="min-height:750px">
                 <br>
                 <ol class="breadcrumb">
-                    <li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data PR</b></font></h1></li>					
+                    <li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data PR WH</b></font></h1></li>					
                 </ol>
                 <br>
                 <div class="col-md-12" >
                     <div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
                         <div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-                                <b><i class="fa fa-search"></i>&nbsp;Filter PR</b>
+                                <b><i class="fa fa-search"></i>&nbsp;Filter PR WH</b>
                         </div>
                         <br>					
                         <div style="width:100%" class="input-group">
-                            <span class="input-group-addon" style="text-align:right;"><b>Find PR :</b></span>
+                            <span class="input-group-addon" style="text-align:right;"><b>Find PR WH :</b></span>
                             <input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
                             style="text-align: left;width:200px" onkeypress="ReadData(1)" >
                             <input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
@@ -259,14 +255,16 @@
                         <div style="width:100%;background: #fff;" class="input-group" >
                             <span class="input-group-addon" style="width:50%;text-align:left;padding:0px">	
                                 <?php if ($m_add == '1'){
-                                    $xy1="Add|";
-                                    $xy1=base64_encode($xy1);?>
+                                    $xy1    = "Add|";
+                                    $xy1    = base64_encode($xy1);?>
+
                                     <button class="btn btn-block btn-success" 
-                                    style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:2px" type="button" title = "Created Order"
-                                    onClick="window.location.href = 'pr_data.php?id=<?php echo $xy1; ?>' ">
+                                    style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:2px" type="button" title = "Created Purchase Request"
+                                    onClick="window.location.href = 'pr_wh_data.php?id=<?php echo $xy1; ?>' ">
                                     <span class="fa  fa-plus-square"></span>
-                                    <b>Create PR</b>
+                                    <b>Create PR WH</b>
                                     </button>
+
                                 <?php }?>	
                             </span>
                             <span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">

@@ -13,8 +13,7 @@ $m_del = $data['m_del'];
 $m_view = $data['m_view'];
 $m_exe = $data['m_exe'];
 
-if ($_GET['type'] == "read")
-{
+if ($_GET['type'] == "read"){
 	$hal = $_GET['hal'];
 	$paging = $_GET['paging'];
 	$search_name = $_GET['search_name'];
@@ -30,7 +29,7 @@ if ($_GET['type'] == "read")
 					<th rowspan="2" width="10%" style="text-align: center;">CONTACT PERSON</th>
 					<th rowspan="2" width="8%" style="text-align: center;">PHONE</th>
 					<th rowspan="2" width="16%" style="text-align: center;">EMAIL</th>
-					<th rowspan="2" width="7%" style="text-align: center;">CREATED</th>
+					<th rowspan="2" width="5%" style="text-align: center;">PPN</th>
 					<th rowspan="2" width="6%" style="text-align: center;">STATUS</th>
 					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>						
 				</tr>
@@ -45,10 +44,11 @@ if ($_GET['type'] == "read")
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 
 	
-	$SQL = "select * from m_vendor_tr where nama_vendor LIKE '%$search_name%'  order by nama_vendor LIMIT $offset, $jmlperhalaman";	
+	$SQL = "SELECT * FROM m_vendor_tr WHERE nama_vendor LIKE '%$search_name%' ORDER BY nama_vendor LIMIT $offset, $jmlperhalaman";	
+
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+       exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
@@ -67,7 +67,7 @@ if ($_GET['type'] == "read")
 				<td style="text-align:center">'.$row['kontak'].'</td> 	
 				<td style="text-align:center">'.$row['telp'].'</td> 
 				<td style="text-align:center">'.$row['email'].'</td>
-				<td style="text-align:center">'.$row['created'].'</td>';
+				<td style="text-align:center">'.$row['ppn'].'</td>';
 				
 			if($row['status'] =='0' ){
 					$data .= '<td style="text-align:center">
@@ -146,57 +146,58 @@ if ($_GET['type'] == "read")
 				$data .= '</ul></div>';
 				
     echo $data;
-
-	
-}else if ($_POST['type'] == "AddData"){		
-	if($_POST['mode'] != '' )
-	{	
-		$id_vendor = $_POST['id_vendor'];
-		$nama_vendor = trim(addslashes(strtoupper($_POST['nama_vendor'])));
-		$caption = addslashes(strtoupper($_POST['caption']));
-		$kontak = addslashes($_POST['kontak']);
-		$alamat = addslashes($_POST['alamat']);	
-		$telp = addslashes($_POST['telp']);
-		$email = addslashes($_POST['email']);
-		$stat = $_POST['stat'];
-		$mode = $_POST['mode'];
-		$tanggal = ConverTglSql($_POST['tanggal']);
-		$batas = str_replace(",","", $batas);
+}
+else if ($_POST['type'] == "AddData"){		
+	if($_POST['mode'] != '' ){	
+		$id_vendor 		= $_POST['id_vendor'];
+		$nama_vendor	= trim(addslashes(strtoupper($_POST['nama_vendor'])));
+		$caption 		= addslashes(strtoupper($_POST['caption']));
+		$kontak 		= addslashes($_POST['kontak']);
+		$alamat 		= addslashes($_POST['alamat']);	
+		$telp 			= addslashes($_POST['telp']);
+		$email			= addslashes($_POST['email']);
+		$stat 			= $_POST['stat'];
+		$ppn 			= $_POST['ppn'];
+		$mode 			= $_POST['mode'];
+		$tanggal 		= ConverTglSql($_POST['tanggal']);
+		$batas 			= str_replace(",","", $batas);
 		
-		if($mode == 'Add')
-		{
-			$sql = "INSERT INTO m_vendor_tr (nama_vendor, caption, kontak, alamat, telp, email, status, created, tanggal) values
+		if($mode == 'Add'){
+			$sql = "INSERT INTO m_vendor_tr 
+					(nama_vendor, caption, kontak, alamat, telp, email, `status`, created, tanggal) 
+				VALUES
 					('$nama_vendor','$caption','$kontak','$alamat','$telp','$email','$stat','$id_user',  '$tanggal')";
 			$hasil=mysqli_query($koneksi, $sql);
 		}
-		else
-		{
-			$sql = "update m_vendor_tr set 
-					nama_vendor = '$nama_vendor',
-					caption = '$caption',
-					kontak= '$kontak',
-					alamat = '$alamat',
-					telp = '$telp',
-					status = '$stat',
-					email = '$email'
-					where id_vendor = '$id_vendor'	";
+		else{
+			$sql = "UPDATE m_vendor_tr SET 
+					kontak		= '$kontak',
+					alamat 		= '$alamat',
+					telp1 		= '$telp',
+					email 		= '$email',
+					ppn 		= '$ppn',
+					`status`	= '$stat'
+					WHERE id_vendor = '$id_vendor'";
+			
+			// echo $sql;
+			// exit;
+
 			$hasil=mysqli_query($koneksi, $sql);
 		}
+
 		if (!$hasil) {
-	        			
-			//exit(mysql_error());
 			echo "Partner Name has found...!";
-	    }
-		else
-		{	
+	    } else {	
 			echo "Data saved!";
 		}
 	}	
-}else if ($_POST['type'] == "DetilData"){
+}
+
+else if ($_POST['type'] == "DetilData"){
 	$id = $_POST['id'];	
-    $query = "select * from m_vendor_tr where id_vendor  = '$id'";
+    $query = "SELECT * from m_vendor_tr where id_vendor  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error());
+        exit(mysqli_error($koneksi));
     }
     $response = array();
     if(mysqli_num_rows($result) > 0) {
@@ -230,7 +231,7 @@ if ($_GET['type'] == "read")
 	
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
-        exit(mysqli_error());
+       exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {

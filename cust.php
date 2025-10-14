@@ -75,6 +75,22 @@ else
 					$("#hal").val(hal);
 				});
 			}
+			function Rupiah(num) {
+				num = num.toString().replace(/\$|\,/g,'');
+				if(isNaN(num))
+					num = "0";
+					sign = (num == (num = Math.abs(num)));
+					num = Math.floor(num*100+0.50000000001);
+					cents = num%100;
+					num = Math.floor(num/100).toString();
+				if(cents<10)
+					cents = "0" + cents;
+					for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++)
+						num = num.substring(0,num.length-(4*i+3))+','+
+						num.substring(num.length-(4*i+3));
+				return (((sign)?'':'-') + '' + num);
+				
+			}
 			function Tampil(){	
 				var hal = $("#hal").val();
 				ReadData(hal);
@@ -109,9 +125,7 @@ else
 			function AddData() {
 				if(!$("#nama_cust").val()){
 					alert("Customer Name must fill !..");
-				}
-				else
-				{
+				} else {
 					var id_cust 	= $("#id_cust").val();
 					var nama_cust	= $("#nama_cust").val();
 					var caption 	= $("#caption").val();
@@ -124,6 +138,8 @@ else
 					var email 		= $("#email").val();
 					var tanggal 	= $("#tanggal").val();
 					var tgl_tempo 	= $("#periode_tempo").val();
+					var overlimit 	= $("#overlimit").val();
+					
 					$.post("ajax/cust_crud.php", {
 						id_cust:id_cust,
 						nama_cust:nama_cust,
@@ -134,6 +150,7 @@ else
 						email:email,
 						tanggal:tanggal,
 						tgl_tempo:tgl_tempo,
+						overlimit:overlimit,
 
 						mode:mode,
 						item_pph:item_pph,
@@ -330,7 +347,7 @@ else
 							</button>
 						</div>
 						<br>	
-					</div>
+					</div> 
 				</div>
 				
 				<div class="col-md-12" >
@@ -338,12 +355,12 @@ else
 						<div style="width:100%;background: #fff;" class="input-group" >
 							<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background:#fff;">
 								<?php if ($m_add == '1'){?>
-								<button class="btn btn-block btn-success" 
+								<!-- <button class="btn btn-block btn-success" 
 									style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:3px" type="button" 
 									onClick="javascript:TampilData()">
 									<span class="fa  fa-plus-square"></span>
 									<b>Add New</b>
-								</button>	
+								</button>	 -->
 								<?php }?>
 							</span>
 							<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
@@ -426,11 +443,15 @@ else
 								</div>
 								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Item PPH :</b></span>
-									<input type="number" id="item_pph" value="0" style="text-align: right;width:40%;border:1px solid rgb(169, 169, 169)" />	
+									<input type="number" id="item_pph" value="0" style="text-align: right;width:30%;border:1px solid rgb(169, 169, 169)" />	
 								</div>
 								<div style="width:100%;" class="input-group">
-									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Periode Tempo :</b></span>
-									<input type="number" id="periode_tempo" value="0" style="text-align: right;width:40%;border:1px solid rgb(169, 169, 169)" />	
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>TOP :</b></span>
+									<input type="number" id="periode_tempo" value="0" style="text-align: right;width:30%;border:1px solid rgb(169, 169, 169)" />	
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Limit :</b></span>
+									<input type="text" id="overlimit" value="0" style="text-align: right;width:30%;border:1px solid rgb(169, 169, 169)" onBlur ="this.value=Rupiah(this.value);"/>	
 								</div>
 								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Status :</b></span>

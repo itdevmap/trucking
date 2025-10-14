@@ -1,71 +1,90 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	include "lib.php";
 
-if(!isset($_SESSION['id_user'])  ){
- header('location:logout.php'); 
-}
+	if(!isset($_SESSION['id_user'])  ){
+		header('location:logout.php'); 
+	}
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{		
-	$mode = $_POST['mode'];
-	$id_sewa = $_POST['id_sewa'];	
-	$id_biaya = $_POST['id_biaya'];	
-	$id_cust = $_POST['id_cust'];
-	$id_quo = $_POST['id_quo'];
-	$ket = addslashes(trim($_POST['ket']));
-	$tgl_sjx = ConverTglSql($tgl_sj);
-	$tanggal = $_POST['tanggal'];	
-	$tanggalx = ConverTglSql($tanggal);
-	
-	$uj = str_replace(",","", $uj);
-	$ritase = str_replace(",","", $ritase);
-	
-	if($mode == 'Add' )
-	{
-		$ptgl = explode("-", $tanggal);
-		$tg = $ptgl[0];
-		$bl = $ptgl[1];
-		$th = $ptgl[2];	
-		$query = "SELECT max(right(no_sewa,5)) as maxID FROM t_ware_sewa where   year(tanggal) = '$th'  ";
-		$hasil = mysqli_query($koneksi, $query);    
-		$data  = mysqli_fetch_array($hasil);
-		$idMax = $data['maxID'];
-		if ($idMax == '99999'){
-			$idMax='00000';
-		}
-		$noUrut = (int) $idMax;   
-		$noUrut++;  
-		if(strlen($noUrut)=='1'){
-			$noUrut="0000$noUrut";
-			}elseif(strlen($noUrut)=='2'){
-			$noUrut="000$noUrut";
-			}elseif(strlen($noUrut)=='3'){
-			$noUrut="00$noUrut";
-			}elseif(strlen($noUrut)=='4'){
-			$noUrut="0$noUrut";
-		}   
-		$year = substr($thn,2,2);
-		$no_sewa = "SO-$year$noUrut";
+	if($_SERVER['REQUEST_METHOD'] == "POST"){	
+		// echo "<pre>";
+		// print_r($_POST);
+		// echo "</pre>";
+		// die();
+
+		$mode 		= $_POST['mode'];
+		$id_sewa 	= $_POST['id_sewa'];	
+		$id_biaya 	= $_POST['id_biaya'];	
+		$id_cust 	= $_POST['id_cust'];
+		$id_quo 	= $_POST['id_quo'];
+		$ket 		= addslashes(trim($_POST['ket']));
+		$tgl_sjx 	= ConverTglSql($tgl_sj);
+		$tanggal 	= $_POST['tanggal'];	
+		$tanggalx 	= ConverTglSql($tanggal);
+
+		$rowid 		= $_POST['rowid'];	
 		
-		$sql = "INSERT INTO  t_ware_sewa (no_sewa, id_quo, id_cust,  ket, created, tanggal, id_cost) values
-				('$no_sewa',  '$id_quo', '$id_cust', '$ket', '$id_user', '$tanggalx', '$id_biaya')";
-		$hasil= mysqli_query($koneksi, $sql);
+		$uj 		= str_replace(",","", $uj);
+		$ritase 	= str_replace(",","", $ritase);
 		
-		if (!$hasil)
+		if($mode == 'Add' )
 		{
-			$cat ="Data Sewa Customer untuk Periode tersebut sudah terdaftar...";
-			$xy1="Add|$id_sewa|$cat";
-			$xy1=base64_encode($xy1);
-			header("Location: ware_sewa_data.php?id=$xy1");
+			$ptgl = explode("-", $tanggal);
+			$tg = $ptgl[0];
+			$bl = $ptgl[1];
+			$th = $ptgl[2];	
+			$query = "SELECT max(right(no_sewa,5)) as maxID FROM t_ware_sewa where   year(tanggal) = '$th'  ";
+			$hasil = mysqli_query($koneksi, $query);    
+			$data  = mysqli_fetch_array($hasil);
+			$idMax = $data['maxID'];
+			if ($idMax == '99999'){
+				$idMax='00000';
+			}
+			$noUrut = (int) $idMax;   
+			$noUrut++;  
+			if(strlen($noUrut)=='1'){
+				$noUrut="0000$noUrut";
+				}elseif(strlen($noUrut)=='2'){
+				$noUrut="000$noUrut";
+				}elseif(strlen($noUrut)=='3'){
+				$noUrut="00$noUrut";
+				}elseif(strlen($noUrut)=='4'){
+				$noUrut="0$noUrut";
+			}   
+			$year = substr($thn,2,2);
+			$no_sewa = "SO-$year$noUrut";
+			
+			$sql = "INSERT INTO  t_ware_sewa (sap_rowid, no_sewa, id_quo, id_cust,  ket, created, tanggal, id_cost) values
+					('$rowid', '$no_sewa',  '$id_quo', '$id_cust', '$ket', '$id_user', '$tanggalx', '$id_biaya')";
+			$hasil= mysqli_query($koneksi, $sql);
+			
+			if (!$hasil){
+				$cat ="Data Sewa Customer untuk Periode tersebut sudah terdaftar...";
+				$xy1="Add|$id_sewa|$cat";
+				$xy1=base64_encode($xy1);
+				header("Location: ware_sewa_data.php?id=$xy1");
+			}else{
+				
+				$sql = mysqli_query($koneksi, "SELECT max(id_sewa)as id from t_ware_sewa ");			
+				$row = mysqli_fetch_array($sql);
+				$id_sewa = $row['id'];
+			
+				$cat ="Data saved...";
+				$xy1="Edit|$id_sewa|$cat";
+				$xy1=base64_encode($xy1);
+				header("Location: ware_sewa_data.php?id=$xy1");
+			}
 		}else{
 			
-			$sql = mysqli_query($koneksi, "select max(id_sewa)as id from t_ware_sewa ");			
-			$row = mysqli_fetch_array($sql);
-			$id_sewa = $row['id'];
-		
+			$sql = "UPDATE t_ware_sewa SET 
+						tanggal = '$tanggalx',
+						id_cost = '$id_biaya',
+						ket = '$ket'
+						WHERE id_sewa = '$id_sewa'	";
+			$hasil=mysqli_query($koneksi,$sql);
+			
 			$cat ="Data saved...";
 			$xy1="Edit|$id_sewa|$cat";
 			$xy1=base64_encode($xy1);
@@ -73,70 +92,56 @@ if($_SERVER['REQUEST_METHOD'] == "POST")
 		}
 		
 		
-		
+	} else{	
+		$idx = $_GET['id'];	
+		$x=base64_decode($idx);
+		$pecah = explode("|", $x);
+		$mode= $pecah[0];
+		$id_sewa = $pecah[1];
+		$cat = $pecah[2];
+	}
+
+	if($mode == 'Add'){
+		$no_sewa = '-- Auto -- ';
+		$bln = date('m');
+		$thn = date('Y');
+		$tanggal = date('d-m-Y');
 	}else{
 		
-		$sql = "update t_ware_sewa set 
-					tanggal = '$tanggalx',
-					id_cost = '$id_biaya',
-					ket = '$ket'
-					where id_sewa = '$id_sewa'	";
-		$hasil=mysqli_query($koneksi,$sql);
-		
-		$cat ="Data saved...";
-		$xy1="Edit|$id_sewa|$cat";
-		$xy1=base64_encode($xy1);
-		header("Location: ware_sewa_data.php?id=$xy1");
+		$pq = mysqli_query($koneksi, "SELECT 
+				t_ware_sewa.*, 
+				m_cust_tr.nama_cust, 
+				t_ware_quo.quo_no, 
+				m_cost_tr.nama_cost,
+				sap_project.kode_project
+			FROM t_ware_sewa 
+			LEFT JOIN m_cust_tr ON t_ware_sewa.id_cust = m_cust_tr.id_cust
+			LEFT JOIN t_ware_quo ON t_ware_sewa.id_quo = t_ware_quo.id_quo
+			LEFT JOIN m_cost_tr ON t_ware_sewa.id_cost = m_cost_tr.id_cost
+			LEFT JOIN sap_project ON sap_project.rowid = t_ware_sewa.sap_rowid
+			where t_ware_sewa.id_sewa = '$id_sewa'  ");
+
+		$rq			= mysqli_fetch_array($pq);	
+		$no_sewa 	= $rq['no_sewa'];
+		$tanggal 	= ConverTgl($rq['tanggal']);
+		$id_biaya 	= $rq['id_cost'];
+		$quo_no 	= $rq['quo_no'];
+		$nama_biaya = $rq['nama_cost'];
+		$id_quo 	= $rq['id_quo'];
+		$tgl_sj 	= ConverTgl($rq['tanggal']);
+		$id_cust 	= $rq['id_cust'];
+		$nama_cust 	= $rq['nama_cust'];
+		$ket 		= str_replace("\'","'",$rq['ket']);
+		$disx 		= "Disabled";
+
+		$rowid 		  = $rq['sap_rowid'];
+		$kode_project = $rq['kode_project'];
 	}
-	
-	
-}
-else
-{	
-	$idx = $_GET['id'];	
-	$x=base64_decode($idx);
-	$pecah = explode("|", $x);
-	$mode= $pecah[0];
-	$id_sewa = $pecah[1];
-	$cat = $pecah[2];
-}
 
-if($mode == 'Add')
-{
-	$no_sewa = '-- Auto -- ';
-	$bln = date('m');
-	$thn = date('Y');
-	$tanggal = date('d-m-Y');
-}
-else{
-	
-	$pq = mysqli_query($koneksi, "select t_ware_sewa.*, m_cust_tr.nama_cust, t_ware_quo.quo_no, m_cost_tr.nama_cost
-		  from 
-		  t_ware_sewa left join m_cust_tr on t_ware_sewa.id_cust = m_cust_tr.id_cust
-		   left join t_ware_quo on t_ware_sewa.id_quo = t_ware_quo.id_quo
-		   left join m_cost_tr on t_ware_sewa.id_cost = m_cost_tr.id_cost
-		  where t_ware_sewa.id_sewa = '$id_sewa'  ");
-	$rq=mysqli_fetch_array($pq);	
-	$no_sewa = $rq['no_sewa'];
-	$tanggal = ConverTgl($rq['tanggal']);
-	$id_biaya = $rq['id_cost'];
-	$quo_no = $rq['quo_no'];
-	$nama_biaya = $rq['nama_cost'];
-	$id_quo = $rq['id_quo'];
-	$tgl_sj = ConverTgl($rq['tanggal']);
-	$id_cust = $rq['id_cust'];
-	$nama_cust = $rq['nama_cust'];
-	$ket = str_replace("\'","'",$rq['ket']);
-	$disx = "Disabled";
-}
-
-if($mode == 'View')
-{
-	$dis = "Disabled";
-}
-
+	if($mode == 'View'){
+		$dis = "Disabled";
+	}
 ?>
-
 
 <html>
   <head>
@@ -249,6 +254,34 @@ if($mode == 'View')
 				return true;
 			}	
 		}
+
+	// ============ SAP PROJECT ============
+		function TampilSAP(){
+			$cari = $("#cari_SAP").val('');
+			ListSAP();
+			$('#DaftarSAP').modal('show');
+		}
+		function ListSAP() {
+			var cari = $("#cari_SAP").val();
+			$.get("ajax/jo_crud.php", {cari:cari,  type:"ListSAPWH" }, function (data, status) {
+				$(".tampil_SAP").html(data);
+			});
+		}
+		function PilihSAP(id) {
+			$.post("ajax/jo_crud.php", {
+					id: id, type:"DetilSAP"
+				},
+				function (data, status) {
+					var data = JSON.parse(data);	
+					$("#sap_project").val(data.kode_project);
+					$("#rowid").val(data.rowid);
+				}
+			);
+			$("#DaftarSAP").modal("hide");
+		}
+
+
+		
     </script>
 	
   </head>
@@ -263,145 +296,156 @@ if($mode == 'View')
 		</aside>	
 		
 		<form method="post" name ="myform"  class="form-horizontal" onsubmit="return checkvalue(this)" > 
-		<div class="content-wrapper" style="min-height:750px">
-			<br>
-			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Sewa</b></font></h1></li>					
-			</ol>
-			<br>
-			<?php if($cat != '') {?>
-			<div class="callout callout-Danger" style="margin-bottom: 0!important;width:98%;color:#fff">
-				<i class="icon 	fa fa-info-circle" style="color:#000;font-size:16px"></i>&nbsp;&nbsp;<font color="#000"><?php echo "$cat"; ?></font>
-			</div>
-			<?php }?>
-			
-			<div class="col-md-6" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:205px">					
-					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;
-					text-align:left;padding:5px;margin-bottom:1px">							
-						<b><i class="fa fa-list"></i>&nbsp;Data </b>
-					</div>
-					<br>
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>#No SO :</b></span>
-						<input type="text"  id ="no_sewa" name="no_sewa" value="<?php echo $no_sewa; ?>" 
-						style="text-align: center;width:23.5%" readonly <?php echo $dis;?> >						
-						<input type="hidden"  id ="id_sewa" name="id_sewa" value="<?php echo $id_sewa; ?>" >
-						<input type="hidden"  id ="mode" name="mode" value="<?php echo $mode; ?>" >
-					
-					</div>
-					
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
-						<input type="text"  id ="tanggal" name="tanggal" value="<?php echo $tanggal; ?>" 
-						style="text-align: center;width:23.5%" readonly <?php echo $dis;?>  >
-					</div>	
-					
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>No Quo :</b></span>
-						<input type="text"  id ="quo_no" name="quo_no" value="<?php echo $quo_no; ?>" 
-						style="text-align: center;width:23.5%" readonly <?php echo $dis;?> >		
-						<input type="hidden"  id ="id_quo" name="id_quo" value="<?php echo $id_quo; ?>" >
-						<button class="btn btn-block btn-primary"  <?php echo $disx;?>
-							style="padding:6px;margin-top:-4px;border-radius:0px;margin-left:-1px" type="button" 
-							onClick="javascript:TampilCust()">
-							<span class="glyphicon glyphicon-search"></span>
-						</button>	
-					</div>					
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Customer :</b></span>
-						<input type="text"  id ="nama_cust" name="nama_cust" value="<?php echo $nama_cust; ?>" 
-						style="text-align: left;width:75%;font-weight:bold" readonly <?php echo $dis;?> >
-						<input type="hidden"  id ="id_cust" name="id_cust" value="<?php echo $id_cust; ?>" >
-						
-					</div>
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Jenis Sewa :</b></span>
-						<select size="1" id="id_biaya"  name="id_biaya"  style="width:75%;padding:4px;margin-right:2px">
-							<?php 
-							$tampil1="select * from m_cost_tr where status = '1'  order by nama_cost";
-							$hasil1=mysqli_query($koneksi, $tampil1);       
-							while ($data1=mysqli_fetch_array($hasil1)){  
-							?>
-							<option value="<?php echo $data1['id_cost']; ?>"><?php echo $data1['nama_cost'];?></option>
-							<?php }?>
-							<option value="<?php echo $id_biaya; ?>" selected><?php echo $nama_biaya; ?></option>
-						</select>
-					</div>
-					<br>	
+			<div class="content-wrapper" style="min-height:750px">
+				<br>
+				<ol class="breadcrumb">
+					<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Sewa</b></font></h1></li>					
+				</ol>
+				<br>
+				<?php if($cat != '') {?>
+				<div class="callout callout-Danger" style="margin-bottom: 0!important;width:98%;color:#fff">
+					<i class="icon 	fa fa-info-circle" style="color:#000;font-size:16px"></i>&nbsp;&nbsp;<font color="#000"><?php echo "$cat"; ?></font>
 				</div>
-            </div>
-			
-			<div class="col-md-6" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:205px">					
-					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-						<b><i class="fa fa-list"></i>&nbsp;Remark</b>
-					</div>
-					<br>	
-					
-					<div style="width:100%;" class="input-group">
-					
-						<textarea name="ket" id="ket"
-						style="margin-left:10px;resize:none;width: 95%; height: 130px; font-size: 11px; line-height: 12px; 
-						border: 1px solid #4; padding: 5px;" <?php echo $dis;?> ><?php echo $ket; ?></textarea>
-					</div>
-					<br>	
-				</div>
-            </div>
-		
-			<?php if($mode != 'Add'){?>	
-				<div class="col-md-12" >
-					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;min-height:195px">
-						<?php if($mode == 'Editx'){?>
-							<button class="btn btn-block btn-success" 
-								style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px" type="button" 
-								onClick="javascript:TampilData()"  <?php echo $dis;?> <?php echo $dis_copy;?> >
-								<span class="fa  fa-plus-square"></span>
-								<b>Add Barang</b>
-							</button>
-						<?php }?>
-						<div class="table-responsive mailbox-messages" style="min-height:10px">									
-							<div class="tampil_data"></div>
-						</div>	
-					</div>
-				</div>
-			<?php }?>
-				
-			<?php
-				$link = "ware_sewa.php?id=$xy1";
-				$xy1="$id_sewa";
-				$idx=base64_encode($xy1);
-			?>
-			<div class="col-md-12" >
-				<div style="width:98%;background:none;margin-left:0;margin-top:0px;border-top:0px;border-bottom:0px" class="input-group">
-					<?php if($mode != 'View'){?>
-				<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
 				<?php }?>
-				<button type="button" class="btn btn-danger" onclick="window.location.href='<?php echo $link; ?>'"><span class="fa fa-backward"></span>&nbsp;&nbsp;<b>Back</b></button>	
-				<?php if($mode != 'Add' ){?>
-					<button class="btn btn-block btn-warning" 
-						style="margin:0px;margin-bottom:0px;margin-left:1px;border-radius:2px;" type="button" 
-						onClick="window.open('cetak_sewa_ware.php?id=<?php echo $idx;?>','blank')" >
-						<span class="fa fa-print "></span>
-						<b>Print SO</b>
-					</button>	
-					<?php }?>
+				
+				<div class="col-md-6" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:250px">					
+						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;
+						text-align:left;padding:5px;margin-bottom:1px">							
+							<b><i class="fa fa-list"></i>&nbsp;Data </b>
+						</div>
+						<br>
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>#No SO :</b></span>
+							<input type="text"  id ="no_sewa" name="no_sewa" value="<?php echo $no_sewa; ?>" 
+							style="text-align: center;width:23.5%" readonly <?php echo $dis;?> >						
+							<input type="hidden"  id ="id_sewa" name="id_sewa" value="<?php echo $id_sewa; ?>" >
+							<input type="hidden"  id ="mode" name="mode" value="<?php echo $mode; ?>" >
+						
+						</div>
+						
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
+							<input type="text"  id ="tanggal" name="tanggal" value="<?php echo $tanggal; ?>" 
+							style="text-align: center;width:23.5%" readonly <?php echo $dis;?>  >
+						</div>	
+						
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>No Quo :</b></span>
+							<input type="text"  id ="quo_no" name="quo_no" value="<?php echo $quo_no; ?>" 
+							style="text-align: center;width:23.5%" readonly <?php echo $dis;?> >		
+							<input type="hidden"  id ="id_quo" name="id_quo" value="<?php echo $id_quo; ?>" >
+							<button class="btn btn-block btn-primary"  <?php echo $disx;?>
+								style="padding:6px;margin-top:-4px;border-radius:0px;margin-left:-1px" type="button" 
+								onClick="javascript:TampilCust()">
+								<span class="glyphicon glyphicon-search"></span>
+							</button>	
+						</div>					
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Customer :</b></span>
+							<input type="text"  id ="nama_cust" name="nama_cust" value="<?php echo $nama_cust; ?>" 
+							style="text-align: left;width:70%;font-weight:bold" readonly <?php echo $dis;?> >
+							<input type="hidden"  id ="id_cust" name="id_cust" value="<?php echo $id_cust; ?>" >
+							
+						</div>
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Jenis Sewa :</b></span>
+							<select size="1" id="id_biaya"  name="id_biaya"  style="width:70%;padding:4px;margin-right:2px">
+								<?php 
+								$tampil1="SELECT * from m_cost_tr where status = '1'  order by nama_cost";
+								$hasil1=mysqli_query($koneksi, $tampil1);       
+								while ($data1=mysqli_fetch_array($hasil1)){  
+								?>
+								<option value="<?php echo $data1['id_cost']; ?>"><?php echo $data1['nama_cost'];?></option>
+								<?php }?>
+								<option value="<?php echo $id_biaya; ?>" selected><?php echo $nama_biaya; ?></option>
+							</select>
+						</div>
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Project :</b></span>
+							<input type="hidden" name="rowid" id="rowid" value="<?php echo $rowid; ?>" >
+							<input type="text" name="sap_project" id="sap_project" style="text-transform: uppercase;text-align: left;width:70%;" value="<?php echo $kode_project; ?>"  readonly>
+								
+							<button class="btn btn-block btn-primary" id="po" style="padding:6px 12px 6px 12px; ;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilSAP()">
+								<span class="glyphicon glyphicon-search"></span>
+							</button>
+						</div>
+						<br>	
+					</div>
 				</div>
-			</div>
+				
+				<div class="col-md-6" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;height:250px">					
+						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+							<b><i class="fa fa-list"></i>&nbsp;Remark</b>
+						</div>
+						<br>	
+						
+						<div style="width:100%;" class="input-group">
+						
+							<textarea name="ket" id="ket"
+							style="margin-left:10px;resize:none;width: 95%; height: 130px; font-size: 11px; line-height: 12px; 
+							border: 1px solid #4; padding: 5px;" <?php echo $dis;?> ><?php echo $ket; ?></textarea>
+						</div>
+						<br>	
+					</div>
+				</div>
 			
-			<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
+				<?php if($mode != 'Add'){?>	
+					<div class="col-md-12" >
+						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;min-height:195px">
+							<?php if($mode == 'Editx'){?>
+								<button class="btn btn-block btn-success" 
+									style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px" type="button" 
+									onClick="javascript:TampilData()"  <?php echo $dis;?> <?php echo $dis_copy;?> >
+									<span class="fa  fa-plus-square"></span>
+									<b>Add Barang</b>
+								</button>
+							<?php }?>
+							<div class="table-responsive mailbox-messages" style="min-height:10px">									
+								<div class="tampil_data"></div>
+							</div>	
+						</div>
+					</div>
+				<?php }?>
+					
+				<?php
+					$link = "ware_sewa.php?id=$xy1";
+					$xy1="$id_sewa";
+					$idx=base64_encode($xy1);
+				?>
+				<div class="col-md-12" >
+					<div style="width:98%;background:none;margin-left:0;margin-top:0px;border-top:0px;border-bottom:0px" class="input-group">
+						<?php if($mode != 'View'){?>
+					<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
+					<?php }?>
+					<button type="button" class="btn btn-danger" onclick="window.location.href='<?php echo $link; ?>'"><span class="fa fa-backward"></span>&nbsp;&nbsp;<b>Back</b></button>	
+					<?php if($mode != 'Add' ){?>
+						<button class="btn btn-block btn-warning" 
+							style="margin:0px;margin-bottom:0px;margin-left:1px;border-radius:2px;" type="button" 
+							onClick="window.open('cetak_sewa_ware.php?id=<?php echo $idx;?>','blank')" >
+							<span class="fa fa-print "></span>
+							<b>Print SO</b>
+						</button>	
+						<?php }?>
+					</div>
 				</div>
+				
 				<div style="width:100%;border:none;background:none" class="input-group">
 					<span class="input-group-addon" style="text-align:right;background:none"></span>						
 				</div>
 				<div style="width:100%;border:none;background:none" class="input-group">
 					<span class="input-group-addon" style="text-align:right;background:none"></span>						
 				</div>
-		</div>		
+				<div style="width:100%;border:none;background:none" class="input-group">
+					<span class="input-group-addon" style="text-align:right;background:none"></span>						
+				</div>
+			</div>		
 		</form>
 	</div>	
 	
+
+	<!-- ========= MODAL CUST ========= -->
 	<div class="modal fade" id="DaftarCust"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document" style="width:60%">
 			<div class="modal-content" style="background: none">	
@@ -442,7 +486,44 @@ if($mode == 'View')
 		</div>	
     </div>
 	
+	<!-- ========= MODAL SAP PROJECT ========= -->
+		<div class="modal fade" id="DaftarSAP"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">
 
+								<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;text-align:left;padding:5px;">
+									<b><i class="fa fa-list"></i>&nbsp;Data SAP Project</b>
+								</div>
+
+								<div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+									<label style="margin:0;width: 100px;"><b>Search :</b></label>
+									<input type="text" id="cari_SAP" name="cari_SAP" value="<?php echo $cari; ?>" style="width:40%" onkeypress="ListSAP()">
+
+									<button class="btn btn-primary" style="padding:6px 10px;" onClick="ListSAP()">
+										<span class="glyphicon glyphicon-search"></span> Search
+									</button>
+									<button class="btn btn-success" style="padding:6px 10px;" onClick="AddSAP()">
+										<span class="glyphicon glyphicon-plus"></span> Project
+									</button>
+									<button class="btn btn-danger" style="padding:6px 10px;" data-dismiss="modal">
+										<span class="glyphicon glyphicon-remove"></span> Close
+									</button>
+								</div>
+								<input type="hidden" id="jenis_project" value="">
+								<div class="table-responsive mailbox-messages" style="margin-top:15px;">
+									<div class="tampil_SAP"></div>
+								</div>
+								<br>
+							</div>
+
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
 	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>

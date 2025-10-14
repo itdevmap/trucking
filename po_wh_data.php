@@ -28,35 +28,32 @@
 		if (empty($rowid))      $errors[] = "SAP Project wajib diisi";
 		if (empty($user_req))   $errors[] = "Vendor wajib diisi";
 		if (empty($code_pr))    $errors[] = "No PR wajib diisi";
-		if (empty($id_quo))     $errors[] = "ID Quotation wajib diisi";
 		if (empty($deliv_date)) $errors[] = "Delivery Date wajib diisi";
 		if (empty($buyer))      $errors[] = "Buyer wajib diisi";
 		if (empty($payment))    $errors[] = "Payment wajib diisi";
 		if (empty($remark))     $errors[] = "Remark wajib diisi";
 
 		if (!empty($errors)) {
-			// tampilkan error dan stop proses
 			echo "<script>alert('".implode("\\n", $errors)."');history.back();</script>";
 			exit;
 		}
 
 		if($mode == 'Add' ){
-			// ----------- BUILD CODE PO -----------
+			// ----------- BUILD CODE PR -----------
 				$tahun = date("y");
 				$q = "SELECT 
 					MAX(RIGHT(code_po, 4)) AS last_num
 				FROM tr_po
-				WHERE code_po NOT LIKE '%POWH%' AND SUBSTRING(code_po,6,2) = '$tahun'";
-
-				// echo $q;
-				// die();
-
+				WHERE code_po LIKE '%POWH%' AND SUBSTRING(code_po,6,2) = '$tahun'";
 				$res 		= mysqli_query($koneksi, $q);
 				$row 		= mysqli_fetch_assoc($res);
+				$bulan 		= date("m");
 				$nextNum 	= ($row['last_num'] ?? 0) + 1;
 				$urut 		= str_pad($nextNum, 4, "0", STR_PAD_LEFT);
-				$bulan		= date("m");
-				$code_po	= "POTR-" . $tahun . $bulan . $urut;
+				$code_po = "POWH-" . $tahun . $bulan . $urut;
+
+				// echo $code_po;
+				// exit;
 			
 			$sql = "INSERT INTO  tr_po (
 						sap_project, 
@@ -95,7 +92,7 @@
 		$cat ="Data saved...";
 		$xy1="Edit|$id_po|$cat";
 		$xy1=base64_encode($xy1);
-		header("Location: po_data.php?id=$xy1");
+		header("Location: po_wh_data.php?id=$xy1");
 	}else{
 
 		$idx 	= $_GET['id'];	
@@ -184,10 +181,11 @@
 					}
 				});
 			});
-			function ReadData(jenis) {
+			function ReadData() {
 				var code_po = $("#code_po").val();
 				var id_pr   = $("#id_pr").val();
 				var mode    = $("#mode").val();
+				var jenis   = 'item';
 
 				$("button[data-jenis]").removeClass("btn-warning").addClass("btn-primary");
 
@@ -245,7 +243,7 @@
 			}
 			function ListPR() {
 				var cari = $("#cari").val();
-				$.get("ajax/po_crud.php", {cari:cari,  type:"ListPR" }, function (data, status) {
+				$.get("ajax/po_crud.php", {cari:cari,  type:"ListPRWH" }, function (data, status) {
 					$(".tampil_po").html(data);
 					$("#hal").val(hal);
 				});
@@ -277,7 +275,6 @@
 				$("#item").val('');
 				$("#description").val('');
 			}
-
 			function ListItemPR(jenis) {
 				var cari 	= $("#cari_Item").val();
 				var code_pr	= $("#no_pr").val();
@@ -336,6 +333,9 @@
 			}
 		
 		function TampilData(jenis){
+
+			// alert("ehj");
+			// return;
 			let jenisCap = jenis.charAt(0).toUpperCase() + jenis.slice(1).toLowerCase();
 			var id_vendor = $("#id_vendor").val();
 
@@ -476,93 +476,61 @@
 
 					$("#id_asal").val('');
 					$("#id_tujuan").val('');
-					$("#form-origin, #form-destination, #form-item, #form-service, #form-itemcode").hide();
-					$("#name-origin, #name-destination, #name-item, #name-service, #name-itemcode, #uom").val('');
 
-					if (data.jenis === "route") {
-						$("#idx").val(data.id);
-						$("#nama_jenis").text(data.jenis);
-						$("#item").val(data.item);
-						$("#id_item").val(data.id_item);
-						$("#itemcode").val(data.itemcode);
-						$("#description").val(data.description);
-						$("#container").val(data.container);
-						$("#uom").val(data.uom).prop("readonly", true);
-						$("#qty").val(data.qty);
-						$("#cur").val(data.cur.toUpperCase()).prop("readonly", true);
-						$("#harga").val(data.harga).prop("readonly", true);
-						$("#disc").val(data.disc);
-						$("#ppn").val(data.ppn);
-						$("#nominal_ppn").val(data.nominal_ppn);
-						$("#total").val(data.total);
-						$("#origin").val(data.id_asal);
-						$("#destination").val(data.id_tujuan);
-					} 
-					else if (jenis === "item") {
-						$("#idx").val(data.id);
-						$("#nama_jenis").text(data.jenis);
-						$("#item").val(data.item);
-						$("#id_item").val(data.id_item);
-						$("#itemcode").val(data.itemcode);
-						$("#description").val(data.description);
-						$("#container").val(data.container);
-						$("#uom").val(data.uom).prop("readonly", true);
-						$("#qty").val(data.qty);
-						$("#cur").val(data.cur.toUpperCase()).prop("readonly", true);
-						$("#harga").val(data.harga).prop("readonly", true);
-						$("#disc").val(data.disc);
-						$("#ppn").val(data.ppn);
-						$("#nominal_ppn").val(data.nominal_ppn);
-						$("#total").val(data.total);
-						$("#origin").val(data.id_asal);
-						$("#destination").val(data.id_tujuan);
-					} 
-					else if (jenis === "service") {
-						$("#idx").val(data.id);
-						$("#nama_jenis").text(data.jenis);
-						$("#item").val(data.item);
-						$("#id_item").val(data.id_item);
-						$("#itemcode").val(data.itemcode);
-						$("#description").val(data.description);
-						$("#container").val(data.container);
-						$("#uom").val(data.uom.toUpperCase()).prop("readonly", true);
-						$("#qty").val(data.qty);
-						$("#cur").val(data.cur.toUpperCase()).prop("readonly", true);
-						$("#harga").val(data.harga).prop("readonly", true);
-						$("#disc").val(data.disc);
-						$("#ppn").val(data.ppn);
-						$("#nominal_ppn").val(data.nominal_ppn);
-						$("#total").val(data.total);
-						$("#origin").val(data.id_asal);
-						$("#destination").val(data.id_tujuan);
-					}
+					$("#idx").val(data.id);
+					$("#nama_jenis").text(data.jenis);
+					$("#item").val(data.item);
+					$("#id_item").val(data.id_item);
+					$("#itemcode").val(data.itemcode);
+					$("#description").val(data.description);
+					$("#container").val(data.container);
+					$("#uom").val(data.uom);
+					$("#qty").val(data.qty);
+					$("#cur").val(data.cur.toUpperCase());
+					$("#harga").val(data.harga);
+					$("#disc").val(data.disc);
+					$("#ppn").val(data.ppn);
+					$("#nominal_ppn").val(data.nominal_ppn);
+					$("#total").val(data.total);
+					$("#origin").val(data.id_asal);
+					$("#destination").val(data.id_tujuan);
+
 				}, "json");
 				$('#modalAddDetail').modal('show');
 		}
 
-		function checkPayment(id_vendor) {
-			$.post("ajax/po_crud.php", {
-				id_vendor: id_vendor,
-				type: "checkPayment"
-			}, function (data) {
-				try {
-					var res = JSON.parse(data);
-					if (res.status === "success") {
-						$("#payment").val(res.payment);
-						$("#buyer").val(res.nama_rek);
-					} else {
-						$("#payment").val("");
-						$("#buyer").val("");
-						alert("Data bank vendor tidak ditemukan.");
+		// --------- ADD SAP ---------
+			function AddSAP() {
+				$.get("ajax/po_crud.php", { type: "AddProject" }, function (res) {
+					$("#sap_project").val(res.newKode);
+					$("#rowid").val(res.rowid);
+
+					$("#DaftarSAP").modal("hide");
+				}, "json");
+			}
+			function checkPayment(id_vendor) {
+				$.post("ajax/po_crud.php", {
+					id_vendor: id_vendor,
+					type: "checkPayment"
+				}, function (data) {
+					try {
+						var res = JSON.parse(data);
+						if (res.status === "success") {
+							$("#payment").val(res.payment);
+							$("#buyer").val(res.nama_rek);
+						} else {
+							$("#payment").val("");
+							$("#buyer").val("");
+							alert("Data bank vendor tidak ditemukan.");
+						}
+					} catch (e) {
+						console.error("Invalid JSON:", data);
+						alert("Response server tidak valid.");
 					}
-				} catch (e) {
-					console.error("Invalid JSON:", data);
-					alert("Response server tidak valid.");
-				}
-			}).fail(function (xhr, status, error) {
-				alert("AJAX Error: " + error);
-			});
-		}
+				}).fail(function (xhr, status, error) {
+					alert("AJAX Error: " + error);
+				});
+			}
     </script>
 	
   </head>
@@ -580,7 +548,7 @@
 			<div class="content-wrapper" style="min-height:750px">
 				<br>
 				<ol class="breadcrumb">
-					<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Purchase Order</b></font></h1></li>					
+					<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Purchase Order WH</b></font></h1></li>					
 				</ol>
 				<br>
 				<?php if($cat != '') {?>
@@ -593,7 +561,7 @@
 					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc; min-height:190px">					
 						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;
 						text-align:left;padding:5px;margin-bottom:1px">							
-							<b><i class="fa fa-list"></i>&nbsp;Data Purchase Order</b>
+							<b><i class="fa fa-list"></i>&nbsp;Data Purchase Order WH</b>
 						</div>
 						<br>
 						<input type="hidden" id ="id_po" name="id_po" value="<?php echo $id_po; ?>" >	
@@ -606,7 +574,6 @@
 							<input type="text"  id ="quo_date" name="quo_date" value="<?php echo $quo_date; ?>" style="text-align: center;width:20%" readonly>
 						</div>		
 
-						
 						<div style="width:100%;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No PR :</b></span>
 							<input type="text"  id ="no_pr" name="no_pr" value="<?php echo $no_pr;?>" style="text-align: left;width:70%" readonly >
@@ -614,6 +581,7 @@
 								<span class="glyphicon glyphicon-search"></span>
 							</button>	
 						</div>
+						
 						<div style="width:100%;" class="input-group">
                             <span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Project :</b></span>
                             <input type="text" name="sap_project" id="sap_project" style="text-transform: uppercase;text-align: left;width:70%;" value="<?php echo $kode_project; ?>"  readonly>
@@ -684,24 +652,10 @@
 								<button class="btn btn-primary" 
 										style="border-radius:2px" 
 										type="button" 
-										data-jenis="route"
-										onClick="ReadData('route')">
-									<b>PO Route</b>
-								</button>
-								<button class="btn btn-primary" 
-										style="border-radius:2px" 
-										type="button" 
 										data-jenis="item"
 										onClick="ReadData('item')">
 									<b>PO Item</b>
 								</button>
-								<!-- <button class="btn btn-primary" 
-										style="border-radius:2px" 
-										type="button" 
-										data-jenis="service"
-										onClick="ReadData('service')">
-									<b>PO Service</b>
-								</button> -->
 							</div>
 
 							<div class="table-responsive mailbox-messages" style="min-height:10px">									
@@ -712,7 +666,7 @@
 				<?php }?>	
 
 				<?php
-					$link = "po.php?id=$xy1";
+					$link = "po_wh.php?id=$xy1";
 					$xy1="$id_po";
 					$idx=base64_encode($xy1);
 				?>

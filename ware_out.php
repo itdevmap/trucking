@@ -1,44 +1,44 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-//include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	//include "lib.php";
 
-$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='17' ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+	$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='17' ");
+	$rq=mysqli_fetch_array($pq);	
+	$m_edit = $rq['m_edit'];
+	$m_add = $rq['m_add'];
+	$m_del = $rq['m_del'];
+	$m_view = $rq['m_view'];
+	$m_exe = $rq['m_exe'];
 
-if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
- header('location:logout.php'); 
-}
+	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
+	header('location:logout.php'); 
+	}
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{	
-	$hal='1';	
-	$field = $_POST['field'];
-	$search_name = $_POST['search_name'];
-	$tgl1 = $_POST['tgl1'];
-	$tgl2 = $_POST['tgl2'];
-	$paging = $_POST['paging'];
-	$stat = $_POST['stat'];
-	$field1 = $_POST['field1'];
-	$search_name1 = $_POST['search_name1'];
-}
-else
-{	
-	$tahun= date("Y") ;
-	$tgl1= date("01-01-$tahunx");
-	$tgl2= date("31-12-$tahun");
-	$paging='15';
-	$hal='1';
-	$field = 'No SJ';
-	$field1 = 'Customer';
-	$stat = 'All';
-}
+	if($_SERVER['REQUEST_METHOD'] == "POST")
+	{	
+		$hal='1';	
+		$field = $_POST['field'];
+		$search_name = $_POST['search_name'];
+		$tgl1 = $_POST['tgl1'];
+		$tgl2 = $_POST['tgl2'];
+		$paging = $_POST['paging'];
+		$stat = $_POST['stat'];
+		$field1 = $_POST['field1'];
+		$search_name1 = $_POST['search_name1'];
+	}
+	else
+	{	
+		$tahun= date("Y") ;
+		$tgl1= date("01-01-$tahunx");
+		$tgl2= date("31-12-$tahun");
+		$paging='15';
+		$hal='1';
+		$field = 'No SJ';
+		$field1 = 'Customer';
+		$stat = 'All';
+	}
 
 ?>
 
@@ -129,8 +129,7 @@ else
 			}
 			return true;
 		}
-		function ReadData(hal) 
-		{
+		function ReadData(hal) {
 			var tgl1 = $("#tgl1").val();
 			var tgl2 = $("#tgl2").val();				
 			var paging = $("#paging").val();	
@@ -179,8 +178,7 @@ else
 				);
 			}
 		}
-		function Download() 
-		{
+		function Download() {
 			var tgl1 = $("#tgl1").val();
 			var tgl2 = $("#tgl2").val();		
 			var field = $("#field").val();
@@ -192,8 +190,7 @@ else
 			var idx = btoa(id);
 			var win = window.open('ware_out_excel.php?id='+idx);
 		}
-		function DownloadInOut(id) 
-		{			
+		function DownloadInOut(id) {
 			var tgl1 = $("#tgl1").val();
 			var tgl2 = $("#tgl2").val();	
 			var field = $("#field").val();
@@ -205,6 +202,119 @@ else
 			var idx = btoa(id);
 			var win = window.open('ware_in_out_excel.php?id='+idx);
 		}
+
+	// ============ SO WH UP TO SAP ============
+		function TampilUpSOWH(id_data){
+			$cari = $("#cari_UpSAP").val('');
+			ListUpSAP(id_data);
+			$('#DaftarSOWH').modal('show');
+		}
+		function ListUpSAP(id_data) {
+			var cari = $("#cari_UpSAP").val();
+			$.get("ajax/ware_crud.php", {cari:cari,id_data:id_data,  type:"ListUpSOWHSAP" }, function (data, status) {
+				console.log("STATUS:", status);
+    			console.log("RESP:", data);
+				$(".tampil_SOWH").html(data);
+				$("#hal").val(hal);
+			});
+		}
+		function SaveUpSAP() {
+			let selected = [];
+			$('input[name="sap_selected[]"]:checked').each(function () {
+				selected.push($(this).val());
+			});
+
+			if (selected.length === 0) {
+				alert("Pilih minimal 1 data!");
+				return;
+			}
+
+			$("#btnSaveSAP").prop("disabled", true).text("Processing...");
+
+			$.ajax({
+				url: "ajax/ware_crud.php",
+				type: "POST",
+				data: { type: "SaveUpSAP", ids: selected },
+				dataType: "json",
+				success: function (res) {
+					if (res.success === false) {
+						alert("Gagal: " + res.message);
+					} else {
+						alert("Data berhasil dikirim ke SAP!");
+						console.log(res);
+						$('#DaftarSOWH').modal('hide');
+					}
+				},
+				error: function (xhr, status, err) {
+					console.error(xhr.responseText);
+					alert("Terjadi error: " + err);
+				},
+				complete: function () {
+					$("#btnSaveSAP").prop("disabled", false).text("Send to SAP");
+					ReadData();
+				}
+			});
+		}
+		$(document).on('click', '#btnSaveSAP', function () {
+			SaveUpSAP();
+		});
+
+	// ============ AR WH UP TO SAP ============
+		function TampilUpARWH(id_data){
+			$cari = $("#cari_UpAR").val('');
+			ListUpARWHSAP(id_data);
+			$('#DaftarUpARWH').modal('show');
+		}
+		function ListUpARWHSAP(id_data) {
+			var cari = $("#cari_UpAR").val();
+			$.get("ajax/ware_crud.php", {cari:cari,id_data:id_data,  type:"ListUpARWHSAP" }, function (data, status) {
+				$(".tampil_UpAR").html(data);
+				$("#hal").val(hal);
+			});
+		}
+		function SaveUpAR() {
+				let selected = [];
+				$('input[name="ar_selected[]"]:checked').each(function () {
+					selected.push($(this).val());
+				});
+
+				if (selected.length === 0) {
+					alert("Pilih minimal 1 data!");
+					return;
+				}
+
+				$("#btnSaveAR").prop("disabled", true).text("Processing...");
+
+				$.ajax({
+					url: "ajax/ware_crud.php",
+					type: "POST",
+					data: { type: "SaveUpAR", ids: selected },
+					dataType: "json",
+					success: function (res) {
+						let msg = res.message ?? "Berhasil UP AR ke SAP";
+
+						if (res.success === false) {
+							alert("Gagal: " + msg);
+						} else {
+							alert("Sukses: " + msg);
+							console.log(res);
+							$('#DaftarUpAR').modal('hide');
+						}
+					},
+					error: function (xhr, status, err) {
+						let errMsg = xhr.responseText || err || "Unknown error";
+						console.error(errMsg);
+						alert("Terjadi error AJAX: " + errMsg);
+					},
+					complete: function () {
+						$("#btnSaveAR").prop("disabled", false).text("Save to AR");
+						ReadData();
+					}
+				});
+			}
+		$(document).on('click', '#btnSaveAR', function () {
+				SaveUpAR();
+			});
 	</script>	
 	
   </head>
@@ -373,6 +483,87 @@ else
 		</div>		
 		</form>
 	</div>	
+
+	<!-- ========= MODAL SEARCH SO UP TO SAP ========= -->
+		<div class="modal fade" id="DaftarSOWH"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="display:flex;align-items:center;justify-content:space-between; font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;margin-bottom:1px">
+									<div style="text-align:left;">
+										<b><i class="fa fa-list"></i>&nbsp;Data Up to SAP</b>
+									</div>
+									<button class="btn btn-danger btn-sm" style="border-radius:2px;padding:3px 6px;" data-dismiss="modal">
+										<span class="glyphicon glyphicon-remove"></span>
+									</button>
+								</div>
+								<br>
+								<div style="width:100%" class="input-group" style="background:none !important;">
+									<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+									</span>
+								</div>							
+								<div class="table-responsive mailbox-messages">									
+									<form id="formUpSAP">
+										<div class="tampil_SOWH"></div>
+									</form>
+								</div>
+
+								<br>
+								<div style="text-align:right;">
+									<button type="button" id="btnSaveSAP" class="btn btn-success" style="margin:0;border-radius:2px;">
+										<span class="fa fa-plus-square"></span>
+										<b>Send to SAP</b>
+									</button>	
+								</div>
+
+							</div>		
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
+
+	<!-- ========= MODAL SEARCH AR UP TO AR ========= -->
+		<div class="modal fade" id="DaftarUpARWH"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="display:flex;align-items:center;justify-content:space-between; font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;margin-bottom:1px">
+									<div style="text-align:left;">
+										<b><i class="fa fa-list"></i>&nbsp;Data Up to AR</b>
+									</div>
+									<button class="btn btn-danger btn-sm" style="border-radius:2px;padding:3px 6px;" data-dismiss="modal">
+										<span class="glyphicon glyphicon-remove"></span>
+									</button>
+								</div>
+								<br>
+								<div style="width:100%" class="input-group" style="background:none !important;">
+									<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+									</span>
+								</div>							
+								<div class="table-responsive mailbox-messages">									
+									<form id="formUpAR">
+										<div class="tampil_UpAR"></div>
+									</form>
+								</div>
+
+								<br>
+								<div style="text-align:right;">
+									<button type="button" id="btnSaveAR" class="btn btn-success" style="margin:0;border-radius:2px;">
+										<span class="fa fa-plus-square"></span>
+										<b>Save to AR</b>
+									</button>	
+								</div>
+							</div>		
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
 	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>

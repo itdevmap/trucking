@@ -22,11 +22,12 @@ $m_exe = $rq['m_exe'];
 		$data = '<table class="table table-hover table-striped" style="width:100%">
 				<thead style="font-weight:500px !important">
 					<tr>	
-						<th rowspan="2" width="5%" style="text-align: center;">NO</th>
-						<th rowspan="2" width="5%" style="text-align: center;">DATE</th>
-						<th rowspan="2" width="5%" style="text-align: center;">REQ DATE</th>				
-						<th rowspan="2" width="5%" style="text-align: center;">CODE PR</th>
-						<th rowspan="2" width="5%" style="text-align: center;">CODE SQ</th>
+						<th rowspan="2" width="4%" style="text-align: center;">NO</th>
+						<th rowspan="2" width="8%" style="text-align: center;">DATE</th>
+						<th rowspan="2" width="8%" style="text-align: center;">REQ DATE</th>
+						<th rowspan="2" width="10%" style="text-align: center;">SAP PROJECT</th>
+						<th rowspan="2" width="10%" style="text-align: center;">CODE PR</th>
+						<th rowspan="2" width="10%" style="text-align: center;">CODE SQ</th>
 						<th rowspan="2" width="40%" style="text-align: center;">REMARK</th>
 						<th rowspan="2" width="5%" style="text-align: center;">STATUS</th>
 						<th rowspan="2" width="3%" style="text-align: center;">EXEC</th>
@@ -38,22 +39,26 @@ $m_exe = $rq['m_exe'];
 			$page = $_GET['hal']; 
 			$posisi=0;
 		}
+
 		$jmlperhalaman = $paging;
 		$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 		$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 
 
-		$SQL = "SELECT 
+		$q_pr = "SELECT 
 					tr_pr.*,
 					m_cust_tr.nama_cust,
-					tr_quo.quo_no
+					tr_quo.quo_no,
+					sap_project.kode_project
 				FROM tr_pr 
 				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = tr_pr.user_req
 				LEFT JOIN tr_quo ON tr_quo.id_quo = tr_pr.id_quo
+				LEFT JOIN sap_project ON sap_project.rowid = tr_pr.sap_rowid
 				WHERE tr_pr.code_pr LIKE '%$cari%'
+				AND tr_pr.code_pr NOT LIKE '%PRWH%'
 				ORDER BY tr_pr.code_pr DESC
 				LIMIT $offset, $jmlperhalaman";	
 
-		$query = mysqli_query($koneksi, $SQL);	
+		$query = mysqli_query($koneksi, $q_pr);	
 		if (!$result = $query) {
 			exit(mysqli_error($koneksi));
 		}
@@ -81,6 +86,7 @@ $m_exe = $rq['m_exe'];
 					<td style="text-align:center">'.$posisi.'.</td>	
 					<td style="text-align:center">'.$row['tgl'].'</td>
 					<td style="text-align:center">'.$row['tgl_pr'].'</td>
+					<td style="text-align:center">'.$row['kode_project'].'</td>
 					<td style="text-align:center"><a href="'.$link.'">'.$row['code_pr'].'</a></td>
 					<td style="text-align:center">'.$row['quo_no'].'</td>
 					<td style="text-align:center">'.$row['remark'].'</td>
@@ -232,8 +238,8 @@ $m_exe = $rq['m_exe'];
 			$jenisx      = $_POST['jenisx'];
 			$code_pr     = $_POST['code_pr'];
 			$item        = strtoupper($_POST['name']);
-			$origin      = $_POST['origin'];
-			$destination = $_POST['destination'];
+			$origin      = $_POST['origin'] ?? '';
+			$destination = $_POST['destination'] ?? '';
 			$itemcode    = $_POST['itemcode'] ?? '';
 			$desc        = strtoupper($_POST['desc']);
 			$uom         = $_POST['uom'];
@@ -272,24 +278,21 @@ $m_exe = $rq['m_exe'];
 				}
 
 			} else if ($mode === 'Edit') {
+
+
 				if ($jenisx === 'route') {
 					$sql_update = "UPDATE tr_pr_detail SET
 										`description` 	= '$desc',
-										qty 			= '$qty'
+										qty 			= '$qty',
+										qty_close 		= '$qty'
 									WHERE id_detail 	= '$id'";
 				} elseif ($jenisx === 'item') {
 					$sql_update = "UPDATE tr_pr_detail SET
 										itemcode 		= '$itemcode',
 										item 			= '$itemcode',
 										`description` 	= '$desc',
-										qty = '$qty'
-									WHERE id_detail 	= '$id'";
-				}
-				 else {
-					$sql_update = "UPDATE tr_pr_detail SET
-										`description` 	= '$desc',
-										uom 			= '$uom',
-										qty 			= '$qty'
+										qty 			= '$qty',
+										qty_close 		= '$qty'
 									WHERE id_detail 	= '$id'";
 				}
 				
@@ -306,6 +309,12 @@ $m_exe = $rq['m_exe'];
 
 // -------------- DETAIL DATA PO--------------
 	else if($_GET['type'] == "Read_Detil") {
+
+		// echo "<pre>";
+		// print_r($_GET);
+		// echo "</pre>";
+		// die();
+
 
 		$code_pr  = $_GET['code_pr'];
 		$jenis    = $_GET['jenis'];
@@ -336,7 +345,7 @@ $m_exe = $rq['m_exe'];
 
 		switch ($jenis) {
 			case 'route':
-				$SQL = "SELECT 
+				$q_detail = "SELECT 
 							tr_pr_detail.*,
 							CONCAT(m_asal.nama_kota, ' - ', m_tujuan.nama_kota) AS item,
 							tr_pr.status
@@ -350,20 +359,20 @@ $m_exe = $rq['m_exe'];
 				break;
 
 			case 'item':
-				$SQL = "SELECT 
+				$q_detail = "SELECT 
 							tr_pr_detail.*,
-							sap_item_tr.sapitemcode AS item,
+							m_cost_tr.itemcode AS item,
 							tr_pr.status
 						FROM tr_pr_detail 
 						LEFT JOIN tr_pr ON tr_pr.code_pr = tr_pr_detail.code_pr
-						LEFT JOIN sap_item_tr  ON sap_item_tr.rowid = tr_pr_detail.itemcode
+						LEFT JOIN m_cost_tr  ON m_cost_tr.id_cost = tr_pr_detail.itemcode
 						WHERE tr_pr_detail.code_pr = '$code_pr' AND tr_pr_detail.jenis = '$jenis'
 						ORDER BY tr_pr_detail.id_detail";
 				$ket = 'UOM';
 				break;
 
 			default:
-				$SQL = "SELECT 
+				$q_detail = "SELECT 
 							tr_pr_detail.*,
 							tr_pr.status
 						FROM tr_pr_detail 
@@ -374,7 +383,10 @@ $m_exe = $rq['m_exe'];
 				break;
 		}
 
-		$query = mysqli_query($koneksi, $SQL);
+		// echo $query;
+		// exit;
+
+		$query = mysqli_query($koneksi, $q_detail);
 
 		if (!$result = $query) {
 			exit(mysqli_error($koneksi));
@@ -588,6 +600,9 @@ $m_exe = $rq['m_exe'];
 					FROM tr_pr_detail
 					LEFT JOIN sap_item_tr ON sap_item_tr.rowid = tr_pr_detail.item
 					WHERE tr_pr_detail.id_detail = '$id'";
+
+			// echo $query;
+			// exit;
 		} else {
 			$query = "SELECT 
 						tr_pr_detail.id_detail,
@@ -668,9 +683,10 @@ $m_exe = $rq['m_exe'];
 		$posisi = (($page * $jmlperhalaman) - $jmlperhalaman);
 		
 		$SQL = "SELECT * 
-				FROM sap_item_tr 
-				WHERE sapitemcode LIKE '%$cari%'
-				ORDER BY sapitemcode DESC LIMIT 0, 10";
+				FROM m_cost_tr 
+				WHERE nama_cost LIKE '%$cari%'
+					AND sap_ips LIKE '%P%'
+				ORDER BY itemcode DESC LIMIT 0, 10";
 
 		$query = mysqli_query($koneksi, $SQL);	
 		if (!$result = $query) {
@@ -684,11 +700,11 @@ $m_exe = $rq['m_exe'];
 				$data .= '<tr>';		
 				$data .= '<td style="text-align:center">'.$posisi.'.</td>';
 
-				$data .= '<td style="text-align:center"><a href="#" onclick="PilihItem('.$row['rowid'].')" >'.$row['sapitemcode'].'</a></td>';
-				$data .= '<td style="text-align:center"><a href="#" onclick="PilihItem('.$row['rowid'].')" >'.$row['sapitemname'].'</a></td>';
+				$data .= '<td style="text-align:center"><a href="#" onclick="PilihItem('.$row['id_cost'].')" >'.$row['itemcode'].'</a></td>';
+				$data .= '<td style="text-align:left"><a href="#" onclick="PilihItem('.$row['id_cost'].')" >'.$row['nama_cost'].'</a></td>';
 
 				$data .= '<td style="text-align:center">
-						<button type="button" class="btn btn-default" onClick="javascript:PilihItem('.$row['rowid'].')" 
+						<button type="button" class="btn btn-default" onClick="javascript:PilihItem('.$row['id_cost'].')" 
 						style="margin:-3px;width:100%;padding:1px;border-radius:1px">Add</button>
 						</td>';		
 				$data .='</tr>';
@@ -705,7 +721,10 @@ $m_exe = $rq['m_exe'];
 	else if ($_POST['type'] == "DetilItem"){
 		$id = $_POST['id'];	
 		
-		$query = "SELECT * FROM sap_item_tr WHERE rowid = '$id'";
+		$query = "SELECT * FROM m_cost_tr WHERE id_cost = '$id'";
+
+		// echo $query;
+		// exit;
 		
 		if (!$result = mysqli_query($koneksi, $query)) {
 			exit(mysqli_error($koneksi));
@@ -717,6 +736,228 @@ $m_exe = $rq['m_exe'];
 			}
 		}
 		else {
+			$response['status'] = 200;
+			$response['message'] = "Data not found!";
+		}
+		echo json_encode($response);	
+		
+	}
+
+
+// ============== PR WAREHOUSE ==============
+	if ($_GET['type'] == "ReadWH"){
+		$cari = trim($_GET['cari']);
+		$hal = $_GET['hal'];
+		$paging = $_GET['paging'];
+		
+		$data = '<table class="table table-hover table-striped" style="width:100%">
+				<thead style="font-weight:500px !important">
+					<tr>	
+						<th rowspan="2" width="3%" style="text-align: center;">NO</th>
+						<th rowspan="2" width="5%" style="text-align: center;">DATE</th>
+						<th rowspan="2" width="5%" style="text-align: center;">REQ DATE</th>				
+						<th rowspan="2" width="7%" style="text-align: center;">CODE PR</th>
+						<th rowspan="2" width="7%" style="text-align: center;">CODE QUO</th>
+						<th rowspan="2" width="40%" style="text-align: center;">REMARK</th>
+						<th rowspan="2" width="5%" style="text-align: center;">STATUS</th>
+						<th rowspan="2" width="3%" style="text-align: center;">EXEC</th>
+					</tr>
+				</thead>';			
+		if(!isset($_GET['hal'])){ 
+			$page = 1;       
+			} else { 
+			$page = $_GET['hal']; 
+			$posisi=0;
+		}
+		$jmlperhalaman = $paging;
+		$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
+		$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 
+
+		$SQL = "SELECT 
+					tr_pr.*,
+					m_cust_tr.nama_cust,
+					t_ware_quo.quo_no
+				FROM tr_pr 
+				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = tr_pr.user_req
+				LEFT JOIN t_ware_quo ON t_ware_quo.id_quo = tr_pr.id_quo
+				WHERE tr_pr.code_pr LIKE '%$cari%'
+				AND tr_pr.code_pr LIKE '%PRWH%'
+				ORDER BY tr_pr.code_pr DESC
+				LIMIT $offset, $jmlperhalaman";	
+
+		$query = mysqli_query($koneksi, $SQL);	
+		if (!$result = $query) {
+			exit(mysqli_error($koneksi));
+		}
+		if(mysqli_num_rows($result) > 0)
+		{
+			while($row = mysqli_fetch_assoc($result))
+			{	
+				$xy1	= "Edit|$row[id_pr]";
+				$xy1	= base64_encode($xy1);
+				$link 	= "pr_wh_data.php?id=$xy1";
+
+				if($row['status'] == '0')
+				{
+					$label = 'danger';
+					$status = 'In Progress';
+				}
+				else if($row['status'] == '1')
+				{
+					$label = 'success';
+					$status = 'Executed';
+				}
+
+				$posisi++;		
+				$data .= '<tr>							
+					<td style="text-align:center">'.$posisi.'.</td>	
+					<td style="text-align:center">'.$row['tgl'].'</td>
+					<td style="text-align:center">'.$row['tgl_pr'].'</td>
+					<td style="text-align:center"><a href="'.$link.'">'.$row['code_pr'].'</a></td>
+					<td style="text-align:center">'.$row['quo_no'].'</td>
+					<td style="text-align:center">'.$row['remark'].'</td>
+					<td style="text-align:center">
+						<button type="button" class="btn btn-'.$label.'" style="width:100%;padding:1px;margin:-3px">'.$status.'</button>
+					</td>';
+
+				if($row['status'] == '0' ) {
+					$data .= '<td>
+							<button class="btn btn-block btn-default" title="Execute" style="margin:-3px;border-radius:0px" type="button" onClick="javascript:Confirm('.$row['id_pr'].')">
+								<span class="fa fa-check-square-o"></span>
+							</button></td>';
+						
+				}
+				$data .='</tr>';
+				$number++;
+			}		
+		}
+		else
+		{
+			$data .= '<tr><td colspan="7" style="text-align:center">Records not found!</td></tr>';
+		}
+		$data .= '</table>';
+		
+		$data .= '<div class="paginate paginate-dark wrapper">
+					<ul>';
+					$pq = mysqli_query($koneksi, "SELECT count(*) AS jml FROM m_route_tr WHERE rute LIKE '%$cari%' ");					
+					$rq=mysqli_fetch_array($pq);
+					$total_record = $rq['jml'];										
+					$total_halaman = ceil($total_record / $jmlperhalaman);					
+					if ($total_record > $jmlperhalaman){
+						$perhal=4;
+						if($hal > 1){ 
+							$prev = ($page - 1); 
+							$data .='<li><a href=# onclick="ReadData('.$prev.')">Prev</a></li> '; 
+						}
+						if($total_halaman<=$jmlperhalaman){
+							$hal1=1;
+							$hal2=$total_halaman;
+							}else{
+							$hal1=$hal-$perhal;
+							$hal2=$hal+$perhal;
+						}
+						if($hal<=5){
+							$hal1=1;
+						} 
+						if($hal<$total_halaman){
+							$hal2=$hal+$perhal;
+							}else{
+							$hal2=$hal;
+						}
+						for($i = $hal1; $i <= $hal2; $i++){ 
+							if(($hal) == $i){ 
+								$data .='<li><a href="#" class="active">'.$i.'</a></li> '; 
+								}else{ 
+								if($i<=$total_halaman){
+									$data .='<li><a href=# onclick="ReadData('.$i.')">'.$i.'</a></li> ';
+								}
+							} 
+						}
+						if($hal < $total_halaman){ 
+							$next = ($page + 1); 
+							$data .='<li><a href=# onclick="ReadData('.$next.')">Next</a></li> '; 
+						} 
+					}
+					$data .= '</ul></div>';
+					
+		echo $data;
+	}
+
+	else if ($_GET['type'] == "ListSQWH"){
+		$cari = $_GET['cari'];
+		$data = '<table class="table table-hover table-striped" style="width:100%">
+				<thead style="font-weight:500px !important">
+					<tr>
+						<th width="5%" style="text-align: center;">NO</th>
+						<th width="15%" style="text-align: center;">DATE</th>
+						<th width="15%" style="text-align: center;">NO Quo</th>
+						<th width="55%" style="text-align: center;">CUSTOMER</th>
+						<th width="10%" style="text-align: center;">ADD</th>
+					</tr>
+				</thead>';	
+		$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
+		$posisi = (($page * $jmlperhalaman) - $jmlperhalaman);
+		
+		$SQL = "SELECT 
+					t_ware_quo.id_quo,
+					t_ware_quo.quo_date,
+					t_ware_quo.quo_no,
+					m_cust_tr.nama_cust
+				FROM t_ware_quo 
+				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_quo.id_cust
+				WHERE t_ware_quo.quo_no LIKE '%$cari%' AND t_ware_quo.status = '1'
+				ORDER BY id_quo DESC LIMIT 0, 10";
+
+		$query = mysqli_query($koneksi, $SQL);	
+		if (!$result = $query) {
+			exit(mysqli_error($koneksi));
+		}
+		if(mysqli_num_rows($result) > 0)
+		{
+			while($row = mysqli_fetch_assoc($result))
+			{	
+				$posisi++;
+				$data .= '<tr>';		
+				$data .= '<td style="text-align:center">'.$posisi.'.</td>';
+
+				$data .= '<td style="text-align:center"><a href="#" onclick="PilihSQ('.$row['id_quo'].')" >'.$row['quo_date'].'</a></td>';
+				$data .= '<td style="text-align:center"><a href="#" onclick="PilihSQ('.$row['id_quo'].')" >'.$row['quo_no'].'</a></td>';
+				$data .= '<td style="text-align:left"><a href="#" onclick="PilihSQ('.$row['id_quo'].')" >'.$row['nama_cust'].'</a></td>';
+
+				$data .= '<td style="text-align:center">
+						<button type="button" class="btn btn-default" onClick="javascript:PilihSQ('.$row['id_quo'].')" 
+						style="margin:-3px;width:100%;padding:1px;border-radius:1px">Add</button>
+						</td>';		
+				$data .='</tr>';
+			}		
+		}
+		else
+		{
+			$data .= '<tr><td colspan="7"></td></tr>';
+		}
+		$data .= '</table>';
+		echo $data;			
+		
+	}
+	else if ($_POST['type'] == "DetilSQWH"){
+		$id = $_POST['id'];	
+		
+		$query = "SELECT 
+					t_ware_quo.*
+				FROM t_ware_quo 
+				WHERE t_ware_quo.id_quo = '$id'";
+		
+		if (!$result = mysqli_query($koneksi, $query)) {
+			exit(mysqli_error($koneksi));
+		}
+		$response = array();
+		if(mysqli_num_rows($result) > 0) {
+			while ($row = mysqli_fetch_assoc($result)) {
+				$response = $row;
+			}
+		}
+		else
+		{
 			$response['status'] = 200;
 			$response['message'] = "Data not found!";
 		}

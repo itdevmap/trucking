@@ -120,6 +120,7 @@ else
 				var alamat = $("#alamat").val();
 				var telp = $("#telp").val();
 				var stat = $("#stat").val();
+				var ppn = $("#ppn").val();
 				var mode = $("#mode").val();
 				var email = $("#email").val();
 				var tanggal = $("#tanggal").val();
@@ -134,6 +135,7 @@ else
 					tanggal:tanggal,
 					mode:mode,
 					stat:stat,
+					ppn:ppn,
 					type : "AddData"
 					}, function (data, status) {
 					alert(data);
@@ -156,6 +158,7 @@ else
 					$("#telp").val(data.telp);					
 					$("#email").val(data.email);
 					$("#stat").val(data.status);
+					$("#ppn").val(data.ppn);
 					$("#mode").val('Edit');							
 				}
 			);
@@ -243,12 +246,12 @@ else
 					<div style="width:100%;background: #fff;" class="input-group" >
 						<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background:#fff;">
 							<?php if ($m_add == '1'){?>
-							<button class="btn btn-block btn-success" 
+							<!-- <button class="btn btn-block btn-success" 
 								style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:3px" type="button" 
 								onClick="javascript:TampilData()">
 								<span class="fa  fa-plus-square"></span>
 								<b>Add New</b>
-							</button>	
+							</button>	 -->
 							<?php }?>
 						</span>
 						<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
@@ -298,22 +301,25 @@ else
 								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Vendor</b>
 							</div>	
 							<br>
+
+							<input type="hidden" id="id_vendor"/>
+							<input type="hidden" id="mode"/>
+							<input type="hidden" id="tanggal">
+
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Code :</b></span>								
+								<input type="text" id="caption"  maxlength="7" value="" style="text-transform: uppercase;text-align: left;width:20%;border:1px solid rgb(169, 169, 169)" readonly/>	
+							</div>
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Vendor Name :</b></span>
 								<input type="text" id="nama_vendor"  value="" style="text-transform: uppercase;
-								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
-								<input type="hidden" id="id_vendor"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
-								<input type="hidden" id="mode"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
-								<input type="hidden" id="tanggal" value="" style="text-align: center;width:20%;" readonly >	
+								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" readonly/>	
 							</div>	
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Code :</b></span>								
-								<input type="text" id="caption"  maxlength="7" value="" style="text-transform: uppercase;text-align: center;width:20%;border:1px solid rgb(169, 169, 169)" />	
-							</div>
 							
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Contact Person :</b></span>								
-								<input type="text" id="kontak"  value="" style="text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
+								<input type="text" id="kontak"  value="" style="text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" readonly/>	
 							</div>		
 											
 							<div style="width:100%;" class="input-group">
@@ -329,6 +335,10 @@ else
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Email :</b></span>
 								<input type="text" id="email"  value="" style="text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>PPN :</b></span>
+								<input type="number" id="ppn"  value="0" style="text-align: right;width:40%;border:1px solid rgb(169, 169, 169)" />	
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Status :</b></span>
