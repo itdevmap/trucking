@@ -189,26 +189,36 @@
 
         // ----------------- EXECUTE DATA -----------------
             function Confirm(id) {
-                var hal = $("#hal").val();
-                var conf = confirm("Are you sure to Closed ?");
-                if (conf == true) {
-                    $.post("ajax/pr_crud.php", {
-                            id: id,
-                            type: "Executed"
-                        },
-                        function (data, status) {
-                            if (data.includes("GAGAL")) {
-                                alert(data);
-                            } else {
-                                alert("Berhasil");
-                                ReadData(hal);
-                            }
-                        }
-                    ).fail(function(xhr, status, error) {
-                        alert("Request gagal: " + error);
-                    });
-                }
+                const hal = $("#hal").val();
+                const conf = confirm("Are you sure to Close ?");
+                
+                if (!conf) return;
+
+                $.post("ajax/pr_crud.php", {
+                    id: id,
+                    type: "Executed"
+                }, function (response) {
+                    // Coba parse JSON
+                    let res;
+                    try {
+                        res = typeof response === "object" ? response : JSON.parse(response);
+                    } catch (e) {
+                        alert("Response tidak valid: " + response);
+                        return;
+                    }
+
+                    if (res.success) {
+                        alert(res.message || "Berhasil");
+                        ReadData(hal);
+                    } else {
+                        alert("Gagal: " + (res.message || "Terjadi kesalahan"));
+                    }
+
+                }).fail(function (xhr, status, error) {
+                    alert("Request gagal: " + error);
+                });
             }
+
     </script>
 	
   </head>
@@ -223,7 +233,7 @@
 		</aside>	
 
 		<!-- ------------ CONTENT----------- -->
-		<form method="post" name ="myform" action="pr.php" class="form-horizontal" > 
+		<form method="post" name ="myform" action="pr_wh.php" class="form-horizontal" > 
             <div class="content-wrapper" style="min-height:750px">
                 <br>
                 <ol class="breadcrumb">

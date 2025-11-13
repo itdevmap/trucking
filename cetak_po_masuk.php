@@ -52,7 +52,7 @@ class PDF extends FPDF
 
 $idx = $_GET['id'];	
 $id_data =base64_decode($idx);
-$pq = mysqli_query($koneksi, "select t_ware_data.*, m_cust_tr.nama_cust
+$pq = mysqli_query($koneksi, "SELECT t_ware_data.*, m_cust_tr.nama_cust
 		from 
 		t_ware_data left join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
 		where t_ware_data.id_data = '$id_data'  ");
@@ -109,7 +109,7 @@ $pdf->Cell(20,6,"Berat",1,0,'C');
 $pdf->Cell(30,6,"Remark",1,1,'C');
 
 $y=49;
-$t1 = "select t_ware_data_detil.*, t_ware.nama, t_ware.berat, t_ware.vol, t_ware.unit, t_ware.kode, m_lokasi_ware.nama as nama_lokasi
+$t1 = "SELECT t_ware_data_detil.*, t_ware.nama, t_ware.berat, t_ware.vol, t_ware.unit, t_ware.kode, m_lokasi_ware.nama as nama_lokasi
 			from 
 			t_ware_data_detil inner join t_ware on t_ware_data_detil.id_ware = t_ware.id_ware
 			left join m_lokasi_ware on t_ware_data_detil.id_lokasi = m_lokasi_ware.id_lokasi
@@ -120,10 +120,10 @@ while ($d1=mysqli_fetch_array($h1))
 	$n++;
 	$vol = $d1['masuk'] * $d1['vol'];
 	// $volx = number_format($vol,5);
-	$volx = rtrim(rtrim(number_format($vol, 8, '.', ''), '0'), '.');
+	$volx = rtrim(rtrim(number_format($vol, 2, '.', ''), '0'), '.');
 	$berat = $d1['masuk'] * $d1['berat'];
 	// $beratx = number_format($berat,2);
-	$beratx = rtrim(rtrim(number_format($berat, 8, '.', ''), '0'), '.');
+	$beratx = rtrim(rtrim(number_format($berat, 2, '.', ''), '0'), '.');
 	$qty = number_format($d1['masuk'],0);
 	
 	$t_qty = $t_qty + $d1['masuk'];
@@ -166,8 +166,8 @@ while ($d1=mysqli_fetch_array($h1))
 	$y=$y+$tinggi;
 }
 
-$t_vol = rtrim(rtrim(number_format($t_vol, 8, '.', ''), '0'), '.');
-$t_berat = rtrim(rtrim(number_format($t_berat, 8, '.', ''), '0'), '.');
+$t_vol = rtrim(rtrim(number_format($t_vol, 2, '.', ''), '0'), '.');
+$t_berat = rtrim(rtrim(number_format($t_berat, 2, '.', ''), '0'), '.');
 $t_qty = number_format($t_qty,0);
 
 $pdf->setXY(8,$y);

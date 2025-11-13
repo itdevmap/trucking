@@ -5,185 +5,13 @@ include("../koneksi.php");
 include "../lib.php";
 
 
-$sql = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='29' ");
+$sql = mysqli_query($koneksi,"SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='29' ");
 $data=mysqli_fetch_array($sql);
 $m_edit = $data['m_edit'];
 $m_add = $data['m_add'];
 $m_del = $data['m_del'];
 $m_view = $data['m_view'];
 $m_exe = $data['m_exe'];
-
-// if ($_GET['type'] == "read")
-// {
-// 	$tahun = $_GET['tahun'];
-	
-// 	$pq = mysqli_query($koneksi, "select count(id_sales) as jml from  m_sales_tr ");					
-// 	$rq=mysqli_fetch_array($pq);
-// 	$jml_sales = $rq['jml'] + 1;
-// 	$lebar = 67/$jml_sales;
-	
-// 	$data = '<table class="table table-hover table-striped" style="width:100%">
-// 			<thead style="font-weight:500px !important">
-// 				<tr>	
-// 					<th rowspan="2" width="10%" style="text-align: center;">'.$tahun.'</th>		
-// 					<th colspan="'.$jml_sales.'" width="64%" style="text-align: center;">TOTAL REVENUE</th>	
-// 					<th rowspan="2" width="10%" style="text-align: center;">TOTAL REVENUE</th>	
-// 					<th rowspan="2" width="10%" style="text-align: center;">TOTAL COST</th>	
-// 					<th rowspan="2" width="8%" style="text-align: center;">RATIO<br>(%)</th>		
-// 				</tr>';
-// 				$data .= '<tr>';
-// 				$t1="select * from m_sales_tr  order by nama";
-// 				$h1=mysqli_query($koneksi, $t1);       
-// 				while ($d1=mysqli_fetch_array($h1)){  
-						
-// 					$data .= '<th width="'.$lebar.'%" style="text-align: center;">'.$d1['nama'].'</th>';	
-// 				}
-// 				$data .= '<th width="'.$lebar.'%" style="text-align: center;">INTERCOMPANY</th>';
-// 				$data .= '</tr>
-// 			</thead>';			
-
-// 	for ($x = 1; $x <= 12; $x++) {
-// 		if(strlen($x) == 1)
-// 		{
-// 			$bln = "0$x";
-// 		}else{
-// 			$bln = $x;
-// 		}
-// 		if($bln == '01'){
-// 			$bulan = 'January';
-// 		}else if($bln == '02'){
-// 			$bulan = 'February';
-// 		}else if($bln == '03'){
-// 			$bulan = 'March';
-// 		}else if($bln == '04'){
-// 			$bulan = 'April';
-// 		}else if($bln == '05'){
-// 			$bulan = 'May';
-// 		}else if($bln == '06'){
-// 			$bulan = 'Juny';
-// 		}else if($bln == '07'){
-// 			$bulan = 'July';
-// 		}else if($bln == '08'){
-// 			$bulan = 'August';
-// 		}else if($bln == '09'){
-// 			$bulan = 'September';
-// 		}else if($bln == '10'){
-// 			$bulan = 'October';
-// 		}else if($bln == '11'){
-// 			$bulan = 'November';
-// 		}else if($bln == '12'){
-// 			$bulan = 'December';
-// 		}
-// 		$data .= '<tr>							
-// 			<td style="text-align:left">&nbsp;'.$bulan.'</td>';	
-			
-// 			$revenue = 0;
-// 			$t1="select * from m_sales_tr  order by nama";
-// 			$h1=mysqli_query($koneksi, $t1);       
-// 			while ($d1=mysqli_fetch_array($h1)){  
-// 				$pq = mysqli_query($koneksi, "select sum(tr_jo.tagihan) as jml 
-// 					  from  
-// 					  tr_jo left join tr_quo_data on tr_jo.id_detil_quo = tr_quo_data.id_detil
-// 					  left join tr_quo on tr_quo_data.id_quo = tr_quo.id_quo
-// 					  where tr_quo.sales = '$d1[nama]' and tr_jo.status = '1' 
-// 					  and year(tr_jo.tgl_jo) = '$tahun' and month(tr_jo.tgl_jo) = '$bln'");					
-// 				$rq=mysqli_fetch_array($pq);
-// 				$pend = $rq['jml'] ;	
-// 				$revenue_satu = $revenue + $rq['jml'];
-// 				$pendx = number_format($pend,0);
-// 				$data .= '<td style="text-align: right;">'.$pendx.'</td>';	
-// 			}
-			
-// 			$pq = mysqli_query($koneksi, "select sum(tagihan) as jml 
-// 					  from  
-// 					  tr_jo  where id_detil_quo = '0' and status = '1' 
-// 					  and year(tgl_jo) = '$tahun' and month(tgl_jo) = '$bln'");				
-// 			$rq=mysqli_fetch_array($pq);
-// 			$pend_int = $rq['jml'] ;	
-
-// 			$revenue_dua = $revenue_satu + $rq['jml'];
-// 			$pend_intx = number_format($pend_int,0);
-// 			$revenue_akhir = number_format($revenue_dua,0);	
-			
-// 			$pq = mysqli_query($koneksi, "select sum(uj+uj_lain+ritase) as jml 
-// 					  from  
-// 					  tr_jo  where status = '1' 
-// 					  and year(tgl_jo) = '$tahun' and month(tgl_jo) = '$bln'");					
-// 			$rq=mysqli_fetch_array($pq);
-// 			$biaya = $rq['jml'] ;
-// 			$biayax = number_format($biaya,0);
-			
-// 			if($biaya != 0)
-// 			{
-// 				$ratio = $biaya / $total_pend;
-// 			}else{
-// 				$ratio =0;
-// 			}
-// 			$ratiox = number_format($ratio,2);
-			
-// 			$data .= '<td style="text-align:right">&nbsp;'.$pend_intx.'</td>';
-// 			$data .= '<td style="text-align:right">&nbsp;'.$revenue_akhir.'</td>';	
-// 			$data .= '<td style="text-align:right">&nbsp;'.$biayax.'</td>';	
-// 			$data .= '<td style="text-align:right">&nbsp;'.$ratiox.'</td>';	
-// 		$data .='</tr>';
-// 	}
-
-// 	$data .= '<tr>';
-// 	$data .= '<td style="text-align:right;background:#eaebec;color:#000"></td>';	
-// 	$t1="select * from m_sales_tr  order by nama";
-// 	$h1=mysqli_query($koneksi, $t1);       
-// 	while ($d1=mysqli_fetch_array($h1)){  
-// 		$pq = mysqli_query($koneksi, "select sum(tr_jo.tagihan) as jml 
-// 			  from  
-// 			  tr_jo left join tr_quo_data on tr_jo.id_detil_quo = tr_quo_data.id_detil
-// 			  left join tr_quo on tr_quo_data.id_quo = tr_quo.id_quo
-// 			  where tr_quo.sales = '$d1[nama]' and tr_jo.status = '1' 
-// 			  and year(tr_jo.tgl_jo) = '$tahun' ");					
-// 		$rq=mysqli_fetch_array($pq);
-// 		$pend = $rq['jml'] ;	
-// 		$total_pend = $total_pend + $rq['jml'];
-// 		$pendx = number_format($pend,0);
-// 		$data .= '<td style="text-align: right;background:#eaebec;color:#000"><b>'.$pendx.'</b></td>';	
-// 	}
-
-// 	$pq = mysqli_query($koneksi, "select sum(tagihan) as jml 
-// 					  from  
-// 					  tr_jo  where id_detil_quo = '0' and status = '1' 
-// 					  and year(tgl_jo) = '$tahun' ");					
-// 	$rq=mysqli_fetch_array($pq);
-// 	$pend_int = $rq['jml'] ;
-// 	$pend_intx = number_format($pend_int,0);
-// 	$data .= '<td style="text-align: right;background:#eaebec;color:#000"><b>'.$pend_intx.'</b></td>';
-	
-// 	$total = $total_pend + $pend_int;
-// 	$totalx = number_format($total,0);
-// 	$data .= '<td style="text-align: right;background:#eaebec;color:#000"><b>'.$totalx.'</b></td>';
-	
-// 	$pq = mysqli_query($koneksi, "select sum(uj+uj_lain+ritase) as jml 
-// 	  from  
-// 	  tr_jo  where status = '1' 
-// 	  and year(tgl_jo) = '$tahun' ");					
-// 	$rq=mysqli_fetch_array($pq);
-// 	$biaya = $rq['jml'] ;
-// 	$biayax = number_format($biaya,0);
-// 	$data .= '<td style="text-align: right;background:#eaebec;color:#000"><b>'.$biayax.'</b></td>';		
-	
-// 	if($biaya != 0)
-// 	{
-// 		$ratio = $biaya / $total;
-// 	}else{
-// 		$ratio =0;
-// 	}
-// 	$ratiox = number_format($ratio,2);
-// 	$data .= '<td style="text-align: right;background:#eaebec;color:#000"><b>'.$ratiox.'</b></td>';	
-	
-//     $data .= '</table>';	
-	
-				
-//     echo $data;
-	
-	
-// }
 
 if ($_GET['type'] == "read") {
     $tahun = $_GET['tahun'];
@@ -221,20 +49,28 @@ if ($_GET['type'] == "read") {
         $h1 = mysqli_query($koneksi, "SELECT * FROM m_sales_tr ORDER BY nama");
 
 		// ADMIN | HARDY | IBRAM
-        while ($d1 = mysqli_fetch_array($h1)) {
-            $pq = mysqli_query($koneksi, "SELECT SUM(tr_jo.tagihan) AS jml 
-                FROM tr_jo 
-                LEFT JOIN tr_quo_data ON tr_jo.id_detil_quo = tr_quo_data.id_detil
-                LEFT JOIN tr_quo ON tr_quo_data.id_quo = tr_quo.id_quo
-                WHERE tr_quo.sales = '$d1[nama]' AND tr_jo.status = '1' 
-                AND YEAR(tr_jo.tgl_jo) = '$tahun' AND MONTH(tr_jo.tgl_jo) = '$bln'");
+		while ($d1 = mysqli_fetch_array($h1)) {
+			$sql = "SELECT 
+					tr_jo.id_jo,
+					tr_jo.id_detil_quo,
+					tr_quo.sales,
+					tr_jo.tgl_jo,
+					SUM(tr_jo.tagihan) AS jml 
+				FROM tr_jo
+				LEFT JOIN tr_quo ON tr_quo.id_quo = tr_jo.id_quo 
+				WHERE tr_quo.sales LIKE '%{$d1['nama']}%'
+				AND tr_jo.status = '1' 
+				AND YEAR(tr_jo.tgl_jo) = '$tahun' 
+				AND MONTH(tr_jo.tgl_jo) = '$bln'";
+			$pq = mysqli_query($koneksi, $sql) or die(mysqli_error($koneksi));
 
-            $rq = mysqli_fetch_array($pq);
-            $pend = $rq['jml'] ?? 0;
-            $revenue_bulanan += $pend;
-            $pendx = number_format($pend, 0);
-            $data .= '<td style="text-align: right;">' . $pendx . '</td>';
-        }
+			$rq 	= mysqli_fetch_array($pq);
+			$pend 	= $rq['jml'] ?? 0;
+			$revenue_bulanan += $pend;
+			$pendx 	= number_format($pend, 0);
+			$data 	.= '<td style="text-align: right;">' . $pendx . '</td>';
+		}
+
 
 		// INTERCOMPANY
         $pq = mysqli_query($koneksi, "SELECT SUM(tagihan) AS jml FROM tr_jo WHERE id_detil_quo = '0' AND status = '1' 
@@ -248,10 +84,29 @@ if ($_GET['type'] == "read") {
         $revenue_akhir = number_format($total_revenue, 0);
 
 		// HITUNG BIAYA
-        $pq = mysqli_query($koneksi, "SELECT SUM(uj + uj_lain + ritase) AS jml 
-            FROM tr_jo WHERE status = '1' AND YEAR(tgl_jo) = '$tahun' AND MONTH(tgl_jo) = '$bln'");
-        $rq = mysqli_fetch_array($pq);
-        $biaya = $rq['jml'] ?? 0;
+
+		$q_cost = "SELECT 
+						SUM(tr_jo.total_so) AS jml 
+				FROM tr_jo 
+				LEFT JOIN tr_jo_detail ON tr_jo_detail.id_so = tr_jo.id_jo 
+				WHERE tr_jo.status = '1' 
+					AND YEAR(tgl_jo) = '$tahun' 
+					AND MONTH(tgl_jo) = '$bln'
+		
+					";
+		// SELECT 
+		// 			SUM(uj + uj_lain + ritase) AS jml 
+        //     	FROM tr_jo 
+		// 		WHERE `status` = '1' 
+		// 			AND YEAR(tgl_jo) = '$tahun' 
+		// 			AND MONTH(tgl_jo) = '$bln'
+		// echo "</pre>$q_cost</pre>";
+		// exit;
+		
+        $pq 	= mysqli_query($koneksi, $q_cost);
+
+        $rq 	= mysqli_fetch_array($pq);
+        $biaya 	= $rq['jml'] ?? 0;
         $biayax = number_format($biaya, 0);
 
 		// HITUNG RATIO
@@ -307,8 +162,7 @@ if ($_GET['type'] == "read") {
 
     echo $data;
 }
-else if ($_GET['type'] == "read_truck")
-{
+else if ($_GET['type'] == "read_truck"){
 	$tahun = $_GET['tahun'];
 	
 	$data = '<table class="table table-hover table-striped" style="width:100%">
@@ -382,8 +236,7 @@ else if ($_GET['type'] == "read_truck")
 	
 	
 }
-else if ($_GET['type'] == "read_dock")
-{
+else if ($_GET['type'] == "read_dock"){
 	$tahun = $_GET['tahun'];
 	
 	$data = '<table class="table table-hover table-striped" style="width:100%">
@@ -491,8 +344,7 @@ else if ($_GET['type'] == "read_dock")
 	
 }
 
-else if ($_GET['type'] == "read_hand")
-{
+else if ($_GET['type'] == "read_hand"){
 	$tahun = $_GET['tahun'];
 	
 	$data = '<table class="table table-hover table-striped" style="width:100%">
@@ -596,8 +448,8 @@ else if ($_GET['type'] == "read_hand")
 				
     echo $data;			
 	
-}else if ($_GET['type'] == "read_sewa")
-{
+}
+else if ($_GET['type'] == "read_sewa"){
 	$tahun = $_GET['tahun'];
 	
 	$data = '<table class="table table-hover table-striped" style="width:100%">
@@ -702,8 +554,8 @@ else if ($_GET['type'] == "read_hand")
     echo $data;				
 
 
-}else if ($_GET['type'] == "read_rawat")
-{
+}
+else if ($_GET['type'] == "read_rawat"){
 	$tahun = $_GET['tahun'];
 	
 	$data = '<table class="table table-hover table-striped" style="width:100%">

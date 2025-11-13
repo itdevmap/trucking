@@ -13,7 +13,7 @@
 		// echo "<pre>";
 		// print_r($_POST);
 		// echo "</pre>";
-		// die();
+		// exit;
 
 		$mode 		= $_POST['mode'];
 		$id_data 	= $_POST['id_data'];	
@@ -29,22 +29,31 @@
 		$ket 		= addslashes(trim($_POST['ket']));
 		$tgl_sjx 	= ConverTglSql($tgl_sj);
 		$jenis_sj 	= $_POST['jenis_sj'];
+		$sj_vendor 	= $_POST['sj_vendor'];
 		$rowid 		= $_POST['rowid'];
 		
-		$uj = str_replace(",","", $uj);
-		$ritase = str_replace(",","", $ritase);
+		$uj 		= str_replace(",","", $uj);
+		$ritase 	= str_replace(",","", $ritase);
 		
 		if($jenis_sj == '1'){
 			$id_mobil = 0;
 			$id_supir = 0;
 		} else{
-			$pq = mysqli_query($koneksi, "SELECT * from m_mobil_tr where id_mobil = '$id_mobil' ");
-			$rq=mysqli_fetch_array($pq);
+			$pq 	= mysqli_query($koneksi, "SELECT 
+						* 
+					FROM m_mobil_tr 
+					WHERE id_mobil = '$id_mobil' ");
+			$rq		= mysqli_fetch_array($pq);
+
 			$no_polisi = $rq['no_polisi'];
-			$pq = mysqli_query($koneksi, "SELECT * from m_supir_tr where id_supir = '$id_supir' ");
-			$rq=mysqli_fetch_array($pq);
-			$supir = $rq['nama_supir'];
-			$telp = $rq['telp'];
+			$pq 	= mysqli_query($koneksi, "SELECT 
+						* 
+					FROM m_supir_tr 
+					WHERE id_supir = '$id_supir' ");
+			$rq		= mysqli_fetch_array($pq);
+
+			$supir 	= $rq['nama_supir'];
+			$telp 	= $rq['telp'];
 		}
 		
 		
@@ -107,8 +116,8 @@
 			$no_ref = "RF-$year$noUrut";
 			
 			$sql = "INSERT INTO  t_ware_data 
-				(rowid, jenis, tanggal, no_doc, id_cust, jenis_sj, gudang, id_mobil, id_supir, no_polisi, supir, telp, ket, created, no_do, no_ref) 
-				VALUES ('$rowid','1', '$tgl_sjx', '$no_sj',  '$id_cust', '$jenis_sj', '$gudang', '$id_mobil', '$id_supir', '$no_polisi', '$supir', '$telp','$ket', '$id_user', '$no_do', '$no_ref')";
+				(rowid, jenis, tanggal, no_doc, id_cust, jenis_sj, gudang, id_mobil, id_supir, no_polisi, supir, telp, ket, created, no_do, no_ref, sj_vendor) 
+				VALUES ('$rowid','1', '$tgl_sjx', '$no_sj',  '$id_cust', '$jenis_sj', '$gudang', '$id_mobil', '$id_supir', '$no_polisi', '$supir', '$telp','$ket', '$id_user', '$no_do', '$no_ref', '$sj_vendor')";
 				$hasil= mysqli_query($koneksi, $sql);
 			
 			$sql = mysqli_query($koneksi, "SELECT max(id_data)as id from t_ware_data ");			
@@ -184,6 +193,7 @@
 		$no_do 			= $rq['no_do'];
 		$rowid 			= $rq['rowid'];
 		$kode_project 	= $rq['kode_project'];
+		$sj_vendor 		= $rq['sj_vendor'];
 		$disx 			= 'Disabled';
 
 		if($jenis_sj == '1')
@@ -655,9 +665,14 @@
 						</div>
 					</div>
 					<div style="width:100%;" class="input-group">
+						<span class="input-group-addon" style="text-align:right;min-width:160px"><b>SJ Vendor :</b></span>
+						<input type="text"  id ="sj_vendor" name="sj_vendor" value="<?php echo $sj_vendor; ?>" 
+						style="text-transform: uppercase;text-align: left;width:80%"  <?php echo $dis;?>  >
+					</div>
+					<div style="width:100%;" class="input-group">
 						<span class="input-group-addon" style="text-align:right;min-width:160px"><b>Remarks :</b></span>
 						<textarea name="ket" id="ket"
-						style="resize:none;width: 80%; height: 110px; font-size: 11px; line-height: 12px; 
+						style="resize:none;width: 80%; height: 80px; font-size: 11px; line-height: 12px; 
 						border: 1px solid #4; padding: 5px;" <?php echo $dis;?> ><?php echo $ket; ?></textarea>
 					</div>
 					<br>	

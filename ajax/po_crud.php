@@ -26,9 +26,7 @@ $m_exe = $rq['m_exe'];
 						<th width="8%" style="text-align: center;">CODE PR</th>
 						<th width="10%" style="text-align: center;">CODE PO</th>
 						<th width="7%" style="text-align: center;">REQ DATE</th>
-						<th width="15%" style="text-align: center;">USER REQ</th>
-						<th width="15%" style="text-align: center;">ACCOUNT</th>
-						<th width="7%" style="text-align: center;">PAYMENT</th>					
+						<th width="15%" style="text-align: center;">VENDOR NAME</th>			
 						<th width="30%" style="text-align: center;">REMARK</th>			
 						<th rowspan="2" width="5%" style="text-align: center;">STATUS</th>	
 						<th width="5%" style="text-align: center;">EXEC</th>				
@@ -46,10 +44,10 @@ $m_exe = $rq['m_exe'];
 		$SQL = "SELECT 
 					tr_po.*,
 					sap_project.kode_project,
-					m_cust_tr.nama_cust
+					m_vendor_tr.nama_vendor
 				FROM tr_po 
 				LEFT JOIN sap_project ON sap_project.rowid = tr_po.sap_project
-				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = tr_po.user_req
+				LEFT JOIN m_vendor_tr ON m_vendor_tr.id_vendor = tr_po.user_req
 				WHERE tr_po.code_po LIKE '%$cari%'
 				AND tr_po.code_po NOT LIKE '%POWH%'
 				ORDER BY tr_po.code_po DESC
@@ -61,8 +59,7 @@ $m_exe = $rq['m_exe'];
 		}
 
 		if(mysqli_num_rows($result) > 0){
-			while($row = mysqli_fetch_assoc($result))
-			{	
+			while($row = mysqli_fetch_assoc($result)){	
 				$xy1	= "Edit|$row[id_po]";
 				$xy1	= base64_encode($xy1);
 				$link 	= "po_data.php?id=$xy1";
@@ -108,9 +105,7 @@ $m_exe = $rq['m_exe'];
 					<td style="text-align:center">'.$row['code_pr'].'</td>
 					<td style="text-align:center"><a href="'.$link.'">'.$row['code_po'].'</a></td>
 					<td style="text-align:center">'.$row['delivery_date'].'</td>
-					<td style="text-align:center">'.$row['nama_cust'].'</td>
-					<td style="text-align:center">'.$row['buyer'].'</td>
-					<td style="text-align:center">'.$row['payment'].'</td>
+					<td style="text-align:center">'.$row['nama_vendor'].'</td>
 					<td style="text-align:center">'.$row['remark'].'</td>
 					<td style="text-align:center">
 						<button type="button" class="btn btn-'.$label.'" style="width:100%;padding:1px;margin:-3px">'.$status.'</button>
@@ -275,8 +270,9 @@ $m_exe = $rq['m_exe'];
 				<thead style="font-weight:500px !important">
 					<tr>
 						<th width="5%" style="text-align: center;">NO</th>
+						<th width="15%" style="text-align: center;">PR Date</th>
 						<th width="25%" style="text-align: center;">Purchase Request</th>
-						<th width="60%" style="text-align: center;">SQ Code</th>
+						<th width="45%" style="text-align: center;">Remark</th>
 						<th width="10%" style="text-align: center;">ADD</th>
 					</tr>
 				</thead>';	
@@ -295,21 +291,21 @@ $m_exe = $rq['m_exe'];
 					AND tr_pr.code_pr NOT LIKE '%PRWH%'
 				GROUP BY tr_pr.code_pr
 				HAVING total_qty_close > 0
-				ORDER BY tr_pr.code_pr";
+				ORDER BY tr_pr.code_pr DESC";
 		
 		$query = mysqli_query($koneksi, $SQL);	
+		
 		if (!$result = $query) {
 			exit(mysqli_error($koneksi));
 		}
-		if(mysqli_num_rows($result) > 0)
-		{
-			while($row = mysqli_fetch_assoc($result))
-			{	
+		if(mysqli_num_rows($result) > 0){
+			while($row = mysqli_fetch_assoc($result)){	
 				$posisi++;
 				$data .= '<tr>';		
 				$data .= '<td style="text-align:center">'.$posisi.'.</td>';
+				$data .= '<td style="text-align:center"><a href="#" onclick="PilihPR('.$row['id_pr'].')" >'.$row['tgl_pr'].'</a></td>';
 				$data .= '<td style="text-align:center"><a href="#" onclick="PilihPR('.$row['id_pr'].')" >'.$row['code_pr'].'</a></td>';
-				$data .= '<td style="text-align:center"><a href="#" onclick="PilihPR('.$row['id_pr'].')" >'.$row['quo_no'].'</a></td>';
+				$data .= '<td style="text-align:center"><a href="#" onclick="PilihPR('.$row['id_pr'].')" >'.$row['remark'].'</a></td>';
 				$data .= '<td style="text-align:center">
 						<button type="button" class="btn btn-default" onClick="javascript:PilihPR('.$row['id_pr'].')" 
 						style="margin:-3px;width:100%;padding:1px;border-radius:1px"><span class="fa  fa-plus-square"></span></button>
@@ -317,14 +313,12 @@ $m_exe = $rq['m_exe'];
 				$data .='</tr>';
 			}		
 		}
-		else
-		{
+
+		else{
 			$data .= '<tr><td colspan="7"></td></tr>';
 		}
 		$data .= '</table>';
 		echo $data;		
-		
-
 	}
 	else if ($_GET['type'] == "ListPRWH"){
 		$cari = $_GET['cari'];
@@ -332,8 +326,9 @@ $m_exe = $rq['m_exe'];
 				<thead style="font-weight:500px !important">
 					<tr>
 						<th width="5%" style="text-align: center;">NO</th>
-						<th width="25%" style="text-align: center;">Purchase Request</th>
-						<th width="60%" style="text-align: center;">SQ Code</th>
+						<th width="13%" style="text-align: center;">PR Date</th>
+						<th width="17%" style="text-align: center;">Purchase Request</th>
+						<th width="50%" style="text-align: center;">Remark</th>
 						<th width="10%" style="text-align: center;">ADD</th>
 					</tr>
 				</thead>';	
@@ -352,21 +347,22 @@ $m_exe = $rq['m_exe'];
 					AND tr_pr.code_pr LIKE '%PRWH%'
 				GROUP BY tr_pr.code_pr
 				HAVING total_qty_close > 0
-				ORDER BY tr_pr.code_pr";
+				ORDER BY tr_pr.code_pr DESC";
 		
 		$query = mysqli_query($koneksi, $SQL);	
+		
 		if (!$result = $query) {
 			exit(mysqli_error($koneksi));
 		}
-		if(mysqli_num_rows($result) > 0)
-		{
-			while($row = mysqli_fetch_assoc($result))
-			{	
+
+		if(mysqli_num_rows($result) > 0){
+			while($row = mysqli_fetch_assoc($result)){	
 				$posisi++;
 				$data .= '<tr>';		
 				$data .= '<td style="text-align:center">'.$posisi.'.</td>';
+				$data .= '<td style="text-align:center"><a href="#" onclick="PilihPR('.$row['id_pr'].')" >'.$row['tgl'].'</a></td>';
 				$data .= '<td style="text-align:center"><a href="#" onclick="PilihPR('.$row['id_pr'].')" >'.$row['code_pr'].'</a></td>';
-				$data .= '<td style="text-align:center"><a href="#" onclick="PilihPR('.$row['id_pr'].')" >'.$row['quo_no'].'</a></td>';
+				$data .= '<td style="text-align:left"><a href="#" onclick="PilihPR('.$row['id_pr'].')" >'.$row['remark'].'</a></td>';
 				$data .= '<td style="text-align:center">
 						<button type="button" class="btn btn-default" onClick="javascript:PilihPR('.$row['id_pr'].')" 
 						style="margin:-3px;width:100%;padding:1px;border-radius:1px"><span class="fa  fa-plus-square"></span></button>
@@ -501,7 +497,7 @@ $m_exe = $rq['m_exe'];
 					<a href="#" style="text-transform:uppercase;" onclick="PilihItemPR('.$row['id_detail'].')" >'.$row['item'].'</a>
 				</td>
 				<td style="text-align:left;text-transform:uppercase;">
-					'.$row['description'].'
+					'.$row['description'].' - '.$row['remark'].'
 				</td>
 				<td style="text-align:center;text-transform:uppercase;">
 					'.$row['jenis'].'
@@ -528,14 +524,14 @@ $m_exe = $rq['m_exe'];
 		// echo "<pre>";
 		// print_r($_POST);
 		// echo "</pre>";
-		// die();
+		// exit;
 
 		$id        = $_POST['id'];    
 		$jenis     = $_POST['jenis'];
 		$id_vendor = $_POST['id_vendor'];
 
 		if ($jenis === 'route') {
-			$query = "SELECT 
+			$q_datapo = "SELECT 
 							d.*,
 							r.cost AS harga,
 							r.id_route AS item,
@@ -551,22 +547,23 @@ $m_exe = $rq['m_exe'];
 					LEFT JOIN m_kota_tr AS t ON t.id_kota = d.destination
 					WHERE d.id_detail = '$id'";
 
-			// echo $query;
-			// exit;
+		// echo $q_datapo;
+		// exit;
 
 		} else if ($jenis === 'item') {
-			$query = "SELECT 
-							tr_pr_detail.*,
-							m_cost_tr.itemcode AS jenis,
-							m_cost_tr.itemcode,
-							m_cost_tr.uom
+			$q_datapo = "SELECT 
+						tr_pr_detail.*,
+						m_cost_tr.itemcode AS jenis,
+						m_cost_tr.itemcode,
+						m_cost_tr.uom,
+						m_vendor_tr.pph
 					FROM tr_pr_detail 
-					LEFT JOIN m_cost_tr  
-							ON m_cost_tr.id_cost = tr_pr_detail.itemcode
+					LEFT JOIN m_cost_tr ON m_cost_tr.id_cost = tr_pr_detail.itemcode
+					LEFT JOIN m_vendor_tr ON m_vendor_tr.id_vendor = '$id_vendor'
 					WHERE tr_pr_detail.id_detail = '$id'
 					ORDER BY tr_pr_detail.id_detail";    
 		} else {
-			$query = "SELECT 
+			$q_datapo = "SELECT 
 							tr_pr_detail.*,
 							tr_pr_detail.description AS jenis
 					FROM tr_pr_detail 
@@ -574,7 +571,11 @@ $m_exe = $rq['m_exe'];
 					ORDER BY tr_pr_detail.id_detail";    
 		}
 
-		$result = mysqli_query($koneksi, $query);
+		// echo "<pre>$q_datapo</pre>";
+		// exit;
+
+
+		$result = mysqli_query($koneksi, $q_datapo);
 
 		if (!$result) {
 			exit(json_encode([
@@ -607,7 +608,7 @@ $m_exe = $rq['m_exe'];
 		// echo "<pre>";
 		// print_r($_POST);
 		// echo "</pre>";
-		// die();
+		// exit;
 
 		if($_POST['mode'] != '' ) {	
 			$id 		= $_POST['idx'];
@@ -630,14 +631,22 @@ $m_exe = $rq['m_exe'];
 			$disc 		= $_POST['disc'] ?? 0;
 			$ppn 		= $_POST['ppn'] ?? 0;
 			$nominal_ppn= $_POST['nominal_ppn'] ?? 0;
+			$pph 		= $_POST['pph'] ?? 0;
+			$nominal_pph= $_POST['nominal_pph'] ?? 0;
 			$total 		= $_POST['total'];
+
+			// echo $harga;
+			// exit;
 
 			if($mode == 'Add') {
 				$sql_action = "INSERT INTO tr_po_detail (
-						code_po, itemcode, item, origin, destination, `description`, container, qty, uom, cur, harga, total, disc, ppn, nominal_ppn, jenis
+						id_pr_detail, code_po, itemcode, item, origin, destination, `description`, container, qty, qty_pending, uom, cur, harga, total, disc, ppn, nominal_ppn, pph, nominal_pph, jenis
 					) VALUES (
-						'$code_po', '$itemcode', '$id_item', '$origin', '$destination', '$description', '$container', '$qty', '$uom', '$cur', '$harga', '$total', '$disc', '$ppn', '$nominal_ppn', '$jenisx'
+						'$id', '$code_po', '$itemcode', '$id_item', '$origin', '$destination', '$description', '$container', '$qty', '$qty', '$uom', '$cur', '$harga', '$total', '$disc', '$ppn', '$nominal_ppn', '$pph', '$nominal_pph', '$jenisx'
 					)";
+
+				// echo $sql_action;
+				// return;
 
 				if ($jenisx == 'route') {
 					$sql_qty_close = "SELECT 
@@ -648,10 +657,11 @@ $m_exe = $rq['m_exe'];
 									WHERE tr_pr_detail.code_pr = '$code_pr' 
 									AND m_route_tr.id_route = '$id_item'";
 				} elseif ($jenisx == 'item') {
+
 					$sql_qty_close = "SELECT 
 										tr_pr_detail.qty_close AS qty_old
 									FROM tr_pr_detail WHERE tr_pr_detail.code_pr = '$code_pr' 
-									AND tr_pr_detail.item = '$id_item'";
+									AND tr_pr_detail.id_detail = '$id'";
 				} else {
 					$sql_qty_close = "SELECT 
 										tr_pr_detail.qty_close AS qty_old
@@ -668,6 +678,7 @@ $m_exe = $rq['m_exe'];
 						echo "QTY melebihi stok yang di ajukan di PR !";
 						exit;
 					}
+
 					$sql_update_po = "UPDATE tr_pr_detail 
 									LEFT JOIN m_route_tr ON m_route_tr.id_asal = tr_pr_detail.origin 
 										AND m_route_tr.id_tujuan = tr_pr_detail.destination
@@ -675,6 +686,9 @@ $m_exe = $rq['m_exe'];
 									SET tr_pr_detail.qty_close = '$new_qty_close'
 									WHERE tr_pr_detail.code_pr = '$code_pr'
 										AND tr_pr_detail.id_detail = '$id'";
+
+					// echo $sql_update_po;
+					// exit;
 
 					$hasil_update = mysqli_query($koneksi, $sql_update_po);
 					$hasil_action = mysqli_query($koneksi, $sql_action);
@@ -684,14 +698,16 @@ $m_exe = $rq['m_exe'];
 			}else {
 				$sql_action = "UPDATE tr_po_detail SET
 					`description` = '$description',
-					`container`   = '$container',
-					`qty`         = '$qty',
-					`disc`        = '$disc',
-					`ppn`         = '$ppn',
-					`nominal_ppn` = '$nominal_ppn',
-					`harga`       = '$harga',
-					`total`       = '$total'
-					WHERE id = '$id'";
+					container   = '$container',
+					qty         = '$qty',
+					disc        = '$disc',
+					ppn         = '$ppn',
+					nominal_ppn = '$nominal_ppn',
+					pph	        = '$pph',
+					nominal_pph = '$nominal_pph',
+					harga       = '$harga',
+					total       = '$total'
+					WHERE id	= '$id'";
 
 				if ($jenisx == 'route') {
 					$sql_qty_close = "SELECT 
@@ -727,7 +743,8 @@ $m_exe = $rq['m_exe'];
 						echo "Data PO tidak ditemukan untuk code_po: $code_po";
 					}
 
-				} elseif ($jenisx == 'item') {
+				} 
+				elseif ($jenisx == 'item') {
 					$sql_qty_close = "SELECT 
 										tr_pr_detail.qty AS qty_old,
 										tr_pr_detail.id_detail
@@ -754,7 +771,8 @@ $m_exe = $rq['m_exe'];
 					} else {
 						echo "Data PO tidak ditemukan untuk code_po: $code_po";
 					}
-				} else {
+				} 
+				else {
 					$sql_qty_close = "SELECT 
 										tr_pr_detail.qty AS qty_old,
 										tr_pr_detail.id_detail
@@ -784,7 +802,8 @@ $m_exe = $rq['m_exe'];
 					}
 				}
 			}
-			
+			// echo $hasil_action;
+			// exit;
 			if (!$hasil_action) {
 				echo "Action error !";
 			}
@@ -799,12 +818,13 @@ $m_exe = $rq['m_exe'];
 
 // ================= DETAIL DATA PO=================
 	else if($_GET['type'] == "Read_Detil") {
+
 		$code_po  = $_GET['code_po'];
 		$jenis    = $_GET['jenis'];
 
 		$data = '';
-		$xy1    = base64_encode($code_po);
-		$link   = "po_cetak.php?jenis=$jenis&id=$xy1";
+		// $xy1    = base64_encode($code_po);
+		// $link   = "po_cetak.php?jenis=$jenis&id=$xy1";
 		$jenisx = ucwords(strtolower($jenis));
 
 		$data .= '
@@ -867,20 +887,27 @@ $m_exe = $rq['m_exe'];
 			exit(mysqli_error($koneksi));
 		}
 
+		$xy1    = base64_encode($code_po);
+		$link   = "po_cetak.php?jenis=$jenis&id=$xy1";
+		$link2   = "po_cetak_2.php?jenis=$jenis&id=$xy1";
 		if(mysqli_num_rows($result) > 0) {
-			$firstRow = mysqli_fetch_assoc($result);
-			if ($firstRow['no_sap'] != 'error' && !empty($firstRow['no_sap'])) {
-				$data .= '
-					<button class="btn btn-success" 
-							style="border-radius:2px" 
-							type="button" 
-							onClick="window.open(\''.$link.'\')">
-						<span class="fa fa-print"></span> <b>Print PO</b>
-					</button>';
-			}
+
+			$data .= '
+				<button class="btn btn-primary" 
+						style="border-radius:2px" 
+						type="button" 
+						onClick="window.open(\''.$link.'\')">
+					<span class="fa fa-print"></span> <b>Print View 1</b>
+				</button>';
+			$data .= '
+				<button class="btn btn-primary" 
+						style="border-radius:2px" 
+						type="button" 
+						onClick="window.open(\''.$link2.'\')">
+					<span class="fa fa-print"></span> <b>Print View 2</b>
+				</button>';
 			$data .= '</div>';
 
-			// reset pointer ke awal result
 			mysqli_data_seek($result, 0);
 
 			$data .= "<table class='table table-hover table-striped' style='width:100%'>
@@ -888,7 +915,7 @@ $m_exe = $rq['m_exe'];
 							<tr>    
 								<th width='5%' style='text-align: center;'>NO</th>                    
 								<th width='15%' style='text-align: center;text-transform:uppercase;'>$jenis</th>
-								<th width='10%' style='text-align: center;'>CONTAINER</th>         
+								<th width='10%' style='text-align: center;'>CONTAINER</th>
 								<th width='30%' style='text-align: center;'>DESC</th>
 								<th width='10%' style='text-align: center;'>QTY/UoM</th>         
 								<th width='10%' style='text-align: center;'>PRICE</th>         
@@ -896,6 +923,7 @@ $m_exe = $rq['m_exe'];
 								<th width='5%' style='text-align: center;'>PPN</th>         
 								<th width='15%' style='text-align: center;'>TOTAL</th>         
 								<th width='5%' style='text-align: center;'>EDIT</th>         
+								<th width='5%' style='text-align: center;'>DEL</th>     
 							</tr>    
 						</thead>";
 
@@ -903,10 +931,10 @@ $m_exe = $rq['m_exe'];
 			
 			while($row = mysqli_fetch_assoc($result)) {
 				$posisi++;        
-				$harga  = number_format($row['harga'], 0, ',', '.');
-				$total  = number_format($row['total'], 0, ',', '.'); 
-				$disc   = number_format($row['disc'], 0, ',', '.'); 
-				$ppn    = number_format($row['ppn'], 0, ',', '.'); 
+				$harga  = number_format($row['harga'], 2, ',', '.');
+				$total  = number_format($row['total'], 2, ',', '.'); 
+				$disc   = number_format($row['disc'], 2, ',', '.'); 
+				$ppn    = number_format($row['ppn'], 2, ',', '.'); 
 
 				$data .= '<tr>                  
 					<td style="text-align:center">'.$posisi.'.</td>
@@ -921,12 +949,23 @@ $m_exe = $rq['m_exe'];
 
 				if($row['status'] === '0' ) {
 					$data .= '<td>
-								<button class="btn btn-block btn-default" 
+								<button class="btn btn-block btn-warning" 
 										title="Execute" 
 										style="margin:-3px;border-radius:0px" 
 										type="button" 
 										onClick="javascript:EditDetail('.$row['id'].', \''.$jenis.'\')">
 									<span class="fa fa-edit"></span>
+								</button>
+							</td>';
+				}
+				if($row['status'] === '0' ) {
+					$data .= '<td>
+								<button class="btn btn-block btn-danger" 
+										title="Delete" 
+										style="margin:-3px;border-radius:0px" 
+										type="button" 
+										onClick="javascript:DelDetail('.$row['id'].', \''.$jenis.'\')">
+									<span class="fa fa-close"></span>
 								</button>
 							</td>';
 				}
@@ -976,28 +1015,31 @@ $m_exe = $rq['m_exe'];
 			$dp         = mysqli_fetch_assoc($query_po);
 			$tgl_po     = $dp['delivery_date'];
 			$sap_project= $dp['sap_project'];
-			$id_cust    = $dp['id_cust'];
+			$id_vendor    = $dp['user_req'];
 			$id_asal    = $dp['id_asal'];
 			$id_tujuan  = $dp['id_tujuan'];
 		} else {
-			$tgl_po = $sap_project = $id_cust = null;
+			$tgl_po = $sap_project = $id_vendor = null;
 		}
 
-		$SQL = "SELECT 
+		$q_po = "SELECT 
 					tr_po.id_po,
 					tr_po.delivery_date,
 					sap_project.kode_project,
 					tr_po.code_po,
-					m_cust_tr.nama_cust
+					m_vendor_tr.nama_vendor
 				FROM tr_po
 				LEFT JOIN tr_po_detail ON tr_po_detail.code_po = tr_po.code_po
 				LEFT JOIN sap_project ON sap_project.rowid = tr_po.sap_project
-				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = tr_po.user_req
+				LEFT JOIN m_vendor_tr ON m_vendor_tr.id_vendor = tr_po.user_req
 				WHERE tr_po.id_po = '$id_po'
 				GROUP BY tr_po.id_po
 				LIMIT 0, 10";
+
+		// echo $q_po;
+		// exit;
 				
-		$query = mysqli_query($koneksi, $SQL);	
+		$query = mysqli_query($koneksi, $q_po);	
 		if (!$query) {
 			exit(mysqli_error($koneksi));
 		}
@@ -1011,7 +1053,7 @@ $m_exe = $rq['m_exe'];
 				$data .= '<td style="text-align:center">'.$row['delivery_date'].'</td>';
 				$data .= '<td style="text-align:center">'.$row['kode_project'].'</td>';
 				$data .= '<td style="text-align:center">'.$row['code_po'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['nama_cust'].'</td>';
+				$data .= '<td style="text-align:center">'.$row['nama_vendor'].'</td>';
 
 				$id_po = isset($row['id_po']) ? $row['id_po'] : $row['code_po'];
 				$data .= '<td style="text-align:center">
@@ -1035,7 +1077,8 @@ $m_exe = $rq['m_exe'];
 		// echo "<pre>";
 		// print_r($_POST);
 		// echo "</pre>";
-		// die();
+		// exit;
+
 		$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
 		$ids = array_unique($ids);
 		if (empty($ids)) {
@@ -1078,6 +1121,7 @@ $m_exe = $rq['m_exe'];
 				$code_po = mysqli_real_escape_string($koneksi, $row['code_po']);
 				$sql_detail = "SELECT 
 								tr_po_detail.*,
+								m_cost_tr.itemcode,
 								m_cost_tr.sap_coa,
 								m_cost_tr.sap_corporate,
 								m_cost_tr.sap_divisi,
@@ -1085,7 +1129,7 @@ $m_exe = $rq['m_exe'];
 								m_cost_tr.sap_activity,
 								m_cost_tr.sap_location
 							FROM tr_po_detail
-							LEFT JOIN m_cost_tr ON m_cost_tr.itemcode = tr_po_detail.itemcode
+							LEFT JOIN m_cost_tr ON m_cost_tr.id_cost = tr_po_detail.item
 							WHERE tr_po_detail.code_po = '$code_po' AND tr_po_detail.jenis = 'item'";
 
 				// echo $sql_detail;
@@ -1104,6 +1148,7 @@ $m_exe = $rq['m_exe'];
 							"Harga" 		=> (int)$det['harga'],
 							"Disc" 			=> $det['disc'],
 							"PPN"       	=> $det['ppn'],
+							"PPH"       	=> $det['pph'],
 
 							"GLAcct"       	=> $det['sap_coa'] ?? '',
 							"Corporate"     => $det['sap_corporate'] ?? '',
@@ -1117,11 +1162,12 @@ $m_exe = $rq['m_exe'];
 					if (!isset($resultData[$key])) {
 						$resultData[$key] = [
 							"NoPO"    	 => $row['code_po'],
-							"TglPO"    	 => $row['delivery_date'],
+							"TglPO"    	 => date('Y-m-d'),
+							// "TglPO"    	 => $row['delivery_date'],
 							"VendorCode" => $row['caption'],
 							"Project"  	 => $row['kode_project'],
-							"Remarks"  	 => $row['nama_vendor'],
-							"Buyer"  	 => 25,
+							"Remarks"  	 => $row['remark'],
+							"Buyer"  	 => 15,
 							"TipePurch"	 => 6,
 							"Lines"    	 => $lines
 						];
@@ -1137,7 +1183,7 @@ $m_exe = $rq['m_exe'];
 			// echo "<pre>";
 			// echo json_encode($resultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 			// echo "<pre>";
-			// die();
+			// exit;
 
 			// echo json_encode([
 			// 	"success" => true,
@@ -1226,24 +1272,55 @@ $m_exe = $rq['m_exe'];
 
 	}
 	else if ($_POST['type'] == "Executed") {
-		if($_POST['id'] != '' ){
-			$id = $_POST['id'];
-			$sql = "UPDATE tr_po SET 
-					`status` = '1'
-					WHERE id_po = '$id'	";
-				$hasil=mysqli_query($koneksi, $sql);
+		header('Content-Type: application/json');
+
+		if (!empty($_POST['id'])) {
+			$id = mysqli_real_escape_string($koneksi, $_POST['id']);
+
+			$q_check = "SELECT tr_po_detail.id
+						FROM tr_po_detail
+						LEFT JOIN tr_po ON tr_po.code_po = tr_po_detail.code_po
+						WHERE tr_po.id_po = '$id'";
+			$r_check = mysqli_query($koneksi, $q_check);
+
+			if (!$r_check) {
+				echo json_encode([
+					"success" => false,
+					"message" => "Query check gagal: " . mysqli_error($koneksi)
+				]);
+				exit;
+			}
+
+			if (mysqli_num_rows($r_check) == 0) {
+				echo json_encode([
+					"success" => false,
+					"message" => "Masih belum ada detail PO."
+				]);
+				exit;
+			}
+
+			$sql = "UPDATE tr_po 
+					SET status = '1'
+					WHERE id_po = '$id'";
+			$hasil = mysqli_query($koneksi, $sql);
+
 			if (!$hasil) {
-							
-				exit(mysqli_error($koneksi));
-				echo "Data error...!";
+				echo json_encode([
+					"success" => false,
+					"message" => "Gagal update data: " . mysqli_error($koneksi)
+				]);
+			} else {
+				echo json_encode([
+					"success" => true,
+					"message" => "Data Executed!"
+				]);
 			}
-			else
-			{	
-		
-				echo "Data Executed!";
-			}
-		}	
-		
+		} else {
+			echo json_encode([
+				"success" => false,
+				"message" => "ID tidak ditemukan."
+			]);
+		}
 	}
 	elseif ($_POST['type'] == "EditData") {
 		// echo "<pre>";
@@ -1357,11 +1434,12 @@ $m_exe = $rq['m_exe'];
 		]);
 		exit;
 	}
-
+	
 // ================= DETAIL DATA POTR =================
 	else if ($_GET['type'] == "AddProject"){
 		$query_project = "SELECT * 
 				FROM sap_project 
+				where tipe = 'tr'
 				ORDER BY CAST(SUBSTRING_INDEX(kode_project, ' ', -1) AS UNSIGNED) DESC 
 				LIMIT 1
 			";
@@ -1376,7 +1454,6 @@ $m_exe = $rq['m_exe'];
 		$date	= date('Y');
 
 		$newKode = $date . '/TRC ' . ($number + 1);
-		// $newKode = '2025/TRC 1282';
 
 		$sendAPI = [
 			"ProjectCode" => $newKode,
@@ -1385,7 +1462,7 @@ $m_exe = $rq['m_exe'];
 
 		// Kirim ke API
 		$apiUrl = "https://wsp.mitraadipersada.com/trucking/project.php";
-		$ch = curl_init($apiUrl);
+		$ch 	= curl_init($apiUrl);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -1398,7 +1475,7 @@ $m_exe = $rq['m_exe'];
 			// echo "<pre>";
 			// print_r(json_decode($response, true));
 			// echo "</pre>";
-			// die();
+			// exit;
 
 		if ($response === false) {
 			echo "Curl error: " . curl_error($ch);
@@ -1556,11 +1633,11 @@ $m_exe = $rq['m_exe'];
 					tr_po.delivery_date,
 					sap_project.kode_project,
 					tr_po.code_po,
-					m_cust_tr.nama_cust
+					m_vendor_tr.nama_vendor
 				FROM tr_po
 				LEFT JOIN tr_po_detail ON tr_po_detail.code_po = tr_po.code_po
 				LEFT JOIN sap_project ON sap_project.rowid = tr_po.sap_project
-				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = tr_po.user_req
+				LEFT JOIN m_vendor_tr ON m_vendor_tr.id_vendor = tr_po.user_req
 				WHERE tr_po.id_po = '$id_po'
 				GROUP BY tr_po.id_po
 				LIMIT 0, 10";
@@ -1579,7 +1656,7 @@ $m_exe = $rq['m_exe'];
 				$data .= '<td style="text-align:center">'.$row['delivery_date'].'</td>';
 				$data .= '<td style="text-align:center">'.$row['kode_project'].'</td>';
 				$data .= '<td style="text-align:center">'.$row['code_po'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['nama_cust'].'</td>';
+				$data .= '<td style="text-align:center">'.$row['nama_vendor'].'</td>';
 
 				$id_po = isset($row['id_po']) ? $row['id_po'] : $row['code_po'];
 				$data .= '<td style="text-align:center">
@@ -1603,7 +1680,7 @@ $m_exe = $rq['m_exe'];
 		// echo "<pre>";
 		// print_r($_POST);
 		// echo "</pre>";
-		// die();
+		// exit;
 
 		$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
 
@@ -1657,16 +1734,15 @@ $m_exe = $rq['m_exe'];
 
 		$output = [$resultData];
 
-
 		// ============= NO SEND API (LIHAT JSON) =============
-			// header('Content-Type: application/json');
-			// echo "<pre>";
-			// echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			// echo "<pre>";
-			// die();
+			header('Content-Type: application/json');
+			echo "<pre>";
+			echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			echo "<pre>";
+			exit;
 
 		// ============= KIRIM API ============= 
-			// $apiUrl = "https://wsp.mitraadipersada.com/trucking/sales-invoice.php";
+			// $apiUrl = "https://wsp.mitraadipersada.com/trucking/purch-invoice.php";
 			$apiUrl = "http://192.168.1.153/trucking2/purch-invoice.php";
 
 			$ch = curl_init($apiUrl);
@@ -1685,7 +1761,7 @@ $m_exe = $rq['m_exe'];
 				// echo "<pre>";
 				// print_r($data);
 				// echo "</pre>";
-				// die();
+				// exit;
 
 			$apiResponse = json_decode($response, true);
 			$resultDataLog = json_encode($apiResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -1735,12 +1811,174 @@ $m_exe = $rq['m_exe'];
 				"sent"    => $resultDataLog
 			], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	}
+	else if ($_POST['type'] == "SaveAPWH") {
+		// echo "<pre>";
+		// print_r($_POST);
+		// echo "</pre>";
+		// exit;
+
+		$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
+
+		if (empty($ids)) {
+			echo json_encode([
+				"success" => false,
+				"message" => "Tidak ada data yang dipilih"
+			]);
+			exit;
+		}
+
+		$resultData = [
+			"VendorCode" => null,
+			"TglAP"      => date('Y-m-d'),
+			"Lines"      => []
+		];
+
+		foreach ($ids as $id_po) {
+			$id_po = mysqli_real_escape_string($koneksi, $id_po);
+
+			// ===== HEADER =====
+			$sql_header = "
+				SELECT 
+					tr_po.*, 
+					m_vendor_tr.caption 
+				FROM tr_po
+				LEFT JOIN m_vendor_tr ON m_vendor_tr.id_vendor = tr_po.user_req
+				WHERE tr_po.id_po = '$id_po'
+			";
+
+			$query_header = mysqli_query($koneksi, $sql_header);
+
+			if (!$query_header) {
+				echo json_encode([
+					"success" => false,
+					"message" => "Query header gagal: " . mysqli_error($koneksi),
+					"sql" => $sql_header
+				]);
+				exit;
+			}
+
+			$row_header = mysqli_fetch_assoc($query_header);
+
+			if ($row_header) {
+				// Simpan vendor code pertama kali
+				if ($resultData["VendorCode"] === null) {
+					$resultData["VendorCode"] = $row_header['caption'] ?? '';
+				}
+
+				// ===== DETAIL =====
+				$sql_detail = "
+					SELECT 
+						m_part_masuk.no_grpo
+					FROM tr_po
+					LEFT JOIN m_part_masuk ON m_part_masuk.no_po = tr_po.code_po
+					WHERE tr_po.id_po = '$id_po'
+				";
+
+				$query_detail = mysqli_query($koneksi, $sql_detail);
+
+				if (!$query_detail) {
+					echo json_encode([
+						"success" => false,
+						"message" => "Query detail gagal: " . mysqli_error($koneksi),
+						"sql" => $sql_detail
+					]);
+					exit;
+				}
+
+				while ($row_detail = mysqli_fetch_assoc($query_detail)) {
+					$resultData["Lines"][] = [
+						"NoGRPO" => $row_detail['no_grpo']
+					];
+				}
+			}
+		}
+
+		$output = [$resultData];
+
+
+		// ============= NO SEND API (LIHAT JSON) =============
+			// header('Content-Type: application/json');
+			// echo "<pre>";
+			// echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			// echo "<pre>";
+			// exit;
+
+		// ============= KIRIM API ============= 
+			// $apiUrl = "https://wsp.mitraadipersada.com/trucking/purch-apgrpo.php";
+			$apiUrl = "http://192.168.1.153/trucking2/purch-apgrpo.php";
+
+			$ch = curl_init($apiUrl);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_POST, true);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, [
+				'Content-Type: application/json'
+			]);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($output));
+
+			$response = curl_exec($ch);
+			curl_close($ch);
+			
+			// ----------- CHECK RESPONS -----------
+				// $data = json_decode($response, true);
+				// echo "<pre>";
+				// print_r($data);
+				// echo "</pre>";
+				// exit;
+
+			$apiResponse = json_decode($response, true);
+			$resultDataLog = json_encode($apiResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			$rawData = json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+			if (!$apiResponse || !isset($apiResponse['docnum'])) {
+				$success = false;
+				$mssg    = $apiResponse['mssg'] ?? 'Invalid API response';
+				mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) 
+					VALUES (
+						'', 
+						'AP WH TR', 
+						'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
+						'ERROR-" . mysqli_real_escape_string($koneksi, $mssg) . "',
+						'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
+					)
+				");
+			} else {
+				$success = true;
+				$desc    = 'SUCCESS';
+				mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) 
+					VALUES (
+						'" . mysqli_real_escape_string($koneksi, $apiResponse['docnum']) . "', 
+						'AP WH TR', 
+						'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
+						'" . mysqli_real_escape_string($koneksi, $desc) . "',
+						'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
+					)
+				");
+
+				foreach ($ids as $id_po) {
+					$id_po 	= (int)$id_po;
+					$docnum = mysqli_real_escape_string($koneksi, $apiResponse['docnum']);
+					$tgl_ap = date('Y-m-d');
+
+					$sql_update = "UPDATE tr_po SET 
+							no_ap 	= '$docnum',
+							tgl_ap 	= '$tgl_ap'
+						WHERE id_po = '$id_po'";
+					mysqli_query($koneksi, $sql_update);
+				}
+			}
+			
+			echo json_encode([
+				"success" => $success,
+				"message" => $apiResponse['mssg'] ?? ($success ? "Berhasil" : "Gagal tanpa pesan"),
+				"sent"    => $resultDataLog
+			], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	}
 
 
 // ================= PO WH =================
-	if ($_GET['type'] == "ReadWH"){
-		$cari = trim($_GET['cari']);
-		$hal = $_GET['hal'];
+	else if ($_GET['type'] == "ReadWH"){
+		$cari 	= trim($_GET['cari']);
+		$hal 	= $_GET['hal'];
 		$paging = $_GET['paging'];
 		
 		$data = '<table class="table table-hover table-striped" style="width:100%">
@@ -1751,10 +1989,11 @@ $m_exe = $rq['m_exe'];
 						<th width="10%" style="text-align: center;">CODE PR</th>
 						<th width="10%" style="text-align: center;">CODE PO</th>
 						<th width="7%" style="text-align: center;">REQ DATE</th>
-						<th width="15%" style="text-align: center;">USER REQ</th>					
-						<th width="7%" style="text-align: center;">BUYER</th>					
+						<th width="15%" style="text-align: center;">VENDOR NAME</th>
+						<th width="7%" style="text-align: center;">ACC </br> NAME</th>
 						<th width="7%" style="text-align: center;">PAYMENT</th>					
 						<th width="35%" style="text-align: center;">REMARK</th>			
+						<th width="10%" style="text-align: center;">TOTAL</th>			
 						<th rowspan="2" width="5%" style="text-align: center;">STATUS</th>	
 						<th width="5%" style="text-align: center;">EXEC</th>				
 					</tr>
@@ -1768,66 +2007,96 @@ $m_exe = $rq['m_exe'];
 		$jmlperhalaman = $paging;
 		$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 		$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 	
-		$SQL = "SELECT 
-					tr_po.*,
-					sap_project.kode_project,
-					m_cust_tr.nama_cust
-				FROM tr_po 
-				LEFT JOIN sap_project ON sap_project.rowid = tr_po.sap_project
-				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = tr_po.user_req
-				WHERE tr_po.code_po LIKE '%$cari%'
-				AND tr_po.code_po LIKE '%POWH%'
-				ORDER BY tr_po.code_po DESC
-				LIMIT $offset, $jmlperhalaman";	
+		$data_partin = "SELECT 
+						tr_po.*,
+						sap_project.kode_project,
+						m_vendor_tr.nama_vendor,
+						SUM(tr_po_detail.total) AS total
+					FROM tr_po 
+					LEFT JOIN sap_project 
+						ON sap_project.rowid = tr_po.sap_project
+					LEFT JOIN m_vendor_tr 
+						ON m_vendor_tr.id_vendor = tr_po.user_req
+					LEFT JOIN tr_po_detail 
+						ON tr_po_detail.code_po = tr_po.code_po 
+						AND tr_po_detail.jenis = 'item'
+					WHERE tr_po.code_po LIKE '%$cari%'
+					AND tr_po.code_po LIKE '%POWH%'
+					GROUP BY tr_po.id_po
+					ORDER BY tr_po.code_po DESC
+					LIMIT $offset, $jmlperhalaman;
+					";	
 
-		$query = mysqli_query($koneksi, $SQL);	
+		$query = mysqli_query($koneksi, $data_partin);	
 		if (!$result = $query) {
 			exit(mysqli_error($koneksi));
 		}
 
 		if(mysqli_num_rows($result) > 0){
-			while($row = mysqli_fetch_assoc($result))
-			{	
+			while($row = mysqli_fetch_assoc($result)){	
 				$xy1	= "Edit|$row[id_po]";
 				$xy1	= base64_encode($xy1);
 				$link 	= "po_wh_data.php?id=$xy1";
 
-				if($row['status'] == '0')
-				{
+				$total  = number_format($row['total'], 0, ',', '.'); 
+
+				if($row['status'] == '0'){
 					$label = 'danger';
 					$status = 'In Progress';
 				}
-				else if($row['status'] == '1')
-				{
+				else if($row['status'] == '1'){
 					$label = 'success';
 					$status = 'Executed';
 				}
 
+				$id_po = $row['id_po'];
+				$q_checkGR = "SELECT 
+						m_part_masuk.no_grpo
+					FROM m_part_masuk 
+					INNER JOIN tr_po ON tr_po.code_po = m_part_masuk.no_po
+					WHERE tr_po.id_po = '$id_po'
+						AND m_part_masuk.no_grpo IS NOT NULL
+				";
+
+				$r_checkGR = mysqli_query($koneksi, $q_checkGR);
+
+				if (!$r_checkGR) {
+					die("Query GR gagal: " . mysqli_error($koneksi) . " | SQL: " . $q_checkGR);
+				}
+
+				$d_checkGR = mysqli_fetch_array($r_checkGR);
+				$ada_grpo = $d_checkGR ? '1' : '0';
+
+
 				$posisi++;		
 				$data .= '<tr><td style="text-align:center">'.$posisi.'.</td>';
-				if ($row['no_sap']!= null && $row['status'] === '1' && $row['no_ap']!= null) {
+
+				if ($row['status'] === '1' && $row['no_ap']!= null) {
 					$data .= '<td style="text-align:center">
 						'.$row['kode_project'].'<br>
 						PO '.$row['no_sap'].'<br>
 						AP '.$row['no_ap'].'
 					</td>';
-				}elseif ($row['no_sap'] === null && $row['status'] === '1'){
+				}elseif ($row['no_sap'] === null){
 					$data .= '<td style="text-align:center">
 						'.$row['kode_project'].'<br>
 						<a href="javascript:void(0);" onclick="TampilUpSAP(\''.$row['id_po'].'\')">Send PO <br>
 						</a>
 						'.$row['no_sap'].'
 					</td>';
-				} elseif ($row['no_sap'] != null && $row['status'] === '1' && $row['no_ap'] === null) {
+				} 
+				elseif ($row['status'] == '1' && $row['no_ap'] == null && $row['grpo'] == '1') {
 					$data .= '<td style="text-align:center">
 						'.$row['kode_project'].'<br>
 						PO '.$row['no_sap'].'<br>
 						<a href="javascript:void(0);" onclick="TampilUpAP(\''.$row['id_po'].'\')">Send AP<br>
 						</a>
 					</td>';
-				} else{
+				}
+				 else{
 					$data .= '<td style="text-align:center">
 						'.$row['kode_project'].'
+						PO '.$row['no_sap'].'<br>
 					</td>';
 				}
 
@@ -1835,10 +2104,11 @@ $m_exe = $rq['m_exe'];
 					<td style="text-align:center">'.$row['code_pr'].'</td>
 					<td style="text-align:center"><a href="'.$link.'">'.$row['code_po'].'</a></td>
 					<td style="text-align:center">'.$row['delivery_date'].'</td>
-					<td style="text-align:center">'.$row['nama_cust'].'</td>
+					<td style="text-align:center">'.$row['nama_vendor'].'</td>
 					<td style="text-align:center">'.$row['buyer'].'</td>
 					<td style="text-align:center">'.$row['payment'].'</td>
 					<td style="text-align:center">'.$row['remark'].'</td>
+					<td style="text-align:center">'.$total.'</td>
 					<td style="text-align:center">
 						<button type="button" class="btn btn-'.$label.'" style="width:100%;padding:1px;margin:-3px">'.$status.'</button>
 					</td>';
@@ -1855,8 +2125,7 @@ $m_exe = $rq['m_exe'];
 				$number++;
 			}		
 		}
-		else
-		{
+		else{
 			$data .= '<tr><td colspan="9" style="text-align:center">Records not found!</td></tr>';
 		}
 		$data .= '</table>';
@@ -1906,4 +2175,160 @@ $m_exe = $rq['m_exe'];
 					
 		echo $data;
 	}
+
+	else if ($_GET['type'] == "ListVendor"){
+		$cari = $_GET['cari'];
+
+		$data = '<table class="table table-hover table-striped" style="width:100%">
+				<thead style="font-weight:500px !important">
+					<tr>
+						<th width="5%" style="text-align: center;">NO</th>
+						<th width="15%" style="text-align: center;">Code Vendor</th>
+						<th width="70%" style="text-align: center;">Nama Vendor</th>
+						<th width="10%" style="text-align: center;">ADD</th>
+					</tr>
+				</thead>';	
+		$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
+		$posisi = (($page * $jmlperhalaman) - $jmlperhalaman);
+		
+		$SQL = "SELECT *
+				FROM m_vendor_tr 
+				WHERE nama_vendor LIKE '%$cari%'
+					AND `status` = '1'
+					AND caption IS NOT NULL
+				ORDER BY nama_vendor DESC";
+		
+		$query = mysqli_query($koneksi, $SQL);	
+		if (!$result = $query) {
+			exit(mysqli_error($koneksi));
+		}
+		if(mysqli_num_rows($result) > 0)
+		{
+			while($row = mysqli_fetch_assoc($result))
+			{	
+				$posisi++;
+				$data .= '<tr>';		
+				$data .= '<td style="text-align:center">'.$posisi.'.</td>';
+				$data .= '<td style="text-align:center"><a href="#" onclick="PilihVendor('.$row['id_vendor'].')" >'.$row['caption'].'</a></td>';
+				$data .= '<td style="text-align:left"><a href="#" onclick="PilihVendor('.$row['id_vendor'].')" >'.$row['nama_vendor'].'</a></td>';
+				$data .= '<td style="text-align:center">
+						<button type="button" class="btn btn-default" onClick="javascript:PilihVendor('.$row['id_vendor'].')" 
+						style="margin:-3px;width:100%;padding:1px;border-radius:1px"><span class="fa  fa-plus-square"></span></button>
+						</td>';		
+				$data .='</tr>';
+			}		
+		}
+		else
+		{
+			$data .= '<tr><td colspan="7"></td></tr>';
+		}
+		$data .= '</table>';
+		echo $data;		
+		
+
+	}
+	else if ($_POST['type'] == "DetilVendor"){
+
+		// echo "<pre>";
+		// print_r($_POST);
+		// echo "</pre>";
+		// exit;
+
+		$id = $_POST['id_vendor'];
+
+		$query = "SELECT 
+					m_vendor_tr.*,
+					CONCAT(m_vendor_bank_tr.nama_bank, '-', m_vendor_bank_tr.no_rek) AS payment,
+					m_vendor_bank_tr.nama_rek
+				FROM m_vendor_tr 
+				LEFT JOIN m_vendor_bank_tr ON m_vendor_bank_tr.caption = m_vendor_tr.caption
+				WHERE m_vendor_tr.id_vendor = '$id'";
+
+		if (!$result = mysqli_query($koneksi, $query)) {
+			exit(mysqli_error($koneksi));
+		}
+		$response = array();
+		if(mysqli_num_rows($result) > 0) {
+			while ($row = mysqli_fetch_assoc($result)) {
+				$response = $row;
+			}
+		}
+		else
+		{
+			$response['status'] = 200;
+			$response['message'] = "Data not found!";
+		}
+		echo json_encode($response);
+
+	}
+
+	else if ($_POST['type'] == "ConfimAP") {
+		$id_po_ap = $_POST['id_po_ap'] ?? '';
+		$no_ap = $_POST['no_ap'] ?? '';
+
+		if (empty($id_po_ap) || empty($no_ap)) {
+			echo json_encode([
+				"success" => false,
+				"message" => "Data tidak lengkap (id_po_ap / no_ap kosong)"
+			]);
+			exit;
+		}
+
+		$u_po = "UPDATE tr_po SET no_ap = '$no_ap' WHERE id_po = '$id_po_ap'";
+		$update = mysqli_query($koneksi, $u_po);
+
+		if ($update) {
+			echo json_encode([
+				"success" => true,
+				"message" => "Nomor AP berhasil dikonfirmasi"
+			]);
+		} else {
+			echo json_encode([
+				"success" => false,
+				"message" => "Gagal update: " . mysqli_error($koneksi)
+			]);
+		}
+		exit;
+	}
+
+
+	else if ($_POST['type'] == "DelDetail") {
+		$id_detail = (int)$_POST['id_detail'];
+
+		$q_po = "SELECT * FROM tr_po_detail WHERE id = $id_detail";
+		$r_po_select = mysqli_query($koneksi, $q_po);
+		$d_po = mysqli_fetch_array($r_po_select);
+
+		if (!$d_po) {
+			echo json_encode(['status' => 'error', 'message' => 'Data detail PO tidak ditemukan']);
+			exit;
+		}
+
+		$id_pr_detail = (int)$d_po['id_pr_detail'];
+		$qty_pr = (float)$d_po['qty'];
+
+		// Update qty_close di PR detail
+		$update_pr = "UPDATE tr_pr_detail 
+					SET qty_close = qty_close + $qty_pr 
+					WHERE id_detail = $id_pr_detail";
+		$r_pr = mysqli_query($koneksi, $update_pr);
+
+		if (!$r_pr) {
+			echo json_encode(['status' => 'error', 'message' => 'Gagal update qty_close pada PR detail']);
+			exit;
+		}
+
+		// Hapus PO detail
+		$del_po = "DELETE FROM tr_po_detail WHERE id = $id_detail";
+		$r_po_delete = mysqli_query($koneksi, $del_po);
+
+		if (!$r_po_delete) {
+			echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus detail PO']);
+		} else {
+			echo json_encode(['status' => 'success', 'message' => 'Detail PO berhasil dihapus']);
+		}
+	}
+
+
+
 ?>

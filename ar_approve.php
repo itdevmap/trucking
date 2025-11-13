@@ -1,23 +1,31 @@
 <?php
-include "koneksi.php"; 
+    include "koneksi.php"; 
 
-$urlPath = $_SERVER['REQUEST_URI'];
-$parts   = explode('/', trim($urlPath, '/'));
-$no_ar  = end($parts);
+    $no_doc = $_GET['no_doc'] ?? null;
 
-$q_quo  = "UPDATE tr_jo 
-            SET `flag_ar` = 1 
-          WHERE no_ar = '$no_ar'";
-$hasil = mysqli_query($koneksi, $q_quo);
+    $no_doc     = mysqli_real_escape_string($koneksi, $no_doc);
+    $userAgent  = $_SERVER['HTTP_USER_AGENT'];
+    
+    $q_quo  = "UPDATE tr_jo 
+                SET `flag_ar` = 1 
+                WHERE no_ar = '$no_doc'";
+    $hasil   = mysqli_query($koneksi, $q_quo);
+    $success = $hasil ? true : false;
+    $success = $hasil ? true : false;
 
-$success = $hasil ? true : false;
+    // =============== LOG APPROVAL ===============
+    $q_approval   = "INSERT INTO tr_approval_logs
+                    (no_doc, keterangan, device)
+                VALUES 
+                    ('$no_doc','Approve Print AR','$userAgent')";
+    mysqli_query($koneksi, $q_approval);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Approve AR</title>
+    <title>Approve</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {

@@ -3,7 +3,7 @@
     include "koneksi.php"; 
     include "session_log.php";
 
-    $pq = mysqli_query($koneksi,"SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='64' ");
+    $pq = mysqli_query($koneksi,"SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='64'");
 
     $rq=mysqli_fetch_array($pq);	
     $m_edit = $rq['m_edit'];
@@ -24,7 +24,6 @@
         $paging='15';
         $hal='1';
     }
-
 ?>
 
 <html>
@@ -52,7 +51,7 @@
 		.datepicker{z-index:1151 !important;}
 	</style>
 	<script>
-        // ----------------- READ DATA -----------------
+        // ============== READ DATA ==============
             $(document).ready(function () {
                 var hal = $("#hal").val();
                 ReadData(hal);
@@ -98,7 +97,7 @@
                             
             }
 
-        // ----------------- SHOW MODAL -----------------
+        // ============== SHOW MODAL ==============
             function TampilData() {
                 $("#mode").val('Add');
                 $('#Data').modal('show');
@@ -133,7 +132,7 @@
                 $("#DaftarSJ").modal("hide");
             }
 
-        // ----------------- FORMAT RUPIAH -----------------
+        // ============== FORMAT RUPIAH ==============
             function Desimal(num) {
                 num = num.toString().replace(/\$|\,/g,'');
                 if(isNaN(num))
@@ -158,7 +157,7 @@
                 return true;
             }
 
-        // ----------------- EDIT DATA -----------------
+        // ============== EDIT DATA ==============
             function GetData(id) {
                 $("#id").val(id);	
                 $.post("ajax/route_crud.php", {
@@ -183,7 +182,7 @@
                 $("#Data").modal("show");
             }
 
-        // ----------------- STORE/UPDATE DATA -----------------
+        // ============== STORE/UPDATE DATA ==============
             function addSJ() {
                 var r = confirm("Are you sure ?...");
                 if (r == true) {	
@@ -204,18 +203,15 @@
                     $.post("ajax/sj_crud.php", {
                         id:id,
                         mode:mode,
-                        
                         no_jo:no_jo,
                         project_code:project_code,
                         no_do:no_do,
-
                         route:route,
                         container:container,
                         seal:seal,
                         id_mobil:id_mobilx,
                         id_supir:id_supirx,
                         desc:desc,
-                        
                         type : "Add_Data"
                     }, function (data, status) {
                         alert(data);
@@ -255,15 +251,15 @@
             }
             
         // ============== FUNCTION ADD ATTACHMENT ==============
-			function AddAttc(id_jo) {
-				$('#id_jo_attc').val(id_jo);
+			function AddAttc(id_sj) {
+				$('#id_sj_attc').val(id_sj);
 				$('.view_sj').attr('href', '#').text('-');
 
 				$('#DataAttc').modal('show');
 				$.ajax({
 					url: 'ajax/get_attachment_by_idjo.php',
 					method: 'POST',
-					data: { id_jo: id_jo },
+					data: { id_sj: id_sj, Type : "SJ" },
 					dataType: 'json',
 					success: function (res) {
 						if (res.status === 200) {
@@ -287,7 +283,7 @@
 				var formData = new FormData(document.getElementById('form_attachment'));
 
 				$.ajax({
-					url: 'upload_attachment.php',
+					url: 'upload_attach_sj.php',
 					type: 'POST',
 					data: formData,
 					contentType: false,
@@ -419,6 +415,26 @@
 				});
 			}
 
+        // ============== CLAIM UJ ==============
+            function Edit(id_sj) {
+                $("#id").val(id_sj);
+                $("#mode").val('Edit');
+                $("#Data").modal("show");
+                $.post("ajax/sj_crud.php", { id_sj: id_sj, type:"EditSJ" }, function (res){
+                    var data = JSON.parse(res);
+                    $("#no_jo").val(data.no_jo);
+                    $("#project_code").val(data.project_code);
+                    $("#nama_cust").val(data.nama_cust);
+                    $("#penerima").val(data.penerima);
+                    $("#route").val(data.route);
+                    $("#container").val(data.container);
+                    $("#seal").val(data.seal);
+                    $("#id_mobilx").val(data.id_mobil);
+                    $("#id_supirx").val(data.id_supir);
+                    $("#desc").val(data.keterangan);
+
+                });
+            }
     </script>
 	
   </head>
@@ -521,18 +537,19 @@
                                 </div>	
                                 <br>
                                 
-                                <input type="hidden" id="id" value=""/>	
-                                <input type="hidden" id="mode" value=""/>
+                                <input type="text" id="id" value=""/>	
+                                <input type="text" id="mode" value=""/>
 
                                 <div style="width:100%;" class="input-group">
                                     <span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No JO :</b></span>
                                     <input type="text"  id ="no_jo" name="no_jo" value="<?php echo $no_jo;?>" style="text-align: left;width:70%" readonly  >
-                                    <button class="btn btn-block btn-primary" id="btn_custx"
+                                    <button class="btn btn-block btn-primary" id="
+                                    "
                                         style="padding:6px 12px 6px 12px;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" 
                                         onClick="javascript:TampilSO()" <?php echo $disx;?> >
                                         <span class="glyphicon glyphicon-search"></span>
                                     </button>
-                                    <input type="hidden" id="id_cust"  name="id_cust" value="<?php echo $id_cust;?>" 
+                                    <input type="hidden" id="id_cust" name="id_cust" value="<?php echo $id_cust;?>" 
                                     style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />		
                                 </div>
                                 <div style="width:100%;" class="input-group">
@@ -667,7 +684,7 @@
 									<b><i class="fa fa-list"></i>&nbsp;Add Attachment</b>
 								</div>
 								<form id="form_attachment" enctype="multipart/form-data" style="margin-top: 2rem;">
-									<input type="hidden" id="id_jo_attc" name="id_jo">
+									<input type="hidden" id="id_sj_attc" name="id_sj">
 									<div class="form-group mt-3">
 										<label for=""><b>File SJ:</b></label>
 										<input type="file" class="form-control" id="file_sj" name="file_sj">

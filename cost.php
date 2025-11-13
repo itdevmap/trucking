@@ -60,7 +60,6 @@
 			ReadData(hal);
 		});
 		function ReadData(hal) {
-			
 			var cari = $("#search_name").val();
 			var paging = $("#paging").val();	
 			$.get("ajax/cost_crud.php", {paging:paging,cari:cari,hal:hal, type:"Read" }, function (data, status) {
@@ -79,12 +78,14 @@
 					$("#stat").val(data.status);
 					$("#itemcode").val(data.itemcode);
 					$("#sap_coa").val(data.sap_coa);
+					$("#sap_coa_af").val(data.sap_coa_af);
 					$("#sap_corporate").val(data.sap_corporate);
 					$("#sap_divisi").val(data.sap_divisi);
 					$("#sap_dept").val(data.sap_dept);
 					$("#sap_activity").val(data.sap_activity);
 					$("#sap_location").val(data.sap_location);
 					$("#item_pph").val(data.item_pph);
+					$("#uom").val(data.uom);
 					$("#mode").val('Edit');
 				}
 			);
@@ -95,21 +96,22 @@
 			if(!$("#cost_name").val()){
 				alert("Cost Name must fill !..");
 			}
-			else
-			{
+			else{
 				var r = confirm("Are you sure ?...");
 				if (r == true) {	
-					var id = $("#id").val();
-					var cost_name = $("#cost_name").val();
-					var item_pph = $("#item_pph").val();
-					var stat = $("#stat").val();
+					var id 			= $("#id").val();
+					var cost_name 	= $("#cost_name").val();
+					var item_pph 	= $("#item_pph").val();
+					var stat 		= $("#stat").val();
+					var uom 		= $("#uom").val();
 
-					var sap_coa = $("#sap_coa").val();
-					var sap_corporate = $("#sap_corporate").val();
-					var sap_divisi = $("#sap_divisi").val();
-					var sap_dept = $("#sap_dept").val();
-					var sap_activity = $("#sap_activity").val();
-					var sap_location = $("#sap_location").val();
+					var sap_coa 		= $("#sap_coa").val();
+					var sap_coa_af 		= $("#sap_coa_af").val();
+					var sap_corporate 	= $("#sap_corporate").val();
+					var sap_divisi 		= $("#sap_divisi").val();
+					var sap_dept 		= $("#sap_dept").val();
+					var sap_activity 	= $("#sap_activity").val();
+					var sap_location 	= $("#sap_location").val();
 
 					var mode = $("#mode").val();
 					var hal = $("#hal").val();
@@ -120,7 +122,9 @@
 						mode:mode,
 						item_pph:item_pph,
 						stat:stat,
+						uom:uom,
 						sap_coa:sap_coa,
+						sap_coa_af:sap_coa_af,
 						sap_corporate:sap_corporate,
 						sap_divisi:sap_divisi,
 						sap_dept:sap_dept,
@@ -196,12 +200,12 @@
 					<div style="width:100%;background: #fff;" class="input-group" >
 						<span class="input-group-addon" style="width:50%;text-align:left;padding:0px">
 							<?php if ($m_add == '1'){?>
-							<!-- <button class="btn btn-block btn-success" 
+							<button class="btn btn-block btn-success" 
 								style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:2px" type="button" 
 								onClick="javascript:TampilData()">
 								<span class="fa  fa-plus-square"></span>
 								<b>Add New</b>
-							</button>	 -->
+							</button>	
 							<?php }?>								
 						</span>
 						<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
@@ -259,12 +263,20 @@
 							</div>	
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Cost Name :</b></span>
-								<input type="text" id="cost_name"  value="" style="text-transform: uppercase;text-align: left;width:75%;border:1px solid rgb(169, 169, 169)"/>	
+								<input type="text" id="cost_name"  value="" style="text-transform: uppercase;text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" readonly/>	
+							</div>	
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>UoM :</b></span>
+								<input type="text" id="uom"  value="" style="text-transform: uppercase;text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" readonly/>	
 							</div>	
 
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP COA :</b></span>
 								<input type="text" id="sap_coa"  value="" style="text-transform: uppercase; text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP COA AF:</b></span>
+								<input type="text" id="sap_coa_af"  value="" style="text-transform: uppercase; text-align: left;width:75%;border:1px solid rgb(169, 169, 169)" />	
 							</div>
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Corporate :</b></span>

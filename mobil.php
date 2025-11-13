@@ -1,36 +1,34 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	include "lib.php";
 
-$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='11' ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+	$pq 	= mysqli_query($koneksi, "SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='11' ");
+	$rq=mysqli_fetch_array($pq);	
 
-if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
- header('location:logout.php'); 
-}
+	$m_edit = $rq['m_edit'];
+	$m_add 	= $rq['m_add'];
+	$m_del 	= $rq['m_del'];
+	$m_view = $rq['m_view'];
+	$m_exe 	= $rq['m_exe'];
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{	
-	$hal = $_POST['hal'];
-	$field = $_POST['field'];
-	$search_name = $_POST['search_name'];
-	$paging = $_POST['paging'];
-	$status = $_POST['status'];
-}
-else
-{	
-	$paging='25';
-	$hal='1';
-	$field = 'No. Polisi';
-	$status='All';
-}
+	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
+		header('location:logout.php'); 
+	}
+
+	if($_SERVER['REQUEST_METHOD'] == "POST"){	
+		$hal = $_POST['hal'];
+		$field = $_POST['field'];
+		$search_name = $_POST['search_name'];
+		$paging = $_POST['paging'];
+		$status = $_POST['status'];
+	}else{	
+		$paging='25';
+		$hal='1';
+		$field = 'No. Polisi';
+		$status='All';
+	}
 
 ?>
 
@@ -122,8 +120,7 @@ else
 				$("#hal").val(hal);
 			});
 		}
-		function TampilData() 
-		{
+		function TampilData(){
 			var today = new Date();
 			var dd = today.getDate();
 			var mm = today.getMonth()+1; 
@@ -155,6 +152,8 @@ else
 			$("#bbm").val('');
 			$("#berat_max").val('');
 			$("#no_reg").val('');
+			$("#asuransi").val('');
+			$("#pajak").val('');
 			$("#mode").val('Add');
 			$('#Data').modal('show');
 			document.getElementById("id_supir").disabled = false;
@@ -183,30 +182,33 @@ else
 			if(!$("#no_polisi").val()){
 				alert("No. Polisi harus diisi !..");
 			}
-			else
-			{
-				var id = $("#id").val();
-				var no_polisi = $("#no_polisi").val();
-				var tgl_stnk = $("#tgl_stnk").val();
-				var tgl_kir = $("#tgl_kir").val();
-				var tgl_card = $("#tgl_card").val();
-				var merk = $("#merk").val();
-				var tahun_buat = $("#tahun_buat").val();
+			else{
+				var id 			= $("#id").val();
+				var no_polisi 	= $("#no_polisi").val();
+				var tgl_stnk 	= $("#tgl_stnk").val();
+				var tgl_kir 	= $("#tgl_kir").val();
+				var tgl_card 	= $("#tgl_card").val();
+				var merk 		= $("#merk").val();
+				var tahun_buat 	= $("#tahun_buat").val();
 				var tahun_rakit = $("#tahun_rakit").val();
-				var silinder = $("#silinder").val();
+				var silinder 	= $("#silinder").val();
 				var warna_truck = $("#warna_truck").val();
-				var no_rangka = $("#no_rangka").val();
-				var no_mesin = $("#no_mesin").val();
-				var no_bpkb = $("#no_bpkb").val();
-				var no_kabin = $("#no_kabin").val();
-				var iden = $("#iden").val();
-				var warna_tnkb = $("#warna_tnkb").val();
-				var bbm = $("#bbm").val();
-				var berat_max = $("#berat_max").val();
-				var no_reg = $("#no_reg").val();
-				var stat = $("#stat").val();
-				var mode = $("#mode").val();
-				var hal = $("#hal").val();
+				var no_rangka 	= $("#no_rangka").val();
+				var no_mesin 	= $("#no_mesin").val();
+				var no_bpkb 	= $("#no_bpkb").val();
+				var no_kabin 	= $("#no_kabin").val();
+				var iden 		= $("#iden").val();
+				var warna_tnkb 	= $("#warna_tnkb").val();
+				var bbm 		= $("#bbm").val();
+				var berat_max 	= $("#berat_max").val();
+				var no_reg 		= $("#no_reg").val();
+				var stat 		= $("#stat").val();
+				var mode 		= $("#mode").val();
+				var hal 		= $("#hal").val();
+
+				var asuransi = $("#asuransi").val();
+				var pajak 	 = $("#pajak").val();
+
 				$.post("ajax/mobil_crud.php", {
 					id:id,
 					no_polisi:no_polisi,
@@ -229,6 +231,10 @@ else
 					no_reg:no_reg,					
 					mode:mode,
 					stat:stat,
+
+					asuransi:asuransi,
+					pajak:pajak,
+
 					type : "add"
 					}, function (data, status) {
 					alert(data);
@@ -263,6 +269,10 @@ else
 					$("#berat_max").val(data.berat_max);
 					$("#no_reg").val(data.no_reg);
 					$("#stat").val(data.status);
+
+					$("#asuransi").val(data.asuransi);
+					$("#pajak").val(data.pajak);
+					
 					$("#mode").val('Edit');		
 				}
 			);
@@ -369,110 +379,111 @@ else
 		
 		
 		<form method="post" name ="myform" action="mobil.php?action=cari" class="form-horizontal" > 
-		<div class="content-wrapper" style="min-height:750px">
-			<br>
-			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Car Data</b></font></h1></li>					
-			</ol>
-			<br>
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
-					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-							<b><i class="fa fa-search"></i>&nbsp;Filter Data</b>
+			<div class="content-wrapper" style="min-height:750px">
+				<br>
+				<ol class="breadcrumb">
+					<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Car Data</b></font></h1></li>					
+				</ol>
+				<br>
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
+						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+								<b><i class="fa fa-search"></i>&nbsp;Filter Data</b>
+						</div>
+						<br>		
+							
+						<div style="width:100%" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Filter Data :</b></span>
+							<select size="1" id="field"  name="field" style="padding:4px;margin-right:3px;width: 85px" onchange="ReadData(1)">
+								<option>No. Police</option>
+								<option>Brand</option>
+								<option>Year</option>
+								<option value="<?php echo $field; ?>" selected hidden><?php echo $field; ?></option>
+							</select>
+							<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
+							style="text-align: left;margin-left:0px;width:200px" onkeypress="ReadData(1)" >
+							<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >						
+							<button class="btn btn-block btn-primary" 
+								style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding:6px" type="submit" 
+								onClick="window.location.href = 'paket_data.php?id=<?php echo $xy1; ?>' ">
+								<span class="glyphicon glyphicon-search"></span>
+							</button>
+						</div>
+						<br>	
 					</div>
-					<br>		
-						
-					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Filter Data :</b></span>
-						<select size="1" id="field"  name="field" style="padding:4px;margin-right:3px;width: 85px" onchange="ReadData(1)">
-							<option>No. Police</option>
-							<option>Brand</option>
-							<option>Year</option>
-							<option value="<?php echo $field; ?>" selected hidden><?php echo $field; ?></option>
-						</select>
-						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
-						style="text-align: left;margin-left:0px;width:200px" onkeypress="ReadData(1)" >
-						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >						
-						<button class="btn btn-block btn-primary" 
-							style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding:6px" type="submit" 
-							onClick="window.location.href = 'paket_data.php?id=<?php echo $xy1; ?>' ">
-							<span class="glyphicon glyphicon-search"></span>
-						</button>
-					</div>
-					<br>	
 				</div>
-            </div>
-			
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
-					<div style="width:100%;background: #fff;" class="input-group" >
-						<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background:#fff;">
-							<?php if ($m_add == '1'){?>
-							<button class="btn btn-block btn-success" 
-								style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:3px" type="button" 
-								onClick="javascript:TampilData()">
-								<span class="fa  fa-plus-square"></span>
-								<b>Add New</b>
-							</button>	
-							<?php }?>
-						</span>
-						<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
-						Row Page :&nbsp;
-						<select size="1" id="paging"  name="paging" onchange="Tampil()" style="padding:4px;margin-right:2px">
-							<?php 
-							$tampil1="select * from m_paging  order by baris";
-							$hasil1=mysqli_query($koneksi, $tampil1);       
-							while ($data1=mysqli_fetch_array($hasil1)){  
-							?>
-							<option><?php echo $data1['baris'];?></option>
-							<?php }?>
-							<option value="<?php echo $paging; ?>" selected><?php echo $paging; ?></option>
-						</select>	
-						</span>	
-					</div>		
-				</div>
-            </div>			
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
-					<div class="table-responsive mailbox-messages" style="min-height:10px">									
-						<div class="tampil_data"></div>
+				
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
+						<div style="width:100%;background: #fff;" class="input-group" >
+							<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background:#fff;">
+								<?php if ($m_add == '1'){?>
+								<button class="btn btn-block btn-success" 
+									style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:3px" type="button" 
+									onClick="javascript:TampilData()">
+									<span class="fa  fa-plus-square"></span>
+									<b>Add New</b>
+								</button>	
+								<?php }?>
+							</span>
+							<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
+							Row Page :&nbsp;
+							<select size="1" id="paging"  name="paging" onchange="Tampil()" style="padding:4px;margin-right:2px">
+								<?php 
+								$tampil1="select * from m_paging  order by baris";
+								$hasil1=mysqli_query($koneksi, $tampil1);       
+								while ($data1=mysqli_fetch_array($hasil1)){  
+								?>
+								<option><?php echo $data1['baris'];?></option>
+								<?php }?>
+								<option value="<?php echo $paging; ?>" selected><?php echo $paging; ?></option>
+							</select>	
+							</span>	
+						</div>		
 					</div>
-				</div>	
-            </div>
-			<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
+				</div>			
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
+						<div class="table-responsive mailbox-messages" style="min-height:10px">									
+							<div class="tampil_data"></div>
+						</div>
+					</div>	
 				</div>
 				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-		</div>		
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+			</div>		
 		</form>
 	</div>	
 	
-		<div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
+	<!-- =================== ADD DATA MOBIL =================== -->
+	<div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">
 				<div class="modal-body">
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Car Data</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Car Data XXX</b>
 							</div>	
 							<br>
+							<input type="hidden" id="id"/>	
+							<input type="hidden" id="mode"/>	
+							<input type="hidden" id="tgl_card"/>	
+							<input type="hidden" id ="no_reg" name="no_reg" >
+							<input type="hidden" id ="iden" name="iden" >
+							<input type="hidden" id ="no_kabin" name="no_kabin">
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No. Police :</b></span>
 								<input type="text"  id ="no_polisi" name="no_polisi" value="" maxlength="15"
 								style="text-transform: uppercase;text-align: center;width:22%"  >	
-								<input type="hidden" id="id"   value=""  />	
-								<input type="hidden" id="mode"   value=""  />	
-								<input type="hidden" id="tgl_card"  value="" style="text-align: center;width:22%;border:1px solid rgb(169, 169, 169);background:#eee" readonly />	
-								<input type="hidden"  id ="no_reg" name="no_reg" value="" 
-								style="text-transform: uppercase;text-align: left;width:50%"  >
-								<input type="hidden"  id ="iden" name="iden" value="" 
-								style="text-transform: uppercase;text-align: left;width:85%" >
 							</div>	
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;"><b>Brand/Type :</b></span>
@@ -515,8 +526,7 @@ else
 								<span class="input-group-addon" style="text-align:right;"><b>No. BPKB :</b></span>
 								<input type="text"  id ="no_bpkb" name="no_bpkb" value="" 
 								style="text-transform: uppercase;text-align: left;width:85%"  >
-								<input type="hidden"  id ="no_kabin" name="no_kabin" value="" 
-								style="text-transform: uppercase;text-align: left;width:85%" >
+								
 							</div>							
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;"><b>Color TNKB :</b></span>
@@ -527,7 +537,7 @@ else
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Fuel :</b></span>
 								<select id="bbm" name="bbm" style="width: 85%;" <? echo $dis;?>>
 									<?php
-									$t1="select * from m_bbm order by nama ";
+									$t1="SELECT * from m_bbm order by nama ";
 									$h1=mysqli_query($koneksi, $t1);       
 									while ($d1=mysqli_fetch_array($h1)){?>
 										<option ><?php echo $d1['nama'];?></option>
@@ -547,6 +557,16 @@ else
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Validity Period KIR :</b></span>
 								<input type="text" id="tgl_kir"  value="" style="text-align: center;width:22%;border:1px solid rgb(169, 169, 169);background:#eee" readonly />	
 							</div>
+
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Validity  Insurance :</b></span>
+								<input type="date" id="asuransi" style="text-align: center;width:22%;border:1px solid rgb(169, 169, 169);background:#eee" />	
+							</div>
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Validity Period Tax :</b></span>
+								<input type="date" id="pajak" style="text-align: center;width:22%;border:1px solid rgb(169, 169, 169);background:#eee" />	
+							</div>
+
 							<div style="width:100%;" class="input-group">
 								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Status :</b></span>
 								<select id="stat"  style="width: 80%;padding:4px">
@@ -568,7 +588,7 @@ else
 		</div>	
     </div>
 	
-		<div class="modal fade" id="DataPhoto"  role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal fade" id="DataPhoto"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">
 				<div class="modal-body">	

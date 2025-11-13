@@ -15,6 +15,7 @@
 		// die();
 
 		$mode 		= $_POST['mode'];
+		$id_pr 		= $_POST['id_pr'];
 
 		$tgl 		= date('Y-m-d');
 		$tgl_pr 	= $_POST['tgl_pr'];
@@ -62,16 +63,18 @@
 			$id_pr = $row['id_pr'];
 
 		}else{
-			$sql = "UPDATE tr_pr SET
+			$sql	= "UPDATE tr_pr SET
 						tgl_pr = '$tgl_pr',
-						remark = '$remark',
+						remark = '$remark'
 					WHERE id_pr = '$id_pr'	";
-			$hasil=mysqli_query($koneksi,$sql);
+			// echo $sql;
+			// die();
+			$hasil 	= mysqli_query($koneksi,$sql);
 		}
 		
 		$cat ="Data saved...";
-		$xy1="Edit|$id_pr|$cat";
-		$xy1=base64_encode($xy1);
+		$xy1 = "Edit|$id_pr|$cat";
+		$xy1 = base64_encode($xy1);
 		header("Location: pr_data.php?id=$xy1");
 	}else{
 
@@ -377,7 +380,7 @@
 			}
 			function ListItem() {
 				var cari = $("#cari_Item").val();
-				$.get("ajax/pr_crud.php", {cari:cari,  type:"ListItem" }, function (data, status) {
+				$.get("ajax/pr_crud.php", {cari:cari,  type:"ListItem" }, function (data, status){
 					$(".tampil_Item").html(data);
 				});
 			}
@@ -387,9 +390,10 @@
 					},
 					function (data, status) {
 						var data = JSON.parse(data);	
-						$("#item_rowid").val(data.rowid);
-						$("#name-item").val(data.sapitemcode);
-						$("#desc").val(data.sapitemname);
+						
+						$("#item_rowid").val(data.id_cost);
+						$("#name-item").val(data.itemcode);
+						$("#desc").val(data.nama_cost);
 						$("#uom").val(data.uom);
 					}
 				);
@@ -603,9 +607,9 @@
 
 				<div class="col-md-12" >
 					<div style="width:98%;background:none;margin-left:0;margin-top:0px;border-top:0px;border-bottom:0px" class="input-group">
-						<?php if($mode != 'Edit'){?>
-							<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save Request</b>&nbsp;&nbsp;</button>	
-						<?php }?>
+						
+						<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
+						
 						<button type="button" class="btn btn-danger" onclick="window.location.href='<?php echo $link; ?>'">
 							<span class="fa fa-backward"></span>&nbsp;&nbsp;<b>Back</b>
 						</button>	
@@ -761,7 +765,7 @@
 								<div style="width:100%" class="input-group" style="background:none !important;">
 									<span class="input-group-addon" style="width:80%;text-align:left;padding:0px">
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Search :</b>&nbsp;&nbsp;
-										<input type="text" id ="cari_Item" style="text-align: left;width:200px">
+										<input type="text" id="cari_Item" style="text-align:left;width:200px" oninput="ListItem()">
 
 										<button class="btn btn-block btn-primary" style="margin:0px;margin-left:-3px;margin-bottom:3px;border-radius:2px;padding:5px" onClick="javascript:ListItem()">
 											<span class="glyphicon glyphicon-search"></span>

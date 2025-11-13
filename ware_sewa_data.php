@@ -12,7 +12,7 @@
 		// echo "<pre>";
 		// print_r($_POST);
 		// echo "</pre>";
-		// die();
+		// exit;
 
 		$mode 		= $_POST['mode'];
 		$id_sewa 	= $_POST['id_sewa'];	
@@ -29,21 +29,22 @@
 		$uj 		= str_replace(",","", $uj);
 		$ritase 	= str_replace(",","", $ritase);
 		
-		if($mode == 'Add' )
-		{
-			$ptgl = explode("-", $tanggal);
-			$tg = $ptgl[0];
-			$bl = $ptgl[1];
-			$th = $ptgl[2];	
-			$query = "SELECT max(right(no_sewa,5)) as maxID FROM t_ware_sewa where   year(tanggal) = '$th'  ";
-			$hasil = mysqli_query($koneksi, $query);    
-			$data  = mysqli_fetch_array($hasil);
-			$idMax = $data['maxID'];
+		if($mode == 'Add' ){
+			$ptgl 	= explode("-", $tanggal);
+			$tg 	= $ptgl[0];
+			$bl 	= $ptgl[1];
+			$th 	= $ptgl[2];	
+			$query 	= "SELECT max(right(no_sewa,5)) AS maxID FROM t_ware_sewa WHERE year(tanggal) = '$th'";
+			$hasil 	= mysqli_query($koneksi, $query);    
+			$data  	= mysqli_fetch_array($hasil);
+			$idMax 	= $data['maxID'];
+
 			if ($idMax == '99999'){
 				$idMax='00000';
 			}
 			$noUrut = (int) $idMax;   
 			$noUrut++;  
+			
 			if(strlen($noUrut)=='1'){
 				$noUrut="0000$noUrut";
 				}elseif(strlen($noUrut)=='2'){
@@ -56,9 +57,57 @@
 			$year = substr($thn,2,2);
 			$no_sewa = "SO-$year$noUrut";
 			
-			$sql = "INSERT INTO  t_ware_sewa (sap_rowid, no_sewa, id_quo, id_cust,  ket, created, tanggal, id_cost) values
-					('$rowid', '$no_sewa',  '$id_quo', '$id_cust', '$ket', '$id_user', '$tanggalx', '$id_biaya')";
-			$hasil= mysqli_query($koneksi, $sql);
+			// ======== INSERT RENT ========
+			$q_insert_rent = "
+				INSERT INTO t_ware_sewa 
+					(sap_rowid, no_sewa, id_quo, id_cust, ket, created, tanggal, id_cost) 
+				VALUES 
+					('$rowid', '$no_sewa', '$id_quo', '$id_cust', '$ket', '$id_user', '$tanggalx', '$id_biaya')
+			";
+			$hasil = mysqli_query($koneksi, $q_insert_rent);
+			$id_sewa = mysqli_insert_id($koneksi);
+
+			$q_ware = "SELECT 
+					CONCAT(
+						DATE_FORMAT(t_ware_data.tanggal, '%d'), '.', 
+						DATE_FORMAT(t_ware_data.tanggal, '%m'), '.', 
+						t_ware_data_detil.no_cont
+					) AS batch,
+					t_ware_data.tanggal,
+					t_ware.kode,
+					t_ware.nama, 
+					t_ware_data_detil.masuk - t_ware_data_detil.keluar AS qty,
+					(t_ware_data_detil.masuk - t_ware_data_detil.keluar) * t_ware.vol AS cbm,
+					t_ware_quo.max_cbm,
+					t_ware_quo.harga_sewa
+				FROM t_ware
+				INNER JOIN t_ware_data_detil ON t_ware_data_detil.id_ware = t_ware.id_ware
+				INNER JOIN t_ware_data ON t_ware_data.id_data = t_ware_data_detil.id_data
+				INNER JOIN t_ware_quo ON t_ware_quo.id_quo = t_ware.id_quo
+				WHERE t_ware.id_quo = '$id_quo'
+				AND t_ware_data_detil.no_cont != ''";
+
+			// echo $q_ware;
+			// exit;
+			$r_ware = mysqli_query($koneksi, $q_ware);
+
+			while ($row = mysqli_fetch_assoc($r_ware)) {
+				$kode  		= $row['kode'];
+				$nama  		= $row['nama'];
+				$qty   		= $row['qty'];
+				$cbm   		= round($row['cbm'],2);
+				$batch 		= $row['batch'];
+				$tanggal 	= $row['tanggal'];
+				$max_cbm 	= $row['max_cbm'];
+				$harga_sewa = $row['harga_sewa'];
+
+				$q_insert_sewa_detail = "INSERT INTO t_ware_sewa_detail 
+						(id_sewa, tanggal, batch, itemcode, itemname, qty, cbm, max_cbm, harga_sewa)
+					VALUES 
+						('$id_sewa', '$tanggal', '$batch', '$kode', '$nama', '$qty', '$cbm','$max_cbm','$harga_sewa')
+				";
+				mysqli_query($koneksi, $q_insert_sewa_detail);
+			}
 			
 			if (!$hasil){
 				$cat ="Data Sewa Customer untuk Periode tersebut sudah terdaftar...";
@@ -66,14 +115,13 @@
 				$xy1=base64_encode($xy1);
 				header("Location: ware_sewa_data.php?id=$xy1");
 			}else{
-				
 				$sql = mysqli_query($koneksi, "SELECT max(id_sewa)as id from t_ware_sewa ");			
 				$row = mysqli_fetch_array($sql);
 				$id_sewa = $row['id'];
 			
-				$cat ="Data saved...";
-				$xy1="Edit|$id_sewa|$cat";
-				$xy1=base64_encode($xy1);
+				$cat = "Data saved...";
+				$xy1 = "Edit|$id_sewa|$cat";
+				$xy1=  base64_encode($xy1);
 				header("Location: ware_sewa_data.php?id=$xy1");
 			}
 		}else{
@@ -185,8 +233,8 @@
 			var id_quo = $("#id_quo").val();
 			var mode = $("#mode").val();
 			$.get("ajax/ware_crud.php", {mode:mode,id_sewa:id_sewa, id_quo:id_quo, type:"Read_Sewa_Data" }, function (data, status) {
-					$(".tampil_data").html(data);
-				});
+				$(".tampil_data").html(data);
+			});
 		}
 		function Rupiah(num) {
 			num = num.toString().replace(/\$|\,/g,'');
@@ -255,7 +303,7 @@
 			}	
 		}
 
-	// ============ SAP PROJECT ============
+		// ============ SAP PROJECT ============
 		function TampilSAP(){
 			$cari = $("#cari_SAP").val('');
 			ListSAP();
@@ -280,8 +328,6 @@
 			$("#DaftarSAP").modal("hide");
 		}
 
-
-		
     </script>
 	
   </head>
@@ -487,43 +533,43 @@
     </div>
 	
 	<!-- ========= MODAL SAP PROJECT ========= -->
-		<div class="modal fade" id="DaftarSAP"  role="dialog" aria-labelledby="myModalLabel">
-			<div class="modal-dialog" role="document">
-				<div class="modal-content" style="background: none">	
-					<div class="modal-body">						
-						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
-							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">
+	<div class="modal fade" id="DaftarSAP"  role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content" style="background: none">	
+				<div class="modal-body">						
+					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">
 
-								<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;text-align:left;padding:5px;">
-									<b><i class="fa fa-list"></i>&nbsp;Data SAP Project</b>
-								</div>
-
-								<div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
-									<label style="margin:0;width: 100px;"><b>Search :</b></label>
-									<input type="text" id="cari_SAP" name="cari_SAP" value="<?php echo $cari; ?>" style="width:40%" onkeypress="ListSAP()">
-
-									<button class="btn btn-primary" style="padding:6px 10px;" onClick="ListSAP()">
-										<span class="glyphicon glyphicon-search"></span> Search
-									</button>
-									<button class="btn btn-success" style="padding:6px 10px;" onClick="AddSAP()">
-										<span class="glyphicon glyphicon-plus"></span> Project
-									</button>
-									<button class="btn btn-danger" style="padding:6px 10px;" data-dismiss="modal">
-										<span class="glyphicon glyphicon-remove"></span> Close
-									</button>
-								</div>
-								<input type="hidden" id="jenis_project" value="">
-								<div class="table-responsive mailbox-messages" style="margin-top:15px;">
-									<div class="tampil_SAP"></div>
-								</div>
-								<br>
+							<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;text-align:left;padding:5px;">
+								<b><i class="fa fa-list"></i>&nbsp;Data SAP Project</b>
 							</div>
 
-						</div>		
-					</div>	
-				</div>
-			</div>	
-		</div>
+							<div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+								<label style="margin:0;width: 100px;"><b>Search :</b></label>
+								<input type="text" id="cari_SAP" name="cari_SAP" value="<?php echo $cari; ?>" style="width:40%" onkeypress="ListSAP()">
+
+								<button class="btn btn-primary" style="padding:6px 10px;" onClick="ListSAP()">
+									<span class="glyphicon glyphicon-search"></span> Search
+								</button>
+								<button class="btn btn-success" style="padding:6px 10px;" onClick="AddSAP()">
+									<span class="glyphicon glyphicon-plus"></span> Project
+								</button>
+								<button class="btn btn-danger" style="padding:6px 10px;" data-dismiss="modal">
+									<span class="glyphicon glyphicon-remove"></span> Close
+								</button>
+							</div>
+							<input type="hidden" id="jenis_project" value="">
+							<div class="table-responsive mailbox-messages" style="margin-top:15px;">
+								<div class="tampil_SAP"></div>
+							</div>
+							<br>
+						</div>
+
+					</div>		
+				</div>	
+			</div>
+		</div>	
+	</div>
 	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>

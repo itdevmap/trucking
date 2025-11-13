@@ -1,11 +1,13 @@
 <?php
+
+use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Round;
+
 session_start(); 
 include "../session_log.php"; 
 include("../koneksi.php");
 include "../lib.php";
 
-
-$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='14' ");
+$pq = mysqli_query($koneksi, "SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='14' ");
 $rq=mysqli_fetch_array($pq);	
 $m_edit = $rq['m_edit'];
 $m_add = $rq['m_add'];
@@ -13,7 +15,12 @@ $m_del = $rq['m_del'];
 $m_view = $rq['m_view'];
 $m_exe = $rq['m_exe'];
 
+// ====== READ WARE QUOTATION ======
 if ($_GET['type'] == "Read"){
+
+	// echo "trst";
+	// exit;
+
 	$cari = trim($_GET['cari']);
 	$hal = $_GET['hal'];
 	$paging = $_GET['paging'];
@@ -93,31 +100,31 @@ if ($_GET['type'] == "Read"){
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 	
 	
-	if($stat == 'All')
-	{
-		$SQL = "select t_ware_quo.*, m_cust_tr.nama_cust
-			  from 
-		   t_ware_quo left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
-		   where t_ware_quo.quo_date between '$tgl1x' and '$tgl2x'  and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' 
+	if($stat == 'All'){
+		$q_ware = "SELECT 
+				t_ware_quo.*, 
+				m_cust_tr.nama_cust
+			from t_ware_quo 
+			left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
+			where t_ware_quo.quo_date between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' 
 			order by t_ware_quo.quo_date desc, t_ware_quo.quo_no desc LIMIT $offset, $jmlperhalaman";
 	}else{
-		$SQL = "select t_ware_quo.*, m_cust_tr.nama_cust
-			  from 
-		   t_ware_quo left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
-		   where t_ware_quo.quo_date between '$tgl1x' and '$tgl2x'  and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' and t_ware_quo.status = '$stat'
+		$q_ware = "SELECT 
+				t_ware_quo.*, 
+				m_cust_tr.nama_cust
+			from t_ware_quo 
+			left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
+		   	where t_ware_quo.quo_date between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' and t_ware_quo.status = '$stat'
 			order by t_ware_quo.quo_date desc, t_ware_quo.quo_no desc LIMIT $offset, $jmlperhalaman";
 	}
-	
-	
 			
-	$query = mysqli_query($koneksi, $SQL);	
+	$query = mysqli_query($koneksi, $q_ware);	
+
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
     }
-    if(mysqli_num_rows($result) > 0)
-    {
-    	while($row = mysqli_fetch_assoc($result))
-    	{	
+    if(mysqli_num_rows($result) > 0){
+    	while($row = mysqli_fetch_assoc($result)){	
 			$posisi++;	
 			$tanggal = ConverTgl($row['quo_date']);
 			$sewa = number_format($row['harga_sewa'],0);
@@ -269,8 +276,113 @@ if ($_GET['type'] == "Read"){
 	
 	
 }
-else if ($_GET['type'] == "Read_Barang")
-{
+// ====== READ WARE QUOTATION DATA ======
+else if($_GET['type'] == "Read_Data_Quo"){
+	$id_quo = $_GET['id_quo'];
+	$mode = $_GET['mode'];
+	$stat = $_GET['stat'];
+	
+	$data = '<table class="table table-hover table-striped" style="width:100%">
+			<thead style="font-weight:500px !important">
+				<tr>	
+					<th rowspan="2" width="3%" style="text-align: center;">NO</th>	
+					<th rowspan="2" width="12%" style="text-align: center;">ITEM NO</th>
+					<th rowspan="2" width="51%" style="text-align: center;">ITEM DESCRIPTION</th>
+					<th rowspan="2" width="5%" style="text-align: center;">UOM</th>
+					<th rowspan="2" width="5%" style="text-align: center;">WEIGHT</th>
+					<th rowspan="2" width="5%" style="text-align: center;">LENGTH</th>
+					<th rowspan="2" width="5%" style="text-align: center;">WIDE</th>
+					<th rowspan="2" width="5%" style="text-align: center;">HEIGHT</th>
+					<th rowspan="2" width="5%" style="text-align: center;">VOL</th>
+					<th rowspan="2" width="5%" style="text-align: center;">M<sup>2</sup></th>
+					<th colspan="2" width="4%" style="text-align: center;">ACTION</th>
+				</tr>
+				<tr>
+					<th width="2%" style="text-align: center;">EDIT</th>
+					<th width="2%" style="text-align: center;">DEL</th>
+				</tr>	
+			</thead>';	
+	$SQL = "SELECT * from t_ware  where id_quo = '$id_quo' order by  id_ware";
+	$query = mysqli_query($koneksi, $SQL);	
+	if (!$result = $query) {
+        exit(mysqli_error($koneksi));
+    }
+    if(mysqli_num_rows($result) > 0){
+		$idr = 0;
+		$usd =0;
+    	while($row = mysqli_fetch_assoc($result)){	
+			$posisi++;	
+			$berat = number_format($row['berat'],2);
+			// $vol = number_format($row['vol'],8);
+			$vol = rtrim(rtrim(number_format($row['vol'], 2, '.', ''), '0'), '.');
+			$msegi = rtrim(rtrim(number_format($row['msegi'], 2, '.', ''), '0'), '.');
+			
+			// $panjang = number_format($row['panjang'],2);
+			$panjang = rtrim(rtrim(number_format($row['panjang'], 2, '.', ''), '0'), '.');
+			// $lebar = number_format($row['lebar'],2);
+			$lebar = rtrim(rtrim(number_format($row['lebar'], 2, '.', ''), '0'), '.');
+			// $tinggi = number_format($row['tinggi'],2);
+			$tinggi = rtrim(rtrim(number_format($row['tinggi'], 2, '.', ''), '0'), '.');
+			
+			$data .= '<tr>						
+				<td style="text-align:center">'.$posisi.'.</td>			
+				<td style="text-align:center">'.$row['kode'].'</td>	
+				<td style="text-align:left">'.$row['nama'].'</td>
+				<td style="text-align:center">'.$row['unit'].'</td>
+				<td style="text-align:center">'.$berat.'</td>
+				<td style="text-align:center">'.$panjang.'</td>
+				<td style="text-align:center">'.$lebar.'</td>
+				<td style="text-align:center">'.$tinggi.'</td>
+				<td style="text-align:center">'.$vol.'</td>
+				<td style="text-align:center">'.$msegi.'</td>';
+				
+				if($mode == 'Edit' ){
+					$data .= '<td>
+								<button class="btn btn-block btn-default"  title="Edit"
+									style="margin:-3px;border-radius:0px" type="button" 
+									onClick="javascript:GetData('.$row['id_ware'].')"  >
+									<span class="fa fa-edit " ></span>
+								</button></td>';
+				}
+				else
+				{
+					$data .='<td></td>';
+				}
+				
+				if($mode == 'Edit' && $stat == '0' ){
+					$data .= '<td>
+								<button class="btn btn-block btn-default"  title="Delete"
+									style="margin:-3px;border-radius:0px" type="button" 
+									onClick="javascript:DelData('.$row['id_ware'].')"  >
+									<span class="fa fa-close " ></span>
+								</button></td>';			
+				}
+				else
+				{
+					$data .='<td></td>';
+				}
+				
+				$data .='</tr>';
+    		$number++;
+    	}		
+		
+		
+    }
+    else
+    {
+    	$data .= '<tr><td colspan="7">Records not found!</td></tr>';
+    }
+	
+	
+    $data .= '</table>';
+	
+    echo $data;	
+	
+}
+
+// ====== READ WARE STOCK BARANG ======
+else if ($_GET['type'] == "Read_Barang"){
+
 	$cari = trim($_GET['cari']);
 	$hal = $_GET['hal'];
 	$paging = $_GET['paging'];
@@ -470,7 +582,9 @@ else if ($_GET['type'] == "Read_Barang")
     echo $data;	
 
 
-}else if ($_POST['type'] == "Del_Quo"){
+}
+
+else if ($_POST['type'] == "Del_Quo"){
 	$id = $_POST['id']; 	
 	
 	$del = mysqli_query($koneksi, "delete from t_ware where id_quo = '$id' ");
@@ -481,16 +595,15 @@ else if ($_GET['type'] == "Read_Barang")
         exit(mysqli_error($koneksi));
     }	
 
-}else if ($_POST['type'] == "Executed"){		
-	if($_POST['id'] != '' )
-	{	
-		$id = $_POST['id'];
-		$sql = "update t_ware_quo set 
-				status = '1'
-				where id_quo = '$id'	";
-			$hasil=mysqli_query($koneksi, $sql);
-		if (!$hasil) {
-	        			
+}
+else if ($_POST['type'] == "Executed"){
+	if($_POST['id'] != '' ){	
+		$id 	= $_POST['id'];
+		$q_update 	= "UPDATE t_ware_quo SET 
+					`status` = '1'
+				WHERE id_quo = '$id'	";
+			$hasil = mysqli_query($koneksi, $q_update);
+		if (!$hasil) {	
 			exit(mysqli_error($koneksi));
 			echo "Data error...!";
 	    }
@@ -499,111 +612,8 @@ else if ($_GET['type'] == "Read_Barang")
 			echo "Data Executed!";
 		}
 	}	
-}else if($_GET['type'] == "Read_Data_Quo")
-{
-	$id_quo = $_GET['id_quo'];
-	$mode = $_GET['mode'];
-	$stat = $_GET['stat'];
-	
-	$data = '<table class="table table-hover table-striped" style="width:100%">
-			<thead style="font-weight:500px !important">
-				<tr>	
-					<th rowspan="2" width="3%" style="text-align: center;">NO</th>	
-					<th rowspan="2" width="12%" style="text-align: center;">ITEM NO</th>
-					<th rowspan="2" width="51%" style="text-align: center;">ITEM DESCRIPTION</th>
-					<th rowspan="2" width="5%" style="text-align: center;">UOM</th>
-					<th rowspan="2" width="5%" style="text-align: center;">WEIGHT</th>
-					<th rowspan="2" width="5%" style="text-align: center;">LENGTH</th>
-					<th rowspan="2" width="5%" style="text-align: center;">WIDE</th>
-					<th rowspan="2" width="5%" style="text-align: center;">HEIGHT</th>
-					<th rowspan="2" width="5%" style="text-align: center;">VOL</th>
-					<th rowspan="2" width="5%" style="text-align: center;">M<sup>2</sup></th>
-					<th colspan="2" width="4%" style="text-align: center;">ACTION</th>						
-				</tr>
-				<tr>
-					<th width="2%" style="text-align: center;">EDIT</th>
-					<th width="2%" style="text-align: center;">DEL</th>
-				</tr>	
-			</thead>';	
-	$SQL = "select * from t_ware  where id_quo = '$id_quo' order by  id_ware";
-	$query = mysqli_query($koneksi, $SQL);	
-	if (!$result = $query) {
-        exit(mysqli_error($koneksi));
-    }
-    if(mysqli_num_rows($result) > 0)
-    {
-		$idr = 0;
-		$usd =0;
-    	while($row = mysqli_fetch_assoc($result))
-    	{	
-			$posisi++;	
-			$berat = number_format($row['berat'],2);
-			// $vol = number_format($row['vol'],8);
-			$vol = rtrim(rtrim(number_format($row['vol'], 8, '.', ''), '0'), '.');
-			$msegi = rtrim(rtrim(number_format($row['msegi'], 8, '.', ''), '0'), '.');
-			
-			// $panjang = number_format($row['panjang'],2);
-			$panjang = rtrim(rtrim(number_format($row['panjang'], 8, '.', ''), '0'), '.');
-			// $lebar = number_format($row['lebar'],2);
-			$lebar = rtrim(rtrim(number_format($row['lebar'], 8, '.', ''), '0'), '.');
-			// $tinggi = number_format($row['tinggi'],2);
-			$tinggi = rtrim(rtrim(number_format($row['tinggi'], 8, '.', ''), '0'), '.');
-			
-			$data .= '<tr>						
-				<td style="text-align:center">'.$posisi.'.</td>			
-				<td style="text-align:center">'.$row['kode'].'</td>	
-				<td style="text-align:left">'.$row['nama'].'</td>
-				<td style="text-align:center">'.$row['unit'].'</td>
-				<td style="text-align:center">'.$berat.'</td>
-				<td style="text-align:center">'.$panjang.'</td>
-				<td style="text-align:center">'.$lebar.'</td>
-				<td style="text-align:center">'.$tinggi.'</td>
-				<td style="text-align:center">'.$vol.'</td>
-				<td style="text-align:center">'.$msegi.'</td>';
-				
-				if($mode == 'Edit' ){
-					$data .= '<td>
-								<button class="btn btn-block btn-default"  title="Edit"
-									style="margin:-3px;border-radius:0px" type="button" 
-									onClick="javascript:GetData('.$row['id_ware'].')"  >
-									<span class="fa fa-edit " ></span>
-								</button></td>';
-				}
-				else
-				{
-					$data .='<td></td>';
-				}
-				
-				if($mode == 'Edit' && $stat == '0' ){
-					$data .= '<td>
-								<button class="btn btn-block btn-default"  title="Delete"
-									style="margin:-3px;border-radius:0px" type="button" 
-									onClick="javascript:DelData('.$row['id_ware'].')"  >
-									<span class="fa fa-close " ></span>
-								</button></td>';			
-				}
-				else
-				{
-					$data .='<td></td>';
-				}
-				
-				$data .='</tr>';
-    		$number++;
-    	}		
-		
-		
-    }
-    else
-    {
-    	$data .= '<tr><td colspan="7">Records not found!</td></tr>';
-    }
-	
-	
-    $data .= '</table>';
-	
-    echo $data;	
-	
 }
+
 
 else if($_GET['type'] == "Read_Data_Quo_Biaya"){
 	$id_quo = $_GET['id_quo'];
@@ -679,9 +689,13 @@ else if($_GET['type'] == "Read_Data_Quo_Biaya"){
 	
 }
 
-else if ($_POST['type'] == "Add_Data_Quo"){		
-	if($_POST['mode'] != '' )
-	{	
+else if ($_POST['type'] == "Add_Data_Quo"){
+	// echo "<pre>";
+	// print_r($_POST);
+	// echo "</pre>";
+	// exit;
+
+	if($_POST['mode'] != '' ){	
 		$id = $_POST['id'];
 		$id_quo = $_POST['id_quo'];
 		$kode = addslashes(trim(strtoupper($_POST['kode'])));
@@ -699,11 +713,10 @@ else if ($_POST['type'] == "Add_Data_Quo"){
 		$msegi = str_replace(",","", $msegi);
 		$berat = str_replace(",","", $berat);
 		
-		if($mode == 'Add')
-		{			
+		if($mode == 'Add'){			
 			$sql = "INSERT INTO t_ware (kode, id_quo, nama, unit, panjang, lebar, tinggi, berat, vol, msegi) values ('$kode', '$id_quo', '$nama', '$unit', '$panjang', '$lebar', '$tinggi', '$berat', '$vol', '$msegi')";
 		} else {
-			$sql = "update t_ware set 
+			$sql = "UPDATE t_ware SET 
 					kode = '$kode',
 					nama = '$nama',
 					unit = '$unit',
@@ -713,7 +726,7 @@ else if ($_POST['type'] == "Add_Data_Quo"){
 					berat = '$berat',
 					vol = '$vol',
 					msegi = '$msegi'
-					where 	id_ware = '$id'	";
+					WHERE id_ware = '$id'";
 		}
 
 		$hasil = mysqli_query($koneksi, $sql);
@@ -724,10 +737,11 @@ else if ($_POST['type'] == "Add_Data_Quo"){
 		} else {
 			echo "Data saved!";
 		}
-		die();
+		exit;;
 	}		
 
-}else if ($_POST['type'] == "Detil_Data_Quo"){
+}
+else if ($_POST['type'] == "Detil_Data_Quo"){
 	$id = $_POST['id'];	
     $query = "select t_ware.*, t_ware_quo.quo_no, m_cust_tr.nama_cust 
 			from 
@@ -750,7 +764,8 @@ else if ($_POST['type'] == "Add_Data_Quo"){
     }
     echo json_encode($response);
 
-}else if ($_POST['type'] == "Detil_Data_Quo_Biaya"){
+}
+else if ($_POST['type'] == "Detil_Data_Quo_Biaya"){
 	$id = $_POST['id'];	
     $query = "select t_ware_quo_biaya.*, m_cost_tr.nama_cost
 		from t_ware_quo_biaya left join m_cost_tr on t_ware_quo_biaya.id_biaya = m_cost_tr.id_cost
@@ -771,7 +786,8 @@ else if ($_POST['type'] == "Add_Data_Quo"){
     }
     echo json_encode($response);
 	
-}else if ($_POST['type'] == "Detil_Data_Barang"){
+}
+else if ($_POST['type'] == "Detil_Data_Barang"){
 	$id = $_POST['id'];	
     $query = "select * from t_ware where id_ware = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
@@ -790,7 +806,8 @@ else if ($_POST['type'] == "Add_Data_Quo"){
     }
     echo json_encode($response);	
 	
-}else if ($_POST['type'] == "Del_Data_Quo"){
+}
+else if ($_POST['type'] == "Del_Data_Quo"){
 	$id = $_POST['id']; 	
 	
     $query = "DELETE FROM t_ware WHERE id_ware = '$id' ";
@@ -798,7 +815,8 @@ else if ($_POST['type'] == "Add_Data_Quo"){
         exit(mysqli_error($koneksi));
     }
 	
-}else if ($_POST['type'] == "Del_Data_Quo_Jasa"){
+}
+else if ($_POST['type'] == "Del_Data_Quo_Jasa"){
 	$id = $_POST['id']; 	
 	
     $query = "DELETE FROM t_ware_quo_biaya WHERE id_detil = '$id' ";
@@ -806,7 +824,8 @@ else if ($_POST['type'] == "Add_Data_Quo"){
         exit(mysqli_error($koneksi));
     }	
 	
-}else if ($_POST['type'] == "Add_Data_Quo_Biaya"){		
+}
+else if ($_POST['type'] == "Add_Data_Quo_Biaya"){
 	if($_POST['mode'] != '' )
 	{	
 		$id = $_POST['id'];
@@ -841,9 +860,9 @@ else if ($_POST['type'] == "Add_Data_Quo"){
 			echo "Data saved!";
 		}
 	}	
-
 }
 
+// ====== WARE INBOUND ======
 else if ($_GET['type'] == "Read_In"){
 	
 	$hal 	= $_GET['hal'];
@@ -934,7 +953,7 @@ else if ($_GET['type'] == "Read_In"){
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 	
 	
 	if($stat == 'All'){
-		$SQL = "SELECT 
+		$q_data_ware = "SELECT 
 					t_ware_data.*, 
 					t_ware_data_detil.id_detil, 
 					t_ware_data_detil.no_cont, 
@@ -946,7 +965,6 @@ else if ($_GET['type'] == "Read_In"){
 					t_ware.unit, 
 					m_cust_tr.nama_cust, 
 					m_lokasi_ware.nama as nama_lokasi,
-
 					sap_project.kode_project
 				FROM  t_ware_data 
 				LEFT JOIN t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data
@@ -960,7 +978,7 @@ else if ($_GET['type'] == "Read_In"){
 				where t_ware_data.tanggal between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' and t_ware_data.jenis = '0'
 				order  by t_ware_data.tanggal desc LIMIT $offset, $jmlperhalaman";
 	}else{
-		$SQL = "SELECT t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, t_ware_data_detil.masuk, t_ware_data_detil.keluar, t_ware.nama, t_ware.kode, 
+		$q_data_ware = "SELECT t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, t_ware_data_detil.masuk, t_ware_data_detil.keluar, t_ware.nama, t_ware.kode, 
 			t_ware.vol, t_ware.unit, m_cust_tr.nama_cust, m_lokasi_ware.nama as nama_lokasi
 			from  
 			t_ware_data left join t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data
@@ -973,10 +991,10 @@ else if ($_GET['type'] == "Read_In"){
 			order  by t_ware_data.tanggal desc LIMIT $offset, $jmlperhalaman";
 	}
 
-	// echo $SQL;
+	// echo $q_data_ware;
 	// die();
 	
-	$query = mysqli_query($koneksi, $SQL);	
+	$query = mysqli_query($koneksi, $q_data_ware);	
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
     }
@@ -1203,9 +1221,7 @@ else if ($_GET['type'] == "Read_In"){
 
 				
 }
-
-else if($_GET['type'] == "Read_In_Data")
-{
+else if($_GET['type'] == "Read_In_Data"){
 	$id_data = $_GET['id_data'];
 	$mode = $_GET['mode'];
 	
@@ -1280,61 +1296,58 @@ else if($_GET['type'] == "Read_In_Data")
     }
     echo $data;			
 
-}else if ($_POST['type'] == "Add_Data_In"){		
-	if($_POST['mode'] != '' )
-	{	
-		$id = $_POST['id'];
-		$mode = $_POST['mode'];
-		$id_ware = $_POST['id_ware'];
-		$id_data = $_POST['id_data'];
-		$qty = $_POST['qty'];
-		$id_lokasi = $_POST['id_lokasi'];
-		$no_cont = addslashes(trim(strtoupper($_POST['no_cont'])));
-		$qty = str_replace(",","", $qty);
+}
+else if ($_POST['type'] == "Add_Data_In"){
+	if($_POST['mode'] != '' ){	
+		$id 	 	= $_POST['id'];
+		$mode 	 	= $_POST['mode'];
+		$id_ware 	= $_POST['id_ware'];
+		$id_data 	= $_POST['id_data'];
+		$qty 	 	= $_POST['qty'];
+		$id_lokasi 	= $_POST['id_lokasi'];
+		$no_cont 	= addslashes(trim(strtoupper($_POST['no_cont'])));
+		$qty 		= str_replace(",","", $qty);
 		
-		if($mode == 'Add')
-		{
+		if($mode == 'Add'){
 			$sql = "INSERT INTO t_ware_data_detil (id_data, id_ware, no_cont, id_lokasi, masuk, est_masuk) values
 						('$id_data', '$id_ware', '$no_cont', '$id_lokasi', '$qty', '$qty')";
 			$hasil=mysqli_query($koneksi, $sql);
 		}else{
-			$sql = "update t_ware_data_detil set id_ware = '$id_ware', no_cont = '$no_cont', masuk = '$qty', est_masuk = '$qty', id_lokasi = '$id_lokasi' where id_detil = '$id' ";
+			$sql = "UPDATE t_ware_data_detil set id_ware = '$id_ware', no_cont = '$no_cont', masuk = '$qty', est_masuk = '$qty', id_lokasi = '$id_lokasi' where id_detil = '$id' ";
 			$hasil=mysqli_query($koneksi, $sql);
-			
 		}
+
 		if (!$hasil) {
-	        			
 			//exit(mysqli_error());
 			echo "Data Error...!";
-	    }
-		else
-		{	
-			
+	    }else{	
 			echo "Data saved!";
 		}
 	}	
-}else if ($_POST['type'] == "UpdateStok"){
+}
+
+else if ($_POST['type'] == "UpdateStok"){
 	$id = $_POST['id']; 	
 	$id_ware = $_POST['id_ware']; 
 	$qty_masuk = $_POST['qty_masuk']; 
 	$qty_lama = $_POST['qty_lama']; 
 	 
-	$sql = "update t_ware set masuk = masuk - '$qty_lama' where id_ware = '$id_ware' ";
+	$sql = "UPDATE t_ware set masuk = masuk - '$qty_lama' where id_ware = '$id_ware' ";
 	$hasil=mysqli_query($koneksi, $sql);
 	
-	$sql = "update t_ware set masuk = masuk + '$qty_masuk' where id_ware = '$id_ware' ";
+	$sql = "UPDATE t_ware set masuk = masuk + '$qty_masuk' where id_ware = '$id_ware' ";
 	$hasil=mysqli_query($koneksi, $sql);
 		
-	$query = "update t_ware_data_detil set masuk = '$qty_masuk' where id_detil = '$id' ";
+	$query = "UPDATE t_ware_data_detil set masuk = '$qty_masuk' where id_detil = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
         exit(mysqli_error($koneksi));
     }else{
 		echo "Data saved!";
 	}		
 	
-}	
-else if ($_POST['type'] == "Detil_Data_In")
-{
+}
+
+else if ($_POST['type'] == "Detil_Data_In"){
 	$id = $_POST['id'];	
     $query = "select t_ware_data_detil.*, t_ware.nama, t_ware.kode, t_ware.unit
 				from  t_ware_data_detil left join t_ware on t_ware_data_detil.id_ware = t_ware.id_ware 
@@ -1356,16 +1369,15 @@ else if ($_POST['type'] == "Detil_Data_In")
     echo json_encode($response);
 
 }
-else if ($_POST['type'] == "Del_Data_In")
-{
+
+else if ($_POST['type'] == "Del_Data_In"){
 	$id = $_POST['id']; 	
     $query = "DELETE FROM t_ware_data WHERE id_data = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
         exit(mysqli_error($koneksi));
     }	
 }
-else if ($_POST['type'] == "Del_Detil_In")
-{
+else if ($_POST['type'] == "Del_Detil_In"){
 	$id = $_POST['id']; 	
 
     $query = "DELETE FROM t_ware_data_detil WHERE id_detil = '$id' ";
@@ -1374,27 +1386,25 @@ else if ($_POST['type'] == "Del_Detil_In")
     }		
 	
 }
-else if ($_POST['type'] == "Executed_In")
-{
+else if ($_POST['type'] == "Executed_In"){
 	$id = $_POST['id']; 	
 	
-	$t1 = "select * from  t_ware_data_detil	where id_data = '$id'  order by  id_detil ";
+	$t1 = "SELECT * from  t_ware_data_detil	where id_data = '$id'  order by  id_detil ";
 	$h1 = mysqli_query($koneksi, $t1); 
 	while ($d1=mysqli_fetch_array($h1))
 	{
 		
-		$sql = "update t_ware set masuk = masuk + '$d1[masuk]' where id_ware = '$d1[id_ware]' ";
+		$sql = "UPDATE t_ware set masuk = masuk + '$d1[masuk]' where id_ware = '$d1[id_ware]' ";
 		$hasil=mysqli_query($koneksi, $sql);
 	}
 	
-	$query = "update t_ware_data set status = '1' where id_data = '$id' ";
+	$query = "UPDATE t_ware_data set status = '1' where id_data = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
         exit(mysqli_error($koneksi));
     }	
 	
 }
-else if ($_POST['type'] == "UpdateLokasi")
-{
+else if ($_POST['type'] == "UpdateLokasi"){
 	$id = $_POST['id']; 	
 	$id_lokasi = $_POST['id_lokasi']; 
 	$query = "update t_ware_data_detil set id_lokasi = '$id_lokasi' where id_detil = '$id' ";
@@ -1405,8 +1415,7 @@ else if ($_POST['type'] == "UpdateLokasi")
 	}
 	
 }
-else if ($_POST['type'] == "Detil_Data_Barang")
-{
+else if ($_POST['type'] == "Detil_Data_Barang"){
 	$id = $_POST['id'];	
     $query = "select t_ware.*, t_ware_quo.quo_no, m_cust_tr.nama_cust 
 			from 
@@ -1430,6 +1439,7 @@ else if ($_POST['type'] == "Detil_Data_Barang")
     echo json_encode($response);
 	
 }
+
 
 else if ($_GET['type'] == "List_Barang"){	
 	$cari = $_GET['cari'];
@@ -1499,30 +1509,27 @@ else if ($_GET['type'] == "List_Barang"){
 }	
 
 else if ($_GET['type'] == "Read_Out"){
-	$cari = trim($_GET['cari']);
-	$hal = $_GET['hal'];
+
+	$cari	= trim($_GET['cari']);
+	$hal 	= $_GET['hal'];
 	$paging = $_GET['paging'];
-	$tgl1 = $_GET['tgl1'];
-	$tgl2 = $_GET['tgl2'];
-	$tgl1x = ConverTglSql($tgl1);
-	$tgl2x = ConverTglSql($tgl2);	
-	$field = $_GET['field'];
-	$cari = trim($_GET['cari']);
+	$tgl1 	= $_GET['tgl1'];
+	$tgl2 	= $_GET['tgl2'];
+	$tgl1x 	= ConverTglSql($tgl1);
+	$tgl2x 	= ConverTglSql($tgl2);	
+	$field 	= $_GET['field'];
+	$cari 	= trim($_GET['cari']);
 	$field1 = $_GET['field1'];
-	$cari1 = trim($_GET['cari1']);
-	
-	$stat = trim($_GET['stat']);
-	if($stat == 'In Progress')
-	{
+	$cari1 	= trim($_GET['cari1']);
+	$stat 	= trim($_GET['stat']);
+
+	if($stat == 'In Progress'){
 		$stat = '0';
-	}
-	else if($stat == 'Executed')
-	{
+	}else if($stat == 'Executed'){
 		$stat = '1';
 	}
 	
-	if($field == 'No SJ')
-	{
+	if($field == 'No SJ'){
 		$f = 't_ware_data.no_doc';	
 	}else if($field == 'Customer'){
 		$f = 'm_cust_tr.nama_cust';	
@@ -1570,17 +1577,19 @@ else if ($_GET['type'] == "Read_Out"){
 					<th rowspan="2" width="5%" style="text-align: center;">STATUS</th>					
 					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>					
 					<th rowspan="2" width="2%" style="text-align: center;">DEL</th>
-					<th colspan="2" width="4%" style="text-align: center;">PRINT</th>
+					<th colspan="3" width="4%" style="text-align: center;">PRINT</th>
 					<th rowspan="2" width="2%" style="text-align: center;">EXEC</th>
 				</tr>
 				<tr>					
 					<th width="2%" style="text-align: center;">SO</th>
 					<th width="2%" style="text-align: center;">SJ</th>
+					<th width="2%" style="text-align: center;">AR</th>
 				</tr>	
-			</thead>';			
+			</thead>';
+
 	if(!isset($_GET['hal'])){ 
 		$page = 1;       
-		} else { 
+	} else { 
 		$page = $_GET['hal']; 
 		$posisi=0;
 	}
@@ -1590,36 +1599,43 @@ else if ($_GET['type'] == "Read_Out"){
 	
 	if($stat == 'All'){
 		
-		$SQL = "SELECT 
+		$q_part = "SELECT 
+				t_ware_data.*, 
+				m_cust_tr.nama_cust,
+				sap_project.kode_project
+			from t_ware_data 
+			LEFT JOIN m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
+			LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
+			where t_ware_data.tanggal between '$tgl1x' 
+				AND '$tgl2x' 
+				AND $f LIKE '%$cari%'
+				AND $f1 LIKE '%$cari1%' 
+				AND t_ware_data.jenis = '1'
+			ORDER BY t_ware_data.tanggal DESC, t_ware_data.id_data desc LIMIT $offset, $jmlperhalaman";
+	}else{
+		$q_part = "SELECT 
 				t_ware_data.*, 
 				m_cust_tr.nama_cust,
 				sap_project.kode_project
 			from t_ware_data 
 			left join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
 			LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
-			where t_ware_data.tanggal between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%'  and $f1 LIKE '%$cari1%' and t_ware_data.jenis = '1'
-			order  by t_ware_data.tanggal DESC, t_ware_data.id_data desc LIMIT $offset, $jmlperhalaman";
-	}else{
-		$SQL = "SELECT 
-					t_ware_data.*, 
-					m_cust_tr.nama_cust,
-					sap_project.kode_project
-				from t_ware_data 
-				left join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
-				LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
-				where t_ware_data.tanggal between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%'  and $f1 LIKE '%$cari1%' 
-				and t_ware_data.jenis = '1' and t_ware_data.status = '$stat'
-				order  by t_ware_data.tanggal DESC, t_ware_data.id_data desc LIMIT $offset, $jmlperhalaman";
+			where t_ware_data.tanggal between '$tgl1x' 
+				and '$tgl2x' 
+				and $f LIKE '%$cari%'  
+				and $f1 LIKE '%$cari1%' 
+				and t_ware_data.jenis = '1' 
+				and t_ware_data.status = '$stat'
+			ORDER BY t_ware_data.tanggal DESC, t_ware_data.id_data desc LIMIT $offset, $jmlperhalaman";
 	}		
 			
-	$query = mysqli_query($koneksi, $SQL);	
+	$query = mysqli_query($koneksi, $q_part);	
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
     }
-    if(mysqli_num_rows($result) > 0)
-    {
-    	while($row = mysqli_fetch_assoc($result))
-    	{	
+
+    if(mysqli_num_rows($result) > 0){
+    	while($row = mysqli_fetch_assoc($result)){	
 			$posisi++;	
 			$tanggal = ConverTgl($row['tanggal']);
 			$tagihan = number_format($row['tagihan'],0);
@@ -1740,6 +1756,14 @@ else if ($_GET['type'] == "Read_Out"){
 						onClick="window.open('.$link.') ">
 						<span class="fa fa-print " ></span>
 					</button></td>';
+
+				$link2 = "'cetak_sewa_ware_deliv.php?id=$xy1'";	
+				$data .= '<td>
+					<button class="btn btn-block btn-default"  title="Print AR"
+						style="margin:-3px;border-radius:0px" type="button" 									
+						onClick="window.open('.$link2.') ">
+						<span class="fa fa-print " ></span>
+					</button></td>';
 						
 				if($m_exe == '1' && $row['status'] == '0' ) {
 					$data .= '<td>
@@ -1823,133 +1847,11 @@ else if ($_GET['type'] == "Read_Out"){
     echo $data;
 }
 
-else if ($_GET['type'] == "ListPart_In")
-{	
-	$cari = $_GET['cari'];
-	$id_cust = $_GET['id_cust'];
-	$filter = $_GET['filter'];
-	
-	if($filter == 'Item Description')
-	{
-		$f = 't_ware.nama';	
-	}else if($filter == 'No Container'){
-		$f = 't_ware_masuk.no_cont';
-	}else if($filter == 'Item Number'){
-		$f = 't_ware.kode';	
-	}else{
-		$f = 't_ware.nama';	
-	}
-	
-	$data = '<table class="table table-hover table-striped" style="width:100%">
-			<thead style="font-weight:500px !important">
-				<tr>
-					<th width="4%" rowspan="2" style="text-align: center;">NO</th>
-					<th width="10%" rowspan="2" style="text-align: center;">DATE</th>
-					<th width="10%" rowspan="2" style="text-align: center;">NO. DOC</th>
-					<th width="10%" rowspan="2" style="text-align: center;">ITEM NUMBER</th>
-					<th width="37%" rowspan="2" style="text-align: center;">ITEM DESCRIPTION</th>
-					<th width="15%" rowspan="2" style="text-align: center;">CONTAINER</th>
-					<th width="10%" rowspan="2" style="text-align: center;">STOCK</th>
-					<th width="4%" rowspan="2" style="text-align: center;">ADD</th>
-				</tr>
-			</thead>';	
-	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
-	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman);
-		
-	
-	$SQL = "select t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, t_ware_data_detil.masuk, t_ware_data_detil.keluar, 
-				t_ware_data_detil.est_keluar, t_ware.nama, t_ware.kode, 
-				t_ware.vol, t_ware.unit, m_cust_tr.nama_cust, m_lokasi_ware.nama as nama_lokasi
-				from  
-				t_ware_data left join t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data
-				left join t_ware on t_ware_data_detil.id_ware = t_ware.id_ware 
-				left join t_ware_quo on t_ware.id_quo = t_ware_quo.id_quo
-				left join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
-				left join m_lokasi_ware on t_ware_data_detil.id_lokasi = m_lokasi_ware.id_lokasi
-				where t_ware_data.id_cust = '$id_cust' and t_ware_data.status = '1' and $f LIKE '%$cari%' and t_ware_data_detil.masuk - t_ware_data_detil.keluar > 0
-				order by nama LIMIT 0, 25";
-				
-	$query = mysqli_query($koneksi, $SQL);	
-	if (!$result = $query) {
-		exit(mysqli_error($koneksi));
-	}
-	if(mysqli_num_rows($result) > 0)
-	{
-		while($row = mysqli_fetch_assoc($result))
-		{	
-			$n++;
-			$tanggal = ConverTgl($row['tanggal']);
-			$sisa = $row['masuk'] - $row['est_keluar'];
-			$data .= '<tr>';
-			$data .= '<td style="text-align:center">'.$n.'.</td>';	
-			$data .= '<td style="text-align:center"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$tanggal.'</a></td>';
-			$data .= '<td style="text-align:center"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$row['no_doc'].'</a></td>';
-			$data .= '<td style="text-align:center"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$row['kode'].'</a></td>';
-			$data .= '<td style="text-align:left"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$row['nama'].'</a></td>';
-			$data .= '<td style="text-align:center"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$row['no_cont'].'</a></td>';
-			$data .= '<td style="text-align:center"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$sisa.'</a></td>';
-			$data .= '<td style="text-align:center">
-					<button type="button" class="btn btn-default" onClick="javascript:PilihPart('.$row['id_detil'].')" 
-					style="margin:-3px;width:100%;padding:1px;border-radius:1px"><span class="fa  fa-plus-square"></span></button>
-					</td>';		
-			$data .='</tr>';
-		}		
-	}
-	else
-	{
-		$data .= '<tr><td colspan="7"></td></tr>';
-	}
-	$data .= '</table>';
-	
-	
-	
-    echo $data;			
-
-}else if ($_POST['type'] == "Executed_Out"){
-	$id = $_POST['id']; 
-	
-	$t1 = "select * from t_ware_data_detil where id_data = '$id' order by id_detil";
-	$h1 = mysqli_query($koneksi, $t1); 
-	while ($d1=mysqli_fetch_array($h1))
-	{
-		
-		$sql = "update t_ware set keluar = keluar + '$d1[keluar]' where id_ware = '$d1[id_ware]' ";
-		$hasil=mysqli_query($koneksi, $sql);
-			
-		$sql = "update t_ware_data_detil set keluar = keluar + '$d1[keluar]' where id_detil = '$d1[id_detil_masuk]' ";
-		$hasil=mysqli_query($koneksi, $sql);
-	}
-	
-	$query = "update t_ware_data set status = '1' where id_data = '$id' ";
-    if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error($koneksi));
-    }
-	
-}
-else if ($_POST['type'] == "Del_Out")
-{
-	$id = $_POST['id']; 	
-	$t1="select * from  t_ware_data_detil where id_data = '$id' ";
-	$h1=mysqli_query($koneksi, $t1);       
-	while ($d1=mysqli_fetch_array($h1))
-	{  		
-		$sql = "update t_ware_data_detil set est_keluar = est_keluar - '$d1[keluar]' where id_detil = '$d1[id_detil_masuk]' ";
-		$hasil=mysqli_query($koneksi, $sql);
-	}
-	$del = mysqli_query($koneksi, "DELETE FROM t_ware_data_detil WHERE id_data = '$id'");		
-    $query = "DELETE FROM t_ware_data WHERE id_data = '$id' ";
-    if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error($koneksi));
-    }
-	
-}
-
 else if($_GET['type'] == "Read_Out_Data"){
-
 	$id_data = $_GET['id_data'];
-	$mode = $_GET['mode'];
-	
-	$data = '<table class="table table-hover table-striped" style="width:100%">
+	$mode 	 = $_GET['mode'];
+
+	$data 	 = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">
 				<tr>	
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
@@ -1967,10 +1869,10 @@ else if($_GET['type'] == "Read_Out_Data"){
 					<th rowspan="2" width="2%" style="text-align: center;">DEL</th>
 				</tr>
 			</thead>';	
-	$total = 0;		
-	$y=50;
+	$total 	= 0;		
+	$y		= 50;
 	
-	$SQL = "SELECT 
+	$d_warehouse = "SELECT 
 				t_ware_data_detil.*, 
 				t_ware_data_detil1.no_cont, 
 				t_ware_data.tanggal,
@@ -1989,14 +1891,14 @@ else if($_GET['type'] == "Read_Out_Data"){
 			LEFT JOIN t_ware_data AS t_ware_data1 ON t_ware_data_detil.id_data = t_ware_data1.id_data
 			LEFT JOIN t_ware_quo ON t_ware.id_quo = t_ware_quo.id_quo
 			WHERE t_ware_data_detil.id_data = '$id_data' ORDER BY t_ware_data_detil.id_detil";
-	$query = mysqli_query($koneksi, $SQL);	
+
+	$query = mysqli_query($koneksi, $d_warehouse);	
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
     }
 
     if (mysqli_num_rows($result) > 0){
-    	while($row = mysqli_fetch_assoc($result))
-    	{	
+    	while($row = mysqli_fetch_assoc($result)){	
 			$posisi++;		
 			$tanggal = ConverTgl($row['tanggal']);
 			
@@ -2014,23 +1916,22 @@ else if($_GET['type'] == "Read_Out_Data"){
 			$aging 		= round($aging);
 		
 			$vol 	= $row['keluar'] * $row['vol'];
-			$volx 	= rtrim(rtrim(number_format($vol, 8, '.', ''), '0'), '.');
+			$volx 	= rtrim(rtrim(number_format($vol, 2, '.', ''), '0'), '.');
 			
-			if($aging > $row['aging_sewa'])
-			{
+			if($aging > $row['aging_sewa']){
 				$harga = $row['harga_handling'];
-				$hargax = rtrim(rtrim(number_format($harga, 8, '.', ''), '0'), '.');
+				$hargax = rtrim(rtrim(number_format($harga, 2, '.', ''), '0'), '.');
 			}else{
 				$harga = 0;
-				$hargax = rtrim(rtrim(number_format($harga, 8, '.', ''), '0'), '.');
+				$hargax = rtrim(rtrim(number_format($harga, 2, '.', ''), '0'), '.');
 			}
 			
 		
-			$jumlah = $harga * $vol;
-			$jumlahx = rtrim(rtrim(number_format($jumlah, 8, '.', ''), '0'), '.');
+			$jumlah = $harga * round($vol,2);
+
+			$jumlahx = rtrim(rtrim(number_format($jumlah, 2, '.', ''), '0'), '.');
 			$total = $total + $jumlah;
 		
-				
 			$data .= '<tr>						
 				<td style="text-align:center">'.$posisi.'.</td>
 				<td style="text-align:center">'.$batch.'</td>	
@@ -2079,11 +1980,136 @@ else if($_GET['type'] == "Read_Out_Data"){
 	$hasil=mysqli_query($koneksi,$sql);
 			
     echo $data;		
+}
+
+else if ($_GET['type'] == "ListPart_In"){	
+	$cari = $_GET['cari'];
+	$id_cust = $_GET['id_cust'];
+	$filter = $_GET['filter'];
+	
+	if($filter == 'Item Description')
+	{
+		$f = 't_ware.nama';	
+	}else if($filter == 'No Container'){
+		$f = 't_ware_masuk.no_cont';
+	}else if($filter == 'Item Number'){
+		$f = 't_ware.kode';	
+	}else{
+		$f = 't_ware.nama';	
+	}
+	
+	$data = '<table class="table table-hover table-striped" style="width:100%">
+			<thead style="font-weight:500px !important">
+				<tr>
+					<th width="4%" rowspan="2" style="text-align: center;">NO</th>
+					<th width="10%" rowspan="2" style="text-align: center;">DATE</th>
+					<th width="10%" rowspan="2" style="text-align: center;">NO. DOC</th>
+					<th width="10%" rowspan="2" style="text-align: center;">ITEM NUMBER</th>
+					<th width="37%" rowspan="2" style="text-align: center;">ITEM DESCRIPTION</th>
+					<th width="15%" rowspan="2" style="text-align: center;">CONTAINER</th>
+					<th width="10%" rowspan="2" style="text-align: center;">STOCK</th>
+					<th width="4%" rowspan="2" style="text-align: center;">ADD</th>
+				</tr>
+			</thead>';	
+	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
+	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman);
+		
+	
+	$SQL = "SELECT t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, t_ware_data_detil.masuk, t_ware_data_detil.keluar, 
+				t_ware_data_detil.est_keluar, t_ware.nama, t_ware.kode, 
+				t_ware.vol, t_ware.unit, m_cust_tr.nama_cust, m_lokasi_ware.nama as nama_lokasi
+				from  
+				t_ware_data left join t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data
+				left join t_ware on t_ware_data_detil.id_ware = t_ware.id_ware 
+				left join t_ware_quo on t_ware.id_quo = t_ware_quo.id_quo
+				left join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
+				left join m_lokasi_ware on t_ware_data_detil.id_lokasi = m_lokasi_ware.id_lokasi
+				where t_ware_data.id_cust = '$id_cust' and t_ware_data.status = '1' and $f LIKE '%$cari%' and t_ware_data_detil.masuk - t_ware_data_detil.keluar > 0
+				order by nama LIMIT 0, 25";
+				
+	$query = mysqli_query($koneksi, $SQL);	
+	if (!$result = $query) {
+		exit(mysqli_error($koneksi));
+	}
+	if(mysqli_num_rows($result) > 0)
+	{
+		while($row = mysqli_fetch_assoc($result))
+		{	
+			$n++;
+			$tanggal = ConverTgl($row['tanggal']);
+			$sisa = $row['masuk'] - $row['est_keluar'];
+			$data .= '<tr>';
+			$data .= '<td style="text-align:center">'.$n.'.</td>';	
+			$data .= '<td style="text-align:center"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$tanggal.'</a></td>';
+			$data .= '<td style="text-align:center"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$row['no_doc'].'</a></td>';
+			$data .= '<td style="text-align:center"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$row['kode'].'</a></td>';
+			$data .= '<td style="text-align:left"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$row['nama'].'</a></td>';
+			$data .= '<td style="text-align:center"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$row['no_cont'].'</a></td>';
+			$data .= '<td style="text-align:center"><a href="#" onclick="PilihPart('.$row['id_detil'].')" >'.$sisa.'</a></td>';
+			$data .= '<td style="text-align:center">
+					<button type="button" class="btn btn-default" onClick="javascript:PilihPart('.$row['id_detil'].')" 
+					style="margin:-3px;width:100%;padding:1px;border-radius:1px"><span class="fa  fa-plus-square"></span></button>
+					</td>';		
+			$data .='</tr>';
+		}		
+	}
+	else
+	{
+		$data .= '<tr><td colspan="7"></td></tr>';
+	}
+	$data .= '</table>';
+	
+	
+	
+    echo $data;			
 
 }
 
-else if ($_POST['type'] == "Add_Out")
-{		
+else if ($_POST['type'] == "Executed_Out"){
+
+	// echo "<pre>";
+	// print_r($_POST);
+	// echo "</pre>";
+	// exit;
+
+	$id = $_POST['id']; 
+	
+	$t1 = "SELECT * from t_ware_data_detil where id_data = '$id' order by id_detil";
+	$h1 = mysqli_query($koneksi, $t1); 
+
+	while ($d1=mysqli_fetch_array($h1)){
+		$q_tware = "UPDATE t_ware set keluar = keluar + '$d1[keluar]' where id_ware = '$d1[id_ware]' ";
+		
+		$q_waredetail = "UPDATE t_ware_data_detil set keluar = keluar + '$d1[keluar]' where id_detil = '$d1[id_detil_masuk]' ";
+
+		$hasil=mysqli_query($koneksi, $q_tware);
+		$hasil=mysqli_query($koneksi, $q_waredetail);
+	}
+	
+	$query = "UPDATE t_ware_data set status = '1' where id_data = '$id' ";
+    if (!$result = mysqli_query($koneksi, $query)) {
+        exit(mysqli_error($koneksi));
+    }
+}
+
+else if ($_POST['type'] == "Del_Out"){
+	$id = $_POST['id']; 	
+	$t1="SELECT * from  t_ware_data_detil where id_data = '$id' ";
+	$h1=mysqli_query($koneksi, $t1);       
+	while ($d1=mysqli_fetch_array($h1))
+	{  		
+		$sql = "UPDATE t_ware_data_detil set est_keluar = est_keluar - '$d1[keluar]' where id_detil = '$d1[id_detil_masuk]' ";
+		$hasil=mysqli_query($koneksi, $sql);
+	}
+	$del = mysqli_query($koneksi, "DELETE FROM t_ware_data_detil WHERE id_data = '$id'");		
+    $query = "DELETE FROM t_ware_data WHERE id_data = '$id' ";
+    if (!$result = mysqli_query($koneksi, $query)) {
+        exit(mysqli_error($koneksi));
+    }
+	
+}
+
+else if ($_POST['type'] == "Add_Out"){
 	if($_POST['id_data'] != '' ){	
 		$id_data = $_POST['id_data'];
 		$id = $_POST['id'];
@@ -2091,41 +2117,35 @@ else if ($_POST['type'] == "Add_Out")
 		$id_detil_masuk = $_POST['id_detil_masuk'];
 		$qty = $_POST['qty'];
 		$qty_lama = $_POST['qty_lama'];
-		//$rem = addslashes(trim(strtoupper($_POST['rem'])));
 		$rem = addslashes(trim($_POST['rem']));
 		$mode = $_POST['mode'];
 		
-		if($mode == 'Add')
-		{
-			$sql = "INSERT INTO  t_ware_data_detil (id_data, id_detil_masuk, id_ware, keluar,  rem)	 
-					values
+		if($mode == 'Add'){
+			$q_insert = "INSERT INTO  t_ware_data_detil 
+					(id_data, id_detil_masuk, id_ware, keluar,  rem)
+				VALUES
 					('$id_data', '$id_detil_masuk', '$id_ware', '$qty', '$rem')";
-			$hasil=mysqli_query($koneksi, $sql);
-			
-			$sql = "update t_ware_data_detil set est_keluar = est_keluar + '$qty' where id_detil = '$id_detil_masuk' ";
-			$hasil=mysqli_query($koneksi, $sql);
+
+			$q_update = "UPDATE t_ware_data_detil SET 
+					est_keluar = est_keluar + '$qty' 
+					WHERE id_detil = '$id_detil_masuk' ";
+
+			$hasil=mysqli_query($koneksi, $q_insert);
+			$hasil=mysqli_query($koneksi, $q_update);
 		
 		}else{
-			
-			
-			$sql = "update t_ware_data_detil set keluar = '$qty', rem = '$rem' where id_detil = '$id' ";
+			$sql = "UPDATE t_ware_data_detil set keluar = '$qty', rem = '$rem' where id_detil = '$id' ";
 			$hasil=mysqli_query($koneksi, $sql);
-			
+
 			$qty =  $qty_lama - $qty ;
 			
-			$sql = "update t_ware_data_detil set est_keluar = est_keluar - '$qty' where id_detil = '$id_detil_masuk' ";
-			$hasil=mysqli_query($koneksi, $sql);
-			
+			$sql = "UPDATE t_ware_data_detil set est_keluar = est_keluar - '$qty' where id_detil = '$id_detil_masuk' ";
+			$hasil=mysqli_query($koneksi, $sql);	
 		}
 		
-			
 		if (!$hasil) {
-	        			
-			//exit(mysqli_error());
 			echo "Data Error...!";
-	    }
-		else
-		{	
+	    }else{	
 			
 			echo "Data saved!";
 		}
@@ -2172,26 +2192,23 @@ else if ($_POST['type'] == "Detil_Data_Out"){
 
 }
 
-else if ($_POST['type'] == "Del_Data_Out")
-{
+else if ($_POST['type'] == "Del_Data_Out"){
 	$id = $_POST['id']; 	
 	
-	$pq = mysqli_query($koneksi, "select * from t_ware_data_detil where id_detil = '$id' ");
+	$pq = mysqli_query($koneksi, "SELECT * from t_ware_data_detil where id_detil = '$id' ");
 	$rq=mysqli_fetch_array($pq);
 	$id_detil_masuk = $rq['id_detil_masuk'];
 	$qty = $rq['keluar'];
 	
-	$sql = "update t_ware_data_detil set est_keluar = est_keluar - '$qty' where id_detil = '$id_detil_masuk' ";
+	$sql = "UPDATE t_ware_data_detil set est_keluar = est_keluar - '$qty' where id_detil = '$id_detil_masuk' ";
 	$hasil=mysqli_query($koneksi, $sql);		
 	
     $query = "DELETE FROM t_ware_data_detil WHERE id_detil = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
         exit(mysqli_error($koneksi));
-    }
-	
-	
-	
-}else if($_GET['type'] == "ListBiaya_Quo")
+    }	
+}
+else if($_GET['type'] == "ListBiaya_Quo")
 {
 	$id_quo = $_GET['id_quo'];
 	$mode = $_GET['mode'];
@@ -2403,8 +2420,7 @@ else if($_GET['type'] == "Read_Jasa_Biaya"){
     echo $data;			
 	
 }
-else if ($_POST['type'] == "Add_Jasa_Biaya")
-{		
+else if ($_POST['type'] == "Add_Jasa_Biaya"){
 	if($_POST['id_data'] != '' )
 	{	
 		$id_data = $_POST['id_data'];
@@ -2454,17 +2470,22 @@ else if ($_POST['type'] == "Add_Jasa_Biaya")
 		}
 	}	
 }
-else if ($_POST['type'] == "Detil_Data_Jasa")
-{
+else if ($_POST['type'] == "Detil_Data_Jasa"){
 	$id = $_POST['id'];	
-    $query = "select  t_ware_jasa_biaya.*, m_cost_tr.nama_cost
-			from 
-			 t_ware_jasa_biaya inner join t_ware_quo_biaya on t_ware_jasa_biaya.id_biaya = t_ware_quo_biaya.id_detil
-			left join m_cost_tr on t_ware_quo_biaya.id_biaya = m_cost_tr.id_cost
-			where t_ware_jasa_biaya.id_detil  = '$id'";
+    $query = "SELECT 
+				t_ware_jasa_biaya.*, 
+				m_cost_tr.nama_cost
+			FROM t_ware_jasa_biaya 
+			INNER JOIN t_ware_quo_biaya 
+				ON t_ware_jasa_biaya.id_biaya = t_ware_quo_biaya.id_detil
+			LEFT JOIN m_cost_tr 
+				ON t_ware_quo_biaya.id_biaya = m_cost_tr.id_cost
+			WHERE t_ware_jasa_biaya.id_detil = '$id'";
+			
     if (!$result = mysqli_query($koneksi, $query)) {
         exit(mysqli_error($koneksi));
     }
+
     $response = array();
 	if(mysqli_num_rows($result) > 0) {
 		while ($row = mysqli_fetch_assoc($result)) {
@@ -2472,8 +2493,7 @@ else if ($_POST['type'] == "Detil_Data_Jasa")
 			$response = $row;
 		}
 	}
-    else
-    {
+    else{
         $response['status'] = 200;
         $response['message'] = "Data not found!";
     }
@@ -2691,16 +2711,17 @@ else if ($_GET['type'] == "Read_Sewa"){
 					<th rowspan="2" width="14%" style="text-align: center;">RENTAL TYPE</th>
 					<th rowspan="2" width="7%" style="text-align: center;">BILL</th>
 					<th rowspan="2" width="7%" style="text-align: center;">CREATED</th>	
-					<th rowspan="2" width="6%" style="text-align: center;">STATUS</th>					
-					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>					
+					<th rowspan="2" width="6%" style="text-align: center;">STATUS</th>
+					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>
 					<th rowspan="2" width="2%" style="text-align: center;">DEL</th>
 					<th rowspan="2" width="2%" style="text-align: center;">PRINT</th>
+					<th rowspan="2" width="5%" style="text-align: center;">PRINT AR</th>
 					<th rowspan="2" width="2%" style="text-align: center;">EXEC</th>
 				</tr>
 			</thead>';			
 	if(!isset($_GET['hal'])){ 
 		$page = 1;       
-		} else { 
+	} else { 
 		$page = $_GET['hal']; 
 		$posisi=0;
 	}
@@ -2708,9 +2729,7 @@ else if ($_GET['type'] == "Read_Sewa"){
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 	
 	
-	if($stat == 'All')
-	{
-		
+	if($stat == 'All'){
 		$q_rent = "SELECT 
 				t_ware_sewa.*, 
 				m_cust_tr.nama_cust, 
@@ -2745,31 +2764,31 @@ else if ($_GET['type'] == "Read_Sewa"){
 			LIMIT $offset, $jmlperhalaman";
 	}		
 
+	// echo "</pre>$q_rent</pre>";
+	// exit;
 		
 	$query = mysqli_query($koneksi, $q_rent);	
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
     }
-    if(mysqli_num_rows($result) > 0)
-    {
-    	while($row = mysqli_fetch_assoc($result))
-    	{	
+    if(mysqli_num_rows($result) > 0){
+    	while($row 	 = mysqli_fetch_assoc($result)){	
+
 			$posisi++;	
 			$tanggal = ConverTgl($row['tanggal']);
 			$tagihan = number_format($row['tagihan'],0);
-			$xy1="View|$row[id_data]";
-			$xy1=base64_encode($xy1);
-			$link = "ware_sewa_data.php?id=$xy1";
-			if($row['status'] == '0')
-			{
+			$xy1	 = "View|$row[id_data]";
+			$xy1	 = base64_encode($xy1);
+			$link 	 = "ware_sewa_data.php?id=$xy1";
+
+			if($row['status'] == '0'){
 				$label = 'danger';
 				$status = 'Open';
-			}
-			else if($row['status'] == '1')
-			{
+			}else if($row['status'] == '1'){
 				$label = 'success';
 				$status = 'Close';
 			}
+
 			$data .= '<tr>							
 				<td style="text-align:center">'.$posisi.'.</td>	
 				<td style="text-align:center">'.$tanggal.'</td>	';
@@ -2795,14 +2814,13 @@ else if ($_GET['type'] == "Read_Sewa"){
 							SO '.$row['no_so'].'<br>
 							AR '.$row['no_ar'].'<br>
 						</td>';
-				}
-				
-				else {
+				}else {
 					$data .= '<td style="text-align:center">'.$row['kode_project'].'</td>';
 				}
 				
 				
-				$data .= '<td style="text-align:center"><a href="'.$link.'" title="">'.$row['no_sewa'].'</a></td>
+				$data .= '
+				<td style="text-align:center">'.$row['no_sewa'].'</td>
 				<td style="text-align:left">'.$row['nama_cust'].'</td>
 				<td style="text-align:center">'.$row['nama_cost'].'</td>
 				<td style="text-align:right">'.$tagihan.'</td>
@@ -2812,7 +2830,7 @@ else if ($_GET['type'] == "Read_Sewa"){
 						style="width:100%;padding:1px;margin:-3px">'.$status.'</button>
 					</td>';		
 
-				if($m_edit == '1' && $row['status'] == '0' ){
+				// if($m_edit == '1' && $row['status'] == '0' ){
 					$xy1="Edit|$row[id_sewa]";
 					$xy1=base64_encode($xy1);
 					$link = "'ware_sewa_data.php?id=$xy1'";
@@ -2822,9 +2840,9 @@ else if ($_GET['type'] == "Read_Sewa"){
 									onClick="window.location.href = '.$link.' "  >
 									<span class="fa fa-edit " ></span>
 								</button></td>';
-				}else {
-					$data .='<td></td>';
-				}
+				// }else {
+				// 	$data .='<td></td>';
+				// }
 
 				if($m_del == '1' && $row['status'] == '0') 	{
 					$data .= '<td>
@@ -2838,36 +2856,43 @@ else if ($_GET['type'] == "Read_Sewa"){
 					$data .='<td></td>';
 				}
 				
-				$xy1="$row[id_sewa]";
-					$xy1=base64_encode($xy1);
-					$link = "'cetak_sewa_ware.php?id=$xy1'";
-					$data .= '<td>
-						<button class="btn btn-block btn-default"  title="Print"
-							style="margin:-3px;border-radius:0px" type="button" 									
-							onClick="window.open('.$link.') ">
-							<span class="fa fa-print " ></span>
-						</button></td>';
+				$xy1	= "$row[id_sewa]";
+				$xy1	= base64_encode($xy1);
+
+				// ========== PRINT SO ==========
+				$link 	= "'cetak_sewa_ware.php?id=$xy1'";
+				$data 	.= '<td>
+					<button class="btn btn-block btn-success" title="Print"
+						style="margin:-3px;border-radius:0px" type="button" 									
+						onClick="window.open('.$link.') ">
+						<span class="fa fa-print " ></span>
+					</button></td>';
+
+				// ========== PRINT AR ==========
+				$link 	= "'cetak_sewa_ware_ar.php?id=$xy1'";
+				$data 	.= '<td>
+					<button class="btn btn-block btn-primary" title="Print"
+						style="margin:-3px;border-radius:0px" type="button" 									
+						onClick="window.open('.$link.') ">
+						<span class="fa fa-print " ></span>
+					</button></td>';
 						
 				if($row['status'] == '0'  ) {
 					$data .= '<td>
-								<button class="btn btn-block btn-default"  title="Execute"
-									style="margin:-3px;border-radius:0px" type="button" 
-									onClick="javascript:Executed('.$row['id_sewa'].')"  >
-									<span class="fa fa-check-square-o " ></span>
-								</button></td>';
-						
+							<button class="btn btn-block btn-default"  title="Execute"
+								style="margin:-3px;border-radius:0px" type="button" 
+								onClick="javascript:Executed('.$row['id_sewa'].')"  >
+								<span class="fa fa-check-square-o " ></span>
+							</button></td>';
 				}
-				else
-				{
+				else{
 					$data .='<td></td>';
 				}
 					
 				$data .='</tr>';
     		$number++;
     	}		
-    }
-    else
-    {
+    }else{
     	$data .= '<tr><td colspan="7">Records not found!</td></tr>';
     }
     $data .= '</table>';
@@ -2876,13 +2901,13 @@ else if ($_GET['type'] == "Read_Sewa"){
 				<ul>';
 				if($stat == 'All')
 				{
-					$pq = mysqli_query($koneksi, "select count(t_ware_sewa.id_sewa) as jml
+					$pq = mysqli_query($koneksi, "SELECT count(t_ware_sewa.id_sewa) as jml
 					  from 
 					  t_ware_sewa left join m_cust_tr on t_ware_sewa.id_cust = m_cust_tr.id_cust
 					  left join m_cost_tr on t_ware_sewa.id_cost = m_cost_tr.id_cost
 					  where t_ware_sewa.tanggal between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%'  and $f1 LIKE '%$cari1%'  ");
 				}else{
-					$pq = mysqli_query($koneksi, "select count(t_ware_sewa.id_sewa) as jml
+					$pq = mysqli_query($koneksi, "SELECT count(t_ware_sewa.id_sewa) as jml
 					  from 
 					  t_ware_sewa left join m_cust_tr on t_ware_sewa.id_cust = m_cust_tr.id_cust
 					  left join m_cost_tr on t_ware_sewa.id_cost = m_cost_tr.id_cost
@@ -2932,22 +2957,16 @@ else if ($_GET['type'] == "Read_Sewa"){
     echo $data;
 
 }
-else if ($_POST['type'] == "Del_Sewa"){
-	$id = $_POST['id']; 	
-	
-	
-    $query = "DELETE FROM t_ware_sewa WHERE id_sewa = '$id' ";
-    if (!$result = mysqli_query($koneksi, $query)) {
-        exit(mysqli_error($koneksi));
-    }
-	
-}
 
 else if($_GET['type'] == "Read_Sewa_Data"){
+	// echo "<pre>";
+	// print_r($_GET);
+	// echo "</pre>";
+	// exit;
+
 	$id_sewa 	= $_GET['id_sewa'];
 	$id_quo 	= $_GET['id_quo'];
 	$mode 		= $_GET['mode'];
-
 	$pq = mysqli_query($koneksi, "SELECT 
 				t_ware_sewa.*, 
 				m_cust_tr.nama_cust
@@ -2978,86 +2997,63 @@ else if($_GET['type'] == "Read_Sewa_Data"){
 	$total = 0;		
 
 	$q_detail = "SELECT 
-				t_ware_data.*, 
-				t_ware_data_detil.id_detil, 
-				t_ware_data_detil.no_cont, 
-				t_ware_data_detil.masuk, 
-				t_ware_data_detil.keluar, 
-				t_ware.nama, 
-				t_ware.kode, 
-				t_ware.id_quo, 
-				t_ware.vol, 
-				t_ware.unit, 
-				m_cust_tr.nama_cust,
-				m_lokasi_ware.nama AS nama_lokasi,
-				t_ware_quo.max_cbm, 
-				t_ware_quo.harga_sewa, 
+				t_ware_sewa_detail.*,
 				t_ware_quo.aging_sewa
-			from t_ware_data 
-			left join t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data
-			left join t_ware on t_ware_data_detil.id_ware = t_ware.id_ware 
-			left join t_ware_quo on t_ware.id_quo = t_ware_quo.id_quo
-			left join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
-			left join m_lokasi_ware on t_ware_data_detil.id_lokasi = m_lokasi_ware.id_lokasi
-			where t_ware.id_quo = '$id_quo'  
-				and t_ware_data.jenis = '0'
-			and t_ware_data.status = '1' 
-			order by  t_ware_data.id_data";
+			FROM t_ware_sewa_detail
+			LEFT JOIN t_ware_sewa ON t_ware_sewa.id_sewa = t_ware_sewa_detail.id_sewa
+			LEFT JOIN t_ware_quo ON t_ware_quo.id_quo = t_ware_sewa.id_quo
+			WHERE t_ware_sewa_detail.id_sewa = '$id_sewa'";
+
+	// echo $id_sewa;
+	// exit;
 			
 	$query = mysqli_query($koneksi, $q_detail);	
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
     }
-    if(mysqli_num_rows($result) > 0)
-    {
-    	while($row = mysqli_fetch_assoc($result))
-    	{	
+
+    if(mysqli_num_rows($result) > 0){
+    	while($row = mysqli_fetch_assoc($result)){	
 			$posisi++;		
 			
 			$tgl_masuk = strtotime($row['tanggal']);
 			
 			$aging = $tgl_keluar - $tgl_masuk; 
 			$aging = ($aging/24/60/60);
-			$aging = round($aging);
-	
-			$ptgl = explode("-", $row['tanggal']);
-			$th = $ptgl[0];
-			$bl = $ptgl[1];		
-			$tg = $ptgl[2];
-			$year = substr($th,2,2);
-			$batch = "$tg.$bl.$year $row[no_cont]";	
+			$aging 	= round($aging);
 			
-			$max_cbm = $row['max_cbm'];
-			$harga_sewa = $row['harga_sewa'];
-			$max_cbmx = rtrim(rtrim(number_format($row['max_cbm'], 2, '.', ''), '0'), '.');
+			$max_cbm 	 = round($row['max_cbm'],2);
+			$harga_sewa  = $row['harga_sewa'];
+			$max_cbmx 	 = rtrim(rtrim(number_format($row['max_cbm'], 2, '.', ''), '0'), '.');
 			$harga_sewax = number_format($row['harga_sewa'],0);
-			
-			if($aging > $row['aging_sewa'])
-			{
-				$sisa  = $row['masuk'] - $row['keluar'];
+
+			$batch 	= $row['batch'];	
+
+			if($aging > $row['aging_sewa']){
+				$sisa  = $row['qty'];
+				$cbm = $row['cbm'];
 			}else{
 				$sisa = 0;
+				$cbm = 0;
 			}
 			
-			$cbm = $sisa * $row['vol'];
-			$cbmx = round($cbm, 2); 
-			$total = $total + $cbmx;
-			$cbmx = rtrim(rtrim((string)$cbmx, '0'), '.');  
+			// $cbmx = round($cbm, 2);
+			$cbmx = $cbm;
 
+			$fix_cbm += $cbm;
 			$data .= '<tr>						
-			<td style="text-align:center">'.$posisi.'.</td>
-			<td style="text-align:center">'.$batch.'</td>
-			<td style="text-align:center">'.$row['kode'].'</td>
-			<td style="text-align:left">'.$row['nama'].'</td>
-			<td style="text-align:center">'.$aging.'</td>
-			<td style="text-align:center">'.$sisa.' '.$row['unit'].'</td>
-			<td style="text-align:right">'.$cbmx.'</td>';
-				
-			$data .='</tr>';
+				<td style="text-align:center">'.$posisi.'.</td>
+				<td style="text-align:center">'.$batch.'</td>
+				<td style="text-align:center">'.$row['itemcode'].'</td>
+				<td style="text-align:left">'.$row['itemname'].'</td>
+				<td style="text-align:center">'.$aging.'</td>
+				<td style="text-align:center">'.$sisa.' '.$row['unit'].'</td>
+				<td style="text-align:right">'.$cbm.'</td>
+			</tr>';
     		$number++;
     	}
 
-		$totalx = round($total,2);
+		$totalx = round($fix_cbm,2);
 		$data .= '<tr><td colspan="5"></td>';
 		$data .= '<td style="text-align:right;background:#eee;color:#000"><b>Total CBM :</b></td>	
 				  <td style="text-align:right;background:#008d4c;color:#fff"><b>'.$totalx.'</b></td>';
@@ -3068,12 +3064,12 @@ else if($_GET['type'] == "Read_Sewa_Data"){
 				  <td style="text-align:right;background:#008d4c;color:#fff"><b>'.$max_cbmx.'</b></td>';
 		$data .= '</tr>';
 		
-		$sisa_cbm =  $total - $max_cbm;
-		if($sisa_cbm < 0)
-		{
+		$sisa_cbm =  $fix_cbm - $max_cbm;
+		if($sisa_cbm < 0){
 			$sisa_cbm = 0;
 		}
-		$sisa_cbmx = number_format($sisa_cbm,2);
+
+		$sisa_cbmx = round($sisa_cbm,2);
 		$data .= '<tr><td colspan="5"></td>';
 		$data .= '<td style="text-align:right;background:#eee;color:#000"><b>Tagihan CBM :</b></td>	
 				  <td style="text-align:right;background:#008d4c;color:#fff"><b>'.$sisa_cbmx.'</b></td>';
@@ -3084,33 +3080,37 @@ else if($_GET['type'] == "Read_Sewa_Data"){
 				  <td style="text-align:right;background:#008d4c;color:#fff"><b>'.$harga_sewax.'</b></td>';
 		$data .= '</tr>';
 		
-		$tagihan =  $harga_sewa * $sisa_cbm;
+		$tagihan =  $harga_sewa * $sisa_cbmx;
 		$tagihanx = number_format($tagihan,0);
 		
-		// echo $sisa_cbm ;
-		// die();
 		$data .= '<tr><td colspan="5"></td>';
 		$data .= '<td style="text-align:right;background:#eee;color:#000"><b>Jumlah Tagihan :</b></td>	
 				  <td style="text-align:right;background:#008d4c;color:#fff"><b>'.$tagihanx.'</b></td>';
 		$data .= '</tr>';
     }
-    else
-    {
+    else{
     	$data .= '<tr><td colspan="6">Records not found!</td></tr>';
     }
 	
-	$sql = "update t_ware_sewa set tagihan = '$tagihan' where id_sewa = '$id_sewa'	";
-	$hasil=mysqli_query($koneksi,$sql);
-			
+	$sql 	= "UPDATE t_ware_sewa set tagihan = '$tagihan' where id_sewa = '$id_sewa'	";
+	$hasil	= mysqli_query($koneksi,$sql);
     echo $data;		
-
 }
 
+else if ($_POST['type'] == "Del_Sewa"){
+	$id = $_POST['id']; 	
+	
+	
+    $query = "DELETE FROM t_ware_sewa WHERE id_sewa = '$id' ";
+    if (!$result = mysqli_query($koneksi, $query)) {
+        exit(mysqli_error($koneksi));
+    }
+	
+}
 else if ($_POST['type'] == "Executed_Sewa"){
 	$id = $_POST['id']; 
 	
-	
-	$query = "update t_ware_sewa set status = '1' where id_sewa = '$id' ";
+	$query = "UPDATE t_ware_sewa set status = '1' where id_sewa = '$id' ";
     if (!$result = mysqli_query($koneksi, $query)) {
         exit(mysqli_error($koneksi));
     }
@@ -3118,158 +3118,166 @@ else if ($_POST['type'] == "Executed_Sewa"){
 }
 
 // ========= UP SOWH TO SAP =========
-	else if ($_GET['type'] == "ListUpSOWHSAP") {
-		$cari   	= mysqli_real_escape_string($koneksi, $_GET['cari']);
-		$id_data	= mysqli_real_escape_string($koneksi, $_GET['id_data']);
+else if ($_GET['type'] == "ListUpSOWHSAP") {
+	$cari   	= mysqli_real_escape_string($koneksi, $_GET['cari']);
+	$id_data	= mysqli_real_escape_string($koneksi, $_GET['id_data']);
 
 
-		$data = '<table class="table table-hover table-striped" style="width:100%">
-			<thead>
-				<tr>
-					<th width="5%" style="text-align: center;">NO</th>
-					<th width="15%" style="text-align: center;">Date</th>
-					<th width="15%" style="text-align: center;">SAP Project</th>
-					<th width="27%" style="text-align: center;">Nama Customer</th>
-					<th width="10%" style="text-align: center;">ADD</th>
-				</tr>
-			</thead>';
+	$data = '<table class="table table-hover table-striped" style="width:100%">
+		<thead>
+			<tr>
+				<th width="5%" style="text-align: center;">NO</th>
+				<th width="15%" style="text-align: center;">Date</th>
+				<th width="15%" style="text-align: center;">NO DOC</th>
+				<th width="15%" style="text-align: center;">SAP Project</th>
+				<th width="27%" style="text-align: center;">Nama Customer</th>
+				<th width="10%" style="text-align: center;">ADD</th>
+			</tr>
+		</thead>';
 
-		$q_ware = "SELECT 
-					t_ware_data.id_data,
-					sap_project.rowid,
-					t_ware_data.tanggal,
-					t_ware_data.id_cust,
-					sap_project.kode_project,
-					m_cust_tr.nama_cust
-				FROM t_ware_data
-				LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
-				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_data.id_cust
-				WHERE t_ware_data.id_data = '$id_data'
-				LIMIT 1";
-
-		$r_ware = mysqli_query($koneksi, $q_ware);
-
-		if ($r_ware && mysqli_num_rows($r_ware) > 0) {
-			$dj         = mysqli_fetch_assoc($r_ware);
-
-			$tanggal    = $dj['tanggal'];
-			$rowid		= $dj['rowid'];
-			$id_cust    = $dj['id_cust'];
-		} else {
-			$tanggal = $rowid = $id_cust = null;
-		}
-
-		$q_detail_ware = "SELECT 
-					t_ware_data.id_data,
-					sap_project.rowid,
-					t_ware_data.tanggal,
-					t_ware_data.id_cust,
-					sap_project.kode_project,
-					m_cust_tr.nama_cust
-				FROM t_ware_data
-				LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
-				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_data.id_cust
-				WHERE t_ware_data.no_doc LIKE '%$cari%' 
-					AND t_ware_data.tanggal = '$tanggal'
-					AND t_ware_data.rowid = '$rowid'
-					AND t_ware_data.id_cust = '$id_cust'
-					AND t_ware_data.no_so IS NULL
-				ORDER BY t_ware_data.no_doc 
-				LIMIT 0, 10";
-				
-		$r_detail_ware = mysqli_query($koneksi, $q_detail_ware);	
-		if (!$r_detail_ware) {
-			exit(mysqli_error($koneksi));
-		}
-
-		$posisi = 0;
-		if (mysqli_num_rows($r_detail_ware) > 0) {
-			while($row = mysqli_fetch_assoc($r_detail_ware)) {	
-				$posisi++;
-				$data .= '<tr>';		
-				$data .= '<td style="text-align:center">'.$posisi.'</td>';
-				$data .= '<td style="text-align:center">'.$row['tanggal'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['kode_project'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['nama_cust'].'</td>';
-
-				$id_data = isset($row['id_data']) ? $row['id_data'] : $row['no_doc'];
-				$data .= '<td style="text-align:center">
-							<label>
-							<input type="checkbox" 
-									name="sap_selected[]" 
-									value="'.$id_data.'">
-							</label>
-						</td>';
-
-				$data .= '</tr>';
-			}		
-		} else {
-			$data .= '<tr><td colspan="7" style="text-align:center">Data tidak ditemukan</td></tr>';
-		}
-
-		$data .= '</table>';
-		echo $data;			
-	}
-	else if ($_POST['type'] == "SaveUpSAP") {
-		// echo "<pre>";
-		// print_r($_POST);
-		// echo "</pre>";
-		// die();
-
-		$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
-
-		if (empty($ids)) {
-			echo json_encode([
-				"success" => false,
-				"message" => "Tidak ada data yang dipilih"
-			]);
-			exit;
-		}
-
-		$resultData = [];
-		$detailCount = [];
-
-		foreach ($ids as $id_data) {
-			$id_data = mysqli_real_escape_string($koneksi, $id_data);
-
-			$sql_header = "SELECT 
+	$q_ware = "SELECT 
 				t_ware_data.id_data,
+				sap_project.rowid,
 				t_ware_data.tanggal,
-				m_cust_tr.caption,
-				m_cust_tr.nama_cust,
+				t_ware_data.id_cust,
 				sap_project.kode_project,
-				t_ware_data.ket AS remark,
-				t_ware_data.gudang AS penerima,
-				t_ware_data.no_doc,
-				t_ware_data.tagihan
+				m_cust_tr.nama_cust
 			FROM t_ware_data
 			LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
 			LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_data.id_cust
-			WHERE t_ware_data.id_data = '$id_data' LIMIT 1";
+			WHERE t_ware_data.id_data = '$id_data'
+			LIMIT 1";
 
-			$query_header = mysqli_query($koneksi, $sql_header);
+	$r_ware = mysqli_query($koneksi, $q_ware);
 
-			while ($row = mysqli_fetch_assoc($query_header)) {
-				if (empty($row['caption'])) {
-					echo json_encode([
-						"success" => false,
-						"message" => "custcode masih kosong, silahkan hubungi tim IT-SAP"
-					]);
-					exit;
-				}
+	if ($r_ware && mysqli_num_rows($r_ware) > 0) {
+		$dj         = mysqli_fetch_assoc($r_ware);
 
-				$id_ware = mysqli_real_escape_string($koneksi, $row['id_data']);
-				$lines   = [];
-				$noSJ    = '';
-				$total_tagihan = 0;
+		$tanggal    = $dj['tanggal'];
+		$rowid		= $dj['rowid'];
+		$id_cust    = $dj['id_cust'];
+	} else {
+		$tanggal = $rowid = $id_cust = null;
+	}
 
-				// ====== DETAIL UNTUK SJWH ITEM ======
+	$q_detail_ware = "SELECT 
+				t_ware_data.id_data,
+				t_ware_data.no_doc,
+				sap_project.rowid,
+				t_ware_data.tanggal,
+				t_ware_data.id_cust,
+				sap_project.kode_project,
+				m_cust_tr.nama_cust
+			FROM t_ware_data
+			LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
+			LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_data.id_cust
+			WHERE t_ware_data.no_doc LIKE '%$cari%' 
+				AND t_ware_data.tanggal = '$tanggal'
+				AND t_ware_data.rowid = '$rowid'
+				AND t_ware_data.id_cust = '$id_cust'
+				AND t_ware_data.no_so IS NULL
+			ORDER BY t_ware_data.no_doc 
+			LIMIT 0, 10";
+
+		// echo $q_detail_ware;
+		// exit;
+			
+	$r_detail_ware = mysqli_query($koneksi, $q_detail_ware);	
+	if (!$r_detail_ware) {
+		exit(mysqli_error($koneksi));
+	}
+
+	$posisi = 0;
+	if (mysqli_num_rows($r_detail_ware) > 0) {
+		while($row = mysqli_fetch_assoc($r_detail_ware)) {	
+			$posisi++;
+			$data .= '<tr>';		
+			$data .= '<td style="text-align:center">'.$posisi.'</td>';
+			$data .= '<td style="text-align:center">'.$row['tanggal'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['no_doc'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['kode_project'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['nama_cust'].'</td>';
+
+			$id_data = isset($row['id_data']) ? $row['id_data'] : $row['no_doc'];
+			$data .= '<td style="text-align:center">
+						<label>
+						<input type="checkbox" 
+								name="sap_selected[]" 
+								value="'.$id_data.'">
+						</label>
+					</td>';
+
+			$data .= '</tr>';
+		}		
+	} else {
+		$data .= '<tr><td colspan="7" style="text-align:center">Data tidak ditemukan</td></tr>';
+	}
+
+	$data .= '</table>';
+	echo $data;			
+}
+else if ($_POST['type'] == "SaveUpSAP") {
+	// echo "<pre>";
+	// print_r($_POST);
+	// echo "</pre>";
+	// exit;
+
+	$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
+
+	if (empty($ids)) {
+		echo json_encode([
+			"success" => false,
+			"message" => "Tidak ada data yang dipilih"
+		]);
+		exit;
+	}
+
+	$resultData = [];
+	$detailCount = [];
+
+	foreach ($ids as $id_data) {
+		$id_data = mysqli_real_escape_string($koneksi, $id_data);
+
+		$sql_header = "SELECT 
+			t_ware_data.id_data,
+			t_ware_data.tanggal,
+			m_cust_tr.caption,
+			m_cust_tr.nama_cust,
+			m_cust_tr.isintercomp,
+			sap_project.kode_project,
+			t_ware_data.ket AS remark,
+			t_ware_data.gudang AS penerima,
+			t_ware_data.no_doc,
+			t_ware_data.tagihan,
+			t_ware_data.sj_vendor
+		FROM t_ware_data
+		LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
+		LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_data.id_cust
+		WHERE t_ware_data.id_data = '$id_data' LIMIT 1";
+
+		$query_header = mysqli_query($koneksi, $sql_header);
+
+		while ($row = mysqli_fetch_assoc($query_header)) {
+			if (empty($row['caption'])) {
+				echo json_encode([
+					"success" => false,
+					"message" => "custcode masih kosong, silahkan hubungi tim IT-SAP"
+				]);
+				exit;
+			}
+
+			$id_ware = mysqli_real_escape_string($koneksi, $row['id_data']);
+			$lines   = [];
+			$noSJ    = '';
+			$total_tagihan = 0;
+
+			// ====== DETAIL UNTUK SJWH ITEM ======
 				if (strpos($row['no_doc'], 'SJWH') !== false) {
 					$noSJ = $row['no_doc'];
 
 					$sql_detail = "SELECT 
 							t_ware.kode,
-							CONCAT(t_ware.kode, '-',t_ware.nama) as nama,
+							CONCAT(t_ware.kode, '-',t_ware.nama, '-',t_ware_data_detil.keluar , 'ctn') as nama,
 							t_ware_data_detil.keluar AS qty,
 							t_ware.vol,
 							t_ware.unit,
@@ -3297,35 +3305,32 @@ else if ($_POST['type'] == "Executed_Sewa"){
 						LEFT JOIN m_params_tr ON m_params_tr.id_param = '1'
 						WHERE t_ware_data_detil.id_data = '$id_ware'
 					";
-					
 
 					$query_detail = mysqli_query($koneksi, $sql_detail);
 
 					if ($query_detail) {
 						while ($det = mysqli_fetch_assoc($query_detail)) {
 							$cbm   = $det['qty'] * $det['vol'];
-							$total = round($cbm * $det['harga'], 4);
-							
-							if ((int)$det['aging'] > (int)$det['aging_sewa']  && (int)$total > 0) {
+							$total = round($cbm,2) * $det['harga'];
+
+							if ((int)$det['aging'] > (int)$det['aging_sewa'] && (int)$total > 0) {
 								$total_tagihan += $total;
 								$lines[] = [
 									"ItemCode"   => $det['wh_itemcode'],
 									"ItemName"   => $det['nama'],
-									"Qty"   	 => $det['qty'],
-									"JenisMobil" => $det['unit'],
-									"Whse"	 	 => "WH-FG",
+									"Qty"        => round($cbm,2),
+									"UoM" 		 => $det['unit'],
+									"Whse"       => "WH-FG",
 									"BiayaKirim" => $det['harga'] ?? 0,
-									"Disc"	 	 => 0,
-									"PPN"	 	 => 0,
-									"PPH"	 	 => 0,
-
-									"Container"  => '',
-									"Route" 	 => '',
-									"Remark" 	 => $det['remark'] ?? '',
-
-									"GLAcct" 	 => $det['wh_sap_coa'] ?? '',
+									"Disc"       => 0,
+									"PPN"        => 0,
+									"PPH"        => 0,
+									"FreeText"   => '',
+									"Route"      => '',
+									"Remark"     => $det['remark'] ?? '',
+									"GLAcct"     => $det['wh_sap_coa'] ?? '',
 									"Corporate"  => $det['wh_sap_corporate'] ?? '',
-									"Divisi"  	 => $det['wh_sap_divisi'] ?? '',
+									"Divisi"     => $det['wh_sap_divisi'] ?? '',
 									"Department" => $det['wh_sap_dept'] ?? '',
 									"Activity"   => $det['wh_sap_activity'] ?? '',
 									"Location"   => $det['wh_sap_location'] ?? '',
@@ -3333,17 +3338,26 @@ else if ($_POST['type'] == "Executed_Sewa"){
 								];
 							}
 						}
+
+						// === CEK SETELAH LOOP ===
+						if (empty($lines)) {
+							$u_sjwh = "UPDATE t_ware_data SET 
+										no_so = '-', 
+										no_ar = '-' 
+										WHERE id_data = '$id_data'";
+							mysqli_query($koneksi, $u_sjwh);
+						}
 					} else {
 						error_log("Query detail gagal: " . mysqli_error($koneksi));
 					}
 				}
 
-
-				// ====== DETAIL UNTUK SJJS BIAYA ======
+			// ====== DETAIL UNTUK SJJS BIAYA ======
 				if (strpos($row['no_doc'], 'SJJS') !== false) {
 					$sql_detail = "SELECT 
 							m_cost_tr.itemcode AS kode,
 							m_cost_tr.sap_coa,
+							m_cost_tr.sap_coa_af,
 							m_cost_tr.sap_corporate,
 							m_cost_tr.sap_divisi,
 							m_cost_tr.sap_dept,
@@ -3360,31 +3374,31 @@ else if ($_POST['type'] == "Executed_Sewa"){
 						LEFT JOIN t_ware_jasa_biaya ON t_ware_jasa_biaya.id_data = t_ware_data.id_data
 						LEFT JOIN t_ware_quo_biaya ON t_ware_quo_biaya.id_detil = t_ware_jasa_biaya.id_biaya
 						LEFT JOIN t_ware_quo ON t_ware_quo.id_quo = t_ware_quo_biaya.id_quo
-						LEFT JOIN m_cost_tr ON m_cost_tr.id_cost = t_ware_quo_biaya.id_biayaz
+						LEFT JOIN m_cost_tr ON m_cost_tr.id_cost = t_ware_quo_biaya.id_biaya
 						WHERE t_ware_data.id_data = '$id_ware'";
+					
 					$query_detail = mysqli_query($koneksi, $sql_detail);
 
 					if ($query_detail) {
 						while ($det = mysqli_fetch_assoc($query_detail)) {
-							$total = $det['qty'] * $det['harga_handling'];
+							$total = $det['qty'] * $det['harga'];
 							$total_tagihan += $total;
 
 							$lines[] = [
 								"ItemCode"   => $det['kode'] ?? '',
 								"ItemName"   => $det['nama'] ?? '',
 								"Qty"   	 => $det['qty'],
-								"JenisMobil" => $det['unit'],
+								"UoM" 		 => $det['unit'],
 								"Whse"	 	 => "WH-FG",
-								"BiayaKirim" => $det['harga_handling'] ?? 0,
+								"BiayaKirim" => (int) $det['harga'] ?? 0,
 								"Disc"	 	 => 0,
 								"PPN"	 	 => 0,
 								"PPH"	 	 => 0,
 
-								"Container"  => '',
+								"FreeText"  	=> '',
 								"Route" 	 => '',
 								"Remark" 	 => '',
-
-								"GLAcct" 	 => $det['sap_coa'] ?? '',
+								"GLAcct" 	 => ($row['isintercomp'] == 1) ? ($det['sap_coa_af'] ?? '') : ($det['sap_coa'] ?? ''),
 								"Corporate"  => $det['sap_corporate'] ?? '',
 								"Divisi"  	 => $det['sap_divisi'] ?? '',
 								"Department" => $det['sap_dept'] ?? '',
@@ -3396,11 +3410,11 @@ else if ($_POST['type'] == "Executed_Sewa"){
 					}
 				}
 
-				// ====== BUAT KEY DAN MERGE DATA ======
+			// ====== MERGE DATA ======
 				$key = '';
-
 				if (!isset($resultData[$key])) {
 					$resultData[$key] = [
+						"NoSO"     	 	 => $row['no_doc'],
 						"TglSO"     	 => $row['tanggal'],
 						"TglKirim"     	 => $row['tanggal'],
 						"CustCode"  	 => $row['caption'],
@@ -3413,6 +3427,7 @@ else if ($_POST['type'] == "Executed_Sewa"){
 						"TipeSales" 	 => 6,
 						"NoSJ"      	 => $noSJ,
 						"Total" 	 	 => 0,
+						"NoRefVendor" 	 => $row['sj_vendor'],
 						"Lines"     	 => []
 					];
 					$detailCount[$key] = 0;
@@ -3422,710 +3437,389 @@ else if ($_POST['type'] == "Executed_Sewa"){
 					}
 				}
 
-				$resultData[$key]['Lines'] = array_merge($resultData[$key]['Lines'], $lines);
-				$detailCount[$key] += count($lines);
-				$resultData[$key]['Total'] += $total_tagihan;
-			}
+			$resultData[$key]['Lines'] = array_merge($resultData[$key]['Lines'], $lines);
+			$detailCount[$key] += count($lines);
+			$resultData[$key]['Total'] += $total_tagihan;
 		}
-		$resultData = array_values($resultData);
+	}
+	$resultData = array_values($resultData);
 
-		// ----------- NO SEND API (LIHAT JSON) -----------
-			// header('Content-Type: application/json');
+	// ----------- NO SEND API (LIHAT JSON) -----------
+		// header('Content-Type: application/json');
+		// echo "<pre>";
+		// echo json_encode($resultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		// echo "<pre>";
+		// exit;
+
+		// echo json_encode([
+		// 	"success" => true,
+		// 	"data"    => $resultData
+		// ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		
+
+	// ----------- KIRIM API -----------
+		// $apiUrl = "https://wsp.mitraadipersada.com/trucking/sales-order.php";
+		$apiUrl = "http://192.168.1.153/trucking2/sales-order.php";
+
+		$ch = curl_init($apiUrl);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, [
+			'Content-Type: application/json'
+		]);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array_values($resultData)));
+
+		$response = curl_exec($ch);
+		curl_close($ch);
+		
+		// ----------- CHECK RESPONS -----------
+			// $data = json_decode($response, true);
 			// echo "<pre>";
-			// echo json_encode($resultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			// echo "<pre>";
+			// print_r($data);
+			// echo "</pre>";
 			// die();
 
-			// echo json_encode([
-			// 	"success" => true,
-			// 	"data"    => $resultData
-			// ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			
+		$apiResponse = json_decode($response, true);
+		$resultDataLog = json_encode($apiResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		$rawData = json_encode($resultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-		// ----------- KIRIM API -----------
-			// $apiUrl = "https://wsp.mitraadipersada.com/trucking/sales-order.php";
-			$apiUrl = "http://192.168.1.153/trucking2/sales-order.php";
+		if (!$apiResponse || !isset($apiResponse['docnum'])) {
+			$success = false;
+			$mssg    = $apiResponse['mssg'] ?? 'Invalid API response';
+			mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result)) 
+				VALUES (
+					'', 
+					'SO WH', 
+					'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
+					'ERROR-" . mysqli_real_escape_string($koneksi, $mssg) . "',
+					'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
+				)
+			");
 
-			$ch = curl_init($apiUrl);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_POST, true);
-			curl_setopt($ch, CURLOPT_HTTPHEADER, [
-				'Content-Type: application/json'
-			]);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array_values($resultData)));
+		} else {
+			$success = true;
+			$desc    = 'SUCCESS';
+			mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) 
+				VALUES (
+					'" . mysqli_real_escape_string($koneksi, $apiResponse['docnum']) . "',
+					'SO WH',  
+					'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
+					'" . mysqli_real_escape_string($koneksi, $desc) . "',
+					'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
+				)
+			");
 
-			$response = curl_exec($ch);
-			curl_close($ch);
-			
-			// ----------- CHECK RESPONS -----------
-				// $data = json_decode($response, true);
-				// echo "<pre>";
-				// print_r($data);
-				// echo "</pre>";
-				// die();
-
-			$apiResponse = json_decode($response, true);
-			$resultDataLog = json_encode($apiResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			$rawData = json_encode($resultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-			if (!$apiResponse || !isset($apiResponse['docnum'])) {
-				$success = false;
-				$mssg    = $apiResponse['mssg'] ?? 'Invalid API response';
-				mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result)) 
-					VALUES (
-						'', 
-						'SO WH', 
-						'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
-						'ERROR-" . mysqli_real_escape_string($koneksi, $mssg) . "',
-						'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
-					)
-				");
-
-			} else {
-				$success = true;
-				$desc    = 'SUCCESS';
-				mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) 
-					VALUES (
-						'" . mysqli_real_escape_string($koneksi, $apiResponse['docnum']) . "',
-						'SO WH',  
-						'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
-						'" . mysqli_real_escape_string($koneksi, $desc) . "',
-						'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
-					)
-				");
-
-				foreach ($ids as $id_data) {
-					$id_data = (int)$id_data;
-					$docnum = mysqli_real_escape_string($koneksi, $apiResponse['docnum']);
-					$sql_update = "UPDATE t_ware_data 
+			foreach ($ids as $id_data) {
+				$id_data = (int)$id_data;
+				$docnum = mysqli_real_escape_string($koneksi, $apiResponse['docnum']);
+				$sql_update = "UPDATE t_ware_data 
 								SET no_so = '$docnum' 
-								WHERE id_data = '$id_data'";
-
-					// echo $sql_update;
-					// die();
-					mysqli_query($koneksi, $sql_update);
-				}
+								WHERE id_data = '$id_data' 
+								AND no_so IS NULL";
+				mysqli_query($koneksi, $sql_update);
 			}
+		}
 
-			echo json_encode([
-				"success" => $success,
-				"message" => $apiResponse['mssg'] ?? ($success ? "Berhasil" : "Gagal tanpa pesan"),
-				"sent"    => $resultData
-			], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		echo json_encode([
+			"success" => $success,
+			"message" => $apiResponse['mssg'] ?? ($success ? "Berhasil" : "Gagal tanpa pesan"),
+			"sent"    => $resultData
+		], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-	}
+}
 
 // ========= UP ARWH TO SAP =========
-	else if ($_GET['type'] == "ListUpARWHSAP") {
-		$cari   	= mysqli_real_escape_string($koneksi, $_GET['cari']);
-		$id_data  	= mysqli_real_escape_string($koneksi, $_GET['id_data']);
+else if ($_GET['type'] == "ListUpARWHSAP") {
+	$cari   	= mysqli_real_escape_string($koneksi, $_GET['cari']);
+	$id_data  	= mysqli_real_escape_string($koneksi, $_GET['id_data']);
 
-		$data = '<table class="table table-hover table-striped" style="width:100%">
-			<thead>
-				<tr>
-					<th width="5%" style="text-align: center;">NO</th>
-					<th width="15%" style="text-align: center;">Date</th>
-					<th width="15%" style="text-align: center;">SAP Project</th>
-					<th width="15%" style="text-align: center;">No SO SAP</th>
-					<th width="15%" style="text-align: center;">No SO</th>
-					<th width="27%" style="text-align: center;">Nama Customer</th>
-					<th width="10%" style="text-align: center;">ADD</th>
-				</tr>
-			</thead>';
+	$data = '<table class="table table-hover table-striped" style="width:100%">
+		<thead>
+			<tr>
+				<th width="5%" style="text-align: center;">NO</th>
+				<th width="15%" style="text-align: center;">Date</th>
+				<th width="15%" style="text-align: center;">SAP Project</th>
+				<th width="15%" style="text-align: center;">No SO SAP</th>
+				<th width="15%" style="text-align: center;">No SO</th>
+				<th width="27%" style="text-align: center;">Nama Customer</th>
+				<th width="10%" style="text-align: center;">ADD</th>
+			</tr>
+		</thead>';
 
-		$sql_data = "SELECT
-					t_ware_data.id_data,
-					t_ware_data.tanggal,
-					sap_project.kode_project,
-					t_ware_data.id_cust,
-					t_ware_data.no_so,
-					t_ware_data.rowid
-				FROM t_ware_data
-				LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
-				WHERE t_ware_data.id_data = '$id_data'";
+	$sql_data = "SELECT
+				t_ware_data.id_data,
+				t_ware_data.tanggal,
+				sap_project.kode_project,
+				t_ware_data.id_cust,
+				t_ware_data.no_so,
+				t_ware_data.rowid
+			FROM t_ware_data
+			LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
+			WHERE t_ware_data.id_data = '$id_data'";
 
-				// echo $sql_data;
-				// die();
-		$query_data = mysqli_query($koneksi, $sql_data);
+			// echo $sql_data;
+			// die();
+	$query_data = mysqli_query($koneksi, $sql_data);
 
-		if ($query_data && mysqli_num_rows($query_data) > 0) {
-			$dj         = mysqli_fetch_assoc($query_data);
-			$tanggal    = $dj['tanggal'];
-			$rowid		= $dj['rowid'];
-			$id_cust    = $dj['id_cust'];
-			$no_so    	= $dj['no_so'];
-		} else {
-			$tanggal = $rowid = $id_cust = null;
-		}
-
-		$q_data = "SELECT
-					t_ware_data.no_doc,
-					t_ware_data.tanggal,
-					t_ware_data.id_data,
-					t_ware_data.rowid,
-					t_ware_data.id_cust,
-					t_ware_data.no_so,
-					sap_project.kode_project,
-					m_cust_tr.nama_cust
-				FROM t_ware_data
-				LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
-				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_data.id_cust
-				WHERE t_ware_data.no_doc LIKE '%$cari%' 
-					AND t_ware_data.tanggal = '$tanggal'
-					AND t_ware_data.rowid	= '$rowid'
-					AND t_ware_data.id_cust = '$id_cust'
-					AND t_ware_data.no_so 	= '$no_so'
-					AND t_ware_data.no_ar IS NULL
-				ORDER BY t_ware_data.no_doc 
-				LIMIT 0, 10";
-		$query = mysqli_query($koneksi, $q_data);	
-		if (!$query) {
-			exit(mysqli_error($koneksi));
-		}
-
-		$posisi = 0;
-		if (mysqli_num_rows($query) > 0) {
-			while($row = mysqli_fetch_assoc($query)) {	
-				$posisi++;
-				$data .= '<tr>';		
-				$data .= '<td style="text-align:center">'.$posisi.'</td>';
-				$data .= '<td style="text-align:center">'.$row['tanggal'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['kode_project'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['no_so'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['no_doc'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['nama_cust'].'</td>';
-
-				$id_data = isset($row['id_data']) ? $row['id_data'] : $row['no_doc'];
-				$data .= '<td style="text-align:center">
-							<label>
-							<input type="checkbox" 
-									name="ar_selected[]" 
-									value="'.$id_data.'">
-							</label>
-						</td>';
-
-				$data .= '</tr>';
-			}		
-		} else {
-			$data .= '<tr><td colspan="7" style="text-align:center">Data tidak ditemukan</td></tr>';
-		}
-
-		$data .= '</table>';
-		echo $data;			
+	if ($query_data && mysqli_num_rows($query_data) > 0) {
+		$dj         = mysqli_fetch_assoc($query_data);
+		$tanggal    = $dj['tanggal'];
+		$rowid		= $dj['rowid'];
+		$id_cust    = $dj['id_cust'];
+		$no_so    	= $dj['no_so'];
+	} else {
+		$tanggal = $rowid = $id_cust = null;
 	}
-	else if ($_POST['type'] == "SaveUpAR") {
-		// echo "<pre>";
-		// print_r($_POST);
-		// echo "</pre>";
-		// die();
 
-		$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
+	$q_data = "SELECT
+				t_ware_data.no_doc,
+				t_ware_data.tanggal,
+				t_ware_data.id_data,
+				t_ware_data.rowid,
+				t_ware_data.id_cust,
+				t_ware_data.no_so,
+				sap_project.kode_project,
+				m_cust_tr.nama_cust
+			FROM t_ware_data
+			LEFT JOIN sap_project ON sap_project.rowid = t_ware_data.rowid
+			LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_data.id_cust
+			WHERE t_ware_data.no_doc LIKE '%$cari%' 
+				AND t_ware_data.tanggal = '$tanggal'
+				AND t_ware_data.rowid	= '$rowid'
+				AND t_ware_data.id_cust = '$id_cust'
+				AND t_ware_data.no_so 	= '$no_so'
+				AND t_ware_data.no_ar IS NULL
+			ORDER BY t_ware_data.no_doc 
+			LIMIT 0, 10";
+	$query = mysqli_query($koneksi, $q_data);	
+	if (!$query) {
+		exit(mysqli_error($koneksi));
+	}
 
-		if (empty($ids)) {
-			echo json_encode([
+	$posisi = 0;
+	if (mysqli_num_rows($query) > 0) {
+		while($row = mysqli_fetch_assoc($query)) {	
+			$posisi++;
+			$data .= '<tr>';		
+			$data .= '<td style="text-align:center">'.$posisi.'</td>';
+			$data .= '<td style="text-align:center">'.$row['tanggal'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['kode_project'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['no_so'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['no_doc'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['nama_cust'].'</td>';
+
+			$id_data = isset($row['id_data']) ? $row['id_data'] : $row['no_doc'];
+			$data .= '<td style="text-align:center">
+						<label>
+						<input type="checkbox" 
+								name="ar_selected[]" 
+								value="'.$id_data.'">
+						</label>
+					</td>';
+
+			$data .= '</tr>';
+		}		
+	} else {
+		$data .= '<tr><td colspan="7" style="text-align:center">Data tidak ditemukan</td></tr>';
+	}
+
+	$data .= '</table>';
+	echo $data;			
+}
+else if ($_POST['type'] == "SaveUpAR") {
+	// echo "<pre>";
+	// print_r($_POST);
+	// echo "</pre>";
+	// die();
+
+	$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
+
+	if (empty($ids)) {
+		echo json_encode([
+			"success" => false,
+			"message" => "Tidak ada data yang dipilih"
+		]);
+		exit;
+	}
+
+	$resultData = [
+		"CustCode" => null,
+		"Lines"    => []
+	];
+
+	$addedNoSo = [];
+
+	foreach ($ids as $id_data) {
+		$id_data = mysqli_real_escape_string($koneksi, $id_data);
+
+		$sql_header = "
+			SELECT 
+				t_ware_data.no_so,
+				m_cust_tr.caption
+			FROM t_ware_data
+			LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_data.id_cust
+			WHERE t_ware_data.id_data = '$id_data'
+		";
+
+		$query_header = mysqli_query($koneksi, $sql_header);
+
+		if (!$query_header) {
+			die(json_encode([
 				"success" => false,
-				"message" => "Tidak ada data yang dipilih"
-			]);
-			exit;
+				"message" => "Query gagal: " . mysqli_error($koneksi),
+				"sql" => $sql_header
+			]));
 		}
 
-		$resultData = [
-			"CustCode" => null,
-			"Lines"    => []
-		];
+		$row = mysqli_fetch_assoc($query_header);
 
-		foreach ($ids as $id_data) {
-			$id_data = mysqli_real_escape_string($koneksi, $id_data);
-
-			// === Perbaikan query utama ===
-			$sql_header = "SELECT 
-					t_ware_data.no_doc,
-					m_cust_tr.caption
-				FROM t_ware_data
-				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_data.id_cust
-				WHERE t_ware_data.id_data = '$id_data'
-			";
-
-			$query_header = mysqli_query($koneksi, $sql_header);
-
-			// === Tambahkan pengecekan error SQL ===
-			if (!$query_header) {
-				die(json_encode([
-					"success" => false,
-					"message" => "Query gagal: " . mysqli_error($koneksi),
-					"sql" => $sql_header
-				]));
+		if ($row) {
+			if ($resultData["CustCode"] === null) {
+				$resultData["CustCode"] = $row['caption'];
 			}
 
-			$row = mysqli_fetch_assoc($query_header);
+			$noSo = $row['no_so'];
 
-			if ($row) {
-				if ($resultData["CustCode"] === null) {
-					$resultData["CustCode"] = $row['caption'];
-				}
-
+			// Cek apakah no_so sudah pernah dimasukkan
+			if (!in_array($noSo, $addedNoSo)) {
 				$resultData["Lines"][] = [
-					"NoSO" => $row['no_doc']
+					"NoSO" => $noSo
 				];
+				$addedNoSo[] = $noSo; // tandai sudah ditambahkan
 			}
 		}
+	}
 
-		$output = [$resultData];
+	$output = [$resultData];
+
+	echo json_encode([
+		"success" => true,
+		"data" => $output
+	]);
 
 
-		// ----------- NO SEND API (LIHAT JSON) -----------
-			// header('Content-Type: application/json');
+	// ----------- NO SEND API (LIHAT JSON) -----------
+		// header('Content-Type: application/json');
+		// echo "<pre>";
+		// echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		// echo "<pre>";
+		// exit;
+
+	// ----------- KIRIM API ----------- 
+		// $apiUrl = "https://wsp.mitraadipersada.com/trucking/sales-invoice.php";
+		$apiUrl = "http://192.168.1.153/trucking2/sales-invoice.php";
+
+		$ch = curl_init($apiUrl);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, [
+			'Content-Type: application/json'
+		]);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($output));
+
+		$response = curl_exec($ch);
+		curl_close($ch);
+		
+		// ----------- CHECK RESPONS -----------
+			// $data = json_decode($response, true);
 			// echo "<pre>";
-			// echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			// echo "<pre>";
+			// print_r($data);
+			// echo "</pre>";
 			// die();
 
-		// ----------- KIRIM API ----------- 
-			// $apiUrl = "https://wsp.mitraadipersada.com/trucking/sales-invoice.php";
-			$apiUrl = "http://192.168.1.153/trucking2/sales-invoice.php";
+		$apiResponse = json_decode($response, true);
+		$resultDataLog = json_encode($apiResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		$rawData = json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-			$ch = curl_init($apiUrl);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_POST, true);
-			curl_setopt($ch, CURLOPT_HTTPHEADER, [
-				'Content-Type: application/json'
-			]);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($output));
+		if (!$apiResponse || !isset($apiResponse['docnum'])) {
+			$success = false;
+			$mssg    = $apiResponse['mssg'] ?? 'Invalid API response';
+			mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) 
+				VALUES (
+					'', 
+					'AR WH', 
+					'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
+					'ERROR-" . mysqli_real_escape_string($koneksi, $mssg) . "',
+					'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
+				)
+			");
 
-			$response = curl_exec($ch);
-			curl_close($ch);
-			
-			// ----------- CHECK RESPONS -----------
-				// $data = json_decode($response, true);
-				// echo "<pre>";
-				// print_r($data);
-				// echo "</pre>";
-				// die();
+		} else {
+			$success = true;
+			$desc    = 'SUCCESS';
+			mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) 
+				VALUES (
+					'" . mysqli_real_escape_string($koneksi, $apiResponse['docnum']) . "', 
+					'AR WH', 
+					'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
+					'" . mysqli_real_escape_string($koneksi, $desc) . "',
+					'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
+				)
+			");
 
-			$apiResponse = json_decode($response, true);
-			$resultDataLog = json_encode($apiResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			$rawData = json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-			if (!$apiResponse || !isset($apiResponse['docnum'])) {
-				$success = false;
-				$mssg    = $apiResponse['mssg'] ?? 'Invalid API response';
-				mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) 
-					VALUES (
-						'', 
-						'AR WH', 
-						'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
-						'ERROR-" . mysqli_real_escape_string($koneksi, $mssg) . "',
-						'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
-					)
-				");
-
-			} else {
-				$success = true;
-				$desc    = 'SUCCESS';
-				mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) 
-					VALUES (
-						'" . mysqli_real_escape_string($koneksi, $apiResponse['docnum']) . "', 
-						'AR WH', 
-						'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
-						'" . mysqli_real_escape_string($koneksi, $desc) . "',
-						'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
-					)
-				");
-
-				foreach ($ids as $id_data) {
-					$id_data = (int)$id_data;
-					$docnum = mysqli_real_escape_string($koneksi, $apiResponse['docnum']);
-					$tgl_ar = date('Y-m-d');
-					$sql_update = "UPDATE t_ware_data SET 
-							no_ar = '$docnum',
-							tgl_ar = '$tgl_ar'
-						WHERE id_data = '$id_data'";
-					mysqli_query($koneksi, $sql_update);
-				}
+			foreach ($ids as $id_data) {
+				$id_data = (int)$id_data;
+				$docnum = mysqli_real_escape_string($koneksi, $apiResponse['docnum']);
+				$tgl_ar = date('Y-m-d');
+				$sql_update = "UPDATE t_ware_data SET 
+						no_ar = '$docnum',
+						tgl_ar = '$tgl_ar'
+					WHERE id_data = '$id_data'";
+				mysqli_query($koneksi, $sql_update);
 			}
-			
-			echo json_encode([
-				"success" => $success,
-				"message" => $apiResponse['mssg'] ?? ($success ? "Berhasil" : "Gagal tanpa pesan"),
-				"sent"    => $resultDataLog
-			], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-	}
+		}
+		
+		echo json_encode([
+			"success" => $success,
+			"message" => $apiResponse['mssg'] ?? ($success ? "Berhasil" : "Gagal tanpa pesan"),
+			"sent"    => $resultDataLog
+		], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+}
 
 // ========= UP RENT SO TO SAP =========
-	else if ($_GET['type'] == "ListRentSOSAP") {
-		// echo "<pre>";
-		// print_r($_GET);
-		// echo "</pre>";
-		// die();
+else if ($_GET['type'] == "ListRentSOSAP") {
+	// echo "<pre>";
+	// print_r($_GET);
+	// echo "</pre>";
+	// die();
 
-		$cari   	= mysqli_real_escape_string($koneksi, $_GET['cari']);
-		$id_sewa	= mysqli_real_escape_string($koneksi, $_GET['id_sewa']);
+	$cari   	= mysqli_real_escape_string($koneksi, $_GET['cari']);
+	$id_sewa	= mysqli_real_escape_string($koneksi, $_GET['id_sewa']);
 
-		$data = '<table class="table table-hover table-striped" style="width:100%">
-			<thead>
-				<tr>
-					<th width="5%" style="text-align: center;">NO</th>
-					<th width="10%" style="text-align: center;">Tanggal</th>
-					<th width="15%" style="text-align: center;">SAP Project</th>
-					<th width="27%" style="text-align: center;">Nama Customer</th>
-					<th width="10%" style="text-align: center;">ADD</th>
-				</tr>
-			</thead>';
+	$data = '<table class="table table-hover table-striped" style="width:100%">
+		<thead>
+			<tr>
+				<th width="5%" style="text-align: center;">NO</th>
+				<th width="10%" style="text-align: center;">Tanggal</th>
+				<th width="15%" style="text-align: center;">SAP Project</th>
+				<th width="27%" style="text-align: center;">Nama Customer</th>
+				<th width="10%" style="text-align: center;">ADD</th>
+			</tr>
+		</thead>';
 
-		$q_ware = "SELECT 
-					t_ware_sewa.tanggal,
-					t_ware_sewa.sap_rowid,
-					t_ware_sewa.id_cust
-				FROM t_ware_sewa
-				WHERE t_ware_sewa.id_sewa = '$id_sewa'
-				LIMIT 1";
-
-		$r_ware = mysqli_query($koneksi, $q_ware);
-
-		if ($r_ware && mysqli_num_rows($r_ware) > 0) {
-			$dj         = mysqli_fetch_assoc($r_ware);
-
-			$tanggal	= $dj['tanggal'];
-			$rowid		= $dj['sap_rowid'];
-			$id_cust    = $dj['id_cust'];
-		} else {
-			$tanggal = $rowid = $id_cust = null;
-		}
-
-		$q_detail_ware = "SELECT 
-					t_ware_sewa.id_sewa,
-					t_ware_sewa.tanggal,
-					sap_project.rowid,
-					t_ware_sewa.id_cust,
-					sap_project.kode_project,
-					m_cust_tr.nama_cust
-				FROM t_ware_sewa
-				LEFT JOIN sap_project ON sap_project.rowid = t_ware_sewa.sap_rowid
-				LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_sewa.id_cust
-				WHERE t_ware_sewa.no_sewa LIKE '%$cari%' 
-					AND t_ware_sewa.tanggal = '$tanggal'
-					AND t_ware_sewa.sap_rowid = '$rowid'
-					AND t_ware_sewa.id_cust = '$id_cust'
-				ORDER BY t_ware_sewa.no_sewa DESC 
-				LIMIT 0, 10";
-				
-
-		// echo $q_detail_ware;
-		// exit;
-
-		$r_detail_ware = mysqli_query($koneksi, $q_detail_ware);	
-		if (!$r_detail_ware) {
-			exit(mysqli_error($koneksi));
-		}
-
-		$posisi = 0;
-		if (mysqli_num_rows($r_detail_ware) > 0) {
-			while($row = mysqli_fetch_assoc($r_detail_ware)) {	
-				$posisi++;
-				$data .= '<tr>';		
-				$data .= '<td style="text-align:center">'.$posisi.'</td>';
-				$data .= '<td style="text-align:center">'.$row['tanggal'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['kode_project'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['nama_cust'].'</td>';
-
-				$id_sewa = isset($row['id_sewa']) ? $row['id_sewa'] : $row['no_doc'];
-				$data .= '<td style="text-align:center">
-							<label>
-							<input type="checkbox" 
-									name="so_selected[]" 
-									value="'.$id_sewa.'">
-							</label>
-						</td>';
-
-				$data .= '</tr>';
-			}		
-		} else {
-			$data .= '<tr><td colspan="7" style="text-align:center">Data tidak ditemukan</td></tr>';
-		}
-
-		$data .= '</table>';
-		echo $data;			
-	}
-	else if ($_POST['type'] == "SaveRentSOSAP") {
-		// echo "<pre>";
-		// print_r($_POST);
-		// echo "</pre>";
-		// exit;
-
-		$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
-
-		if (empty($ids)) {
-			echo json_encode([
-				"success" => false,
-				"message" => "Tidak ada data yang dipilih"
-			]);
-			exit;
-		}
-
-		$resultData = [];
-		$key = 0; // FIX: define key
-
-		foreach ($ids as $id_sewa) {
-			$id_sewa = mysqli_real_escape_string($koneksi, $id_sewa);
-
-			$sql_header = "SELECT 
-				t_ware_sewa.tanggal,
-				t_ware_sewa.id_quo,
-				m_cust_tr.caption,
-				sap_project.kode_project,
-				t_ware_sewa.ket AS remark,
-				m_cust_tr.nama_cust,
-				m_cust_tr.nama_cust AS penerima,
-				t_ware_sewa.no_sewa AS no_doc,
-				t_ware_sewa.tagihan AS total
-			FROM t_ware_sewa
-			LEFT JOIN sap_project ON sap_project.rowid = t_ware_sewa.sap_rowid
-			LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_sewa.id_cust
-			WHERE t_ware_sewa.id_sewa = '$id_sewa' LIMIT 1";
-
-			$query_header = mysqli_query($koneksi, $sql_header);
-
-			while ($row = mysqli_fetch_assoc($query_header)) {
-
-				if (empty($row['caption'])) {
-					echo json_encode([
-						"success" => false,
-						"message" => "custcode masih kosong, silahkan hubungi tim IT-SAP"
-					]);
-					exit;
-				}
-
-				$id_quo = $row['id_quo'];
-				$lines = [];
-
-				$sql_detail = "SELECT  
-					CONCAT(t_ware.kode, ' - ',t_ware.nama) AS nama, 
-					t_ware_data.tanggal, 
-					(t_ware_data_detil.masuk - t_ware_data_detil.keluar) * t_ware.vol AS qty,
-					t_ware.unit, 
-					t_ware_quo.harga_sewa AS harga, 
-					m_params_tr.wh_itemcode,
-					m_params_tr.wh_sap_coa,
-					m_params_tr.wh_sap_corporate,
-					m_params_tr.wh_sap_divisi,
-					m_params_tr.wh_sap_dept,
-					m_params_tr.wh_sap_activity,
-					m_params_tr.wh_sap_location,
-					t_ware_quo.aging_sewa
-				FROM t_ware_data 
-				LEFT JOIN t_ware_data_detil ON t_ware_data.id_data = t_ware_data_detil.id_data
-				LEFT JOIN t_ware ON t_ware_data_detil.id_ware = t_ware.id_ware 
-				LEFT JOIN t_ware_quo ON t_ware.id_quo = t_ware_quo.id_quo
-				LEFT JOIN m_params_tr ON m_params_tr.id_param = '1'
-				WHERE t_ware.id_quo = '$id_quo'  
-					AND t_ware_data.jenis = '0'
-					AND t_ware_data.status = '1' 
-				ORDER BY  t_ware_data.id_data";
-
-				$query_detail = mysqli_query($koneksi, $sql_detail);
-
-				if ($query_detail) {
-
-					$pq = mysqli_query($koneksi, "SELECT 
-								t_ware_sewa.*,
-								m_cust_tr.nama_cust
-							FROM t_ware_sewa 
-							LEFT JOIN m_cust_tr ON t_ware_sewa.id_cust = m_cust_tr.id_cust
-							WHERE t_ware_sewa.id_sewa = '$id_sewa' LIMIT 1");
-
-					$rq = mysqli_fetch_assoc($pq);
-					$tgl_keluar = strtotime($rq['tanggal']);
-
-					while ($det = mysqli_fetch_assoc($query_detail)) {
-
-						$tgl_masuk = strtotime($det['tanggal']);
-
-						if ($tgl_masuk && $tgl_keluar) {
-							$aging = round(($tgl_keluar - $tgl_masuk) / (60 * 60 * 24));
-							$qty = ($aging > (int)$det['aging_sewa']) ? round($det['qty'], 2) : 0;
-						} else {
-							$qty = 0;
-						}
-
-						if ($qty > 0) {
-							$lines[] = [
-								"ItemCode"   => $det['wh_itemcode'] ?? '',
-								"ItemName"   => $det['nama'] ?? '',
-								"Qty"        => $qty ?? 0,
-								"JenisMobil" => $det['unit'] ?? '',
-								"Whse"       => "WH-FG",
-								"BiayaKirim" => $det['harga'] ?? 0,
-								"Disc"       => 0,
-								"PPN"        => 0,
-								"PPH"        => 0,
-								"Container"  => '',
-								"Route"      => '',
-								"Remark"     => $row['remark'] ?? '',
-								"GLAcct"     => $det['wh_sap_coa'] ?? '',
-								"Corporate"  => $det['wh_sap_corporate'] ?? '',
-								"Divisi"     => $det['wh_sap_divisi'] ?? '',
-								"Department" => $det['wh_sap_dept'] ?? '',
-								"Activity"   => $det['wh_sap_activity'] ?? '',
-								"Location"   => $det['wh_sap_location'] ?? '',
-								"NoSO"       => $row['no_doc'] ?? '',
-							];
-						}
-						
-					}
-
-				} else {
-					error_log("Query detail gagal: " . mysqli_error($koneksi));
-				}
-
-				$resultData[$key] = [
-					"TglSO"     	 => $row['tanggal'],
-					"TglKirim"     	 => $row['tanggal'],
-					"CustCode"  	 => $row['caption'],
-					"CustName"  	 => $row['nama_cust'],
-					"Project"   	 => $row['kode_project'],
-					"Remarks"   	 => $row['remark'],
-					"Penerima"  	 => $row['penerima'],
-					"GudangPenerima" => $row['penerima'],
-					"Sales"     	 => 27,
-					"TipeSales" 	 => 6,
-					"NoSJ"      	 => '',
-					"Total" 	 	 => $row['total'],
-					"Lines"     	 => $lines
-				];
-
-				$key++;
-			}
-		}
-
-		$resultData = array_values($resultData);
-
-
-		// ----------- NO SEND API (LIHAT JSON) -----------
-			// header('Content-Type: application/json');
-			// echo "<pre>";
-			// echo json_encode($resultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			// echo "<pre>";
-			// exit;
-			
-
-		// ----------- KIRIM API -----------
-			// $apiUrl = "https://wsp.mitraadipersada.com/trucking/sales-order.php";
-			$apiUrl = "http://192.168.1.153/trucking2/sales-order.php";
-
-			$ch = curl_init($apiUrl);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_POST, true);
-			curl_setopt($ch, CURLOPT_HTTPHEADER, [
-				'Content-Type: application/json'
-			]);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array_values($resultData)));
-
-			$response = curl_exec($ch);
-			curl_close($ch);
-			
-			// ----------- CHECK RESPONS -----------
-				// $data = json_decode($response, true);
-				// echo "<pre>";
-				// print_r($data);
-				// echo "</pre>";
-				// exit;
-
-			$apiResponse = json_decode($response, true);
-			$resultDataLog = json_encode($apiResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			$rawData = json_encode($resultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-			if (!$apiResponse || !isset($apiResponse['docnum'])) {
-				$success = false;
-				$mssg    = $apiResponse['mssg'] ?? 'Invalid API response';
-				mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result)) 
-					VALUES (
-						'', 
-						'SO RENT', 
-						'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
-						'ERROR-" . mysqli_real_escape_string($koneksi, $mssg) . "',
-						'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
-					)
-				");
-
-			} else {
-				$success = true;
-				$desc    = 'SUCCESS';
-				mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) 
-					VALUES (
-						'" . mysqli_real_escape_string($koneksi, $apiResponse['docnum']) . "',
-						'SO RENT',  
-						'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
-						'" . mysqli_real_escape_string($koneksi, $desc) . "',
-						'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
-					)
-				");
-
-				foreach ($ids as $id_sewa) {
-					$id_sewa = (int)$id_sewa;
-					$docnum = mysqli_real_escape_string($koneksi, $apiResponse['docnum']);
-					$sql_update = "UPDATE t_ware_sewa
-								SET no_so = '$docnum' 
-								WHERE id_sewa = '$id_sewa'";
-
-					// echo $sql_update;
-					// die();
-					mysqli_query($koneksi, $sql_update);
-				}
-			}
-
-			echo json_encode([
-				"success" => $success,
-				"message" => $apiResponse['mssg'] ?? ($success ? "Berhasil" : "Gagal tanpa pesan"),
-				"sent"    => $resultData
-			], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-	}
-
-// ========= UP RENT SO TO SAP =========
-	else if ($_GET['type'] == "ListRentARSAP") {
-		$cari   	= mysqli_real_escape_string($koneksi, $_GET['cari']);
-		$id_sewa  	= mysqli_real_escape_string($koneksi, $_GET['id_sewa']);
-
-		$data = '<table class="table table-hover table-striped" style="width:100%">
-			<thead>
-				<tr>
-					<th width="5%" style="text-align: center;">NO</th>
-					<th width="15%" style="text-align: center;">Date</th>
-					<th width="15%" style="text-align: center;">SAP Project</th>
-					<th width="15%" style="text-align: center;">No SO SAP</th>
-					<th width="15%" style="text-align: center;">No SO</th>
-					<th width="27%" style="text-align: center;">Nama Customer</th>
-					<th width="10%" style="text-align: center;">ADD</th>
-				</tr>
-			</thead>';
-
-		$sql_data = "SELECT 
+	$q_ware = "SELECT 
 				t_ware_sewa.tanggal,
 				t_ware_sewa.sap_rowid,
 				t_ware_sewa.id_cust
 			FROM t_ware_sewa
 			WHERE t_ware_sewa.id_sewa = '$id_sewa'
 			LIMIT 1";
-		// echo $sql_data;
-		// exit;
 
-		$query_data = mysqli_query($koneksi, $sql_data);
+	$r_ware = mysqli_query($koneksi, $q_ware);
 
-		if ($query_data && mysqli_num_rows($query_data) > 0) {
-			$dj         = mysqli_fetch_assoc($query_data);
+	if ($r_ware && mysqli_num_rows($r_ware) > 0) {
+		$dj         = mysqli_fetch_assoc($r_ware);
 
-			$tanggal	= $dj['tanggal'];
-			$rowid		= $dj['sap_rowid'];
-			$id_cust    = $dj['id_cust'];
-		} else {
-			$tanggal = $rowid = $id_cust = null;
-		}
+		$tanggal	= $dj['tanggal'];
+		$rowid		= $dj['sap_rowid'];
+		$id_cust    = $dj['id_cust'];
+	} else {
+		$tanggal = $rowid = $id_cust = null;
+	}
 
-		$q_detail_ware = "SELECT 
+	$q_detail_ware = "SELECT 
 				t_ware_sewa.id_sewa,
-				t_ware_sewa.no_sewa,
 				t_ware_sewa.tanggal,
-				t_ware_sewa.no_so,
 				sap_project.rowid,
 				t_ware_sewa.id_cust,
 				sap_project.kode_project,
@@ -4137,180 +3831,494 @@ else if ($_POST['type'] == "Executed_Sewa"){
 				AND t_ware_sewa.tanggal = '$tanggal'
 				AND t_ware_sewa.sap_rowid = '$rowid'
 				AND t_ware_sewa.id_cust = '$id_cust'
-				AND t_ware_sewa.no_so IS NOT NULL
 			ORDER BY t_ware_sewa.no_sewa DESC 
 			LIMIT 0, 10";
 
-		// echo $q_detail_ware;
-		// exit;
-				
-		$query = mysqli_query($koneksi, $q_detail_ware);	
-		if (!$query) {
-			exit(mysqli_error($koneksi));
-		}
-
-		$posisi = 0;
-		if (mysqli_num_rows($query) > 0) {
-			while($row = mysqli_fetch_assoc($query)) {	
-				$posisi++;
-				$data .= '<tr>';		
-				$data .= '<td style="text-align:center">'.$posisi.'</td>';
-				$data .= '<td style="text-align:center">'.$row['tanggal'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['kode_project'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['no_so'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['no_sewa'].'</td>';
-				$data .= '<td style="text-align:center">'.$row['nama_cust'].'</td>';
-
-				$id_sewa = isset($row['id_sewa']) ? $row['id_sewa'] : $row['no_jo'];
-				$data .= '<td style="text-align:center">
-							<label>
-							<input type="checkbox" 
-									name="ar_selected[]" 
-									value="'.$id_sewa.'">
-							</label>
-						</td>';
-
-				$data .= '</tr>';
-			}		
-		} else {
-			$data .= '<tr><td colspan="7" style="text-align:center">Data tidak ditemukan</td></tr>';
-		}
-
-		$data .= '</table>';
-		echo $data;			
+	$r_detail_ware = mysqli_query($koneksi, $q_detail_ware);	
+	if (!$r_detail_ware) {
+		exit(mysqli_error($koneksi));
 	}
-	else if ($_POST['type'] == "SaveRentARSAP") {
-		// echo "<pre>";
-		// print_r($_POST);
-		// echo "</pre>";
-		// exit;
-		$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
 
-		if (empty($ids)) {
-			echo json_encode([
-				"success" => false,
-				"message" => "Tidak ada data yang dipilih"
-			]);
-			exit;
-		}
+	$posisi = 0;
+	if (mysqli_num_rows($r_detail_ware) > 0) {
+		while($row = mysqli_fetch_assoc($r_detail_ware)) {	
+			$posisi++;
+			$data .= '<tr>';		
+			$data .= '<td style="text-align:center">'.$posisi.'</td>';
+			$data .= '<td style="text-align:center">'.$row['tanggal'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['kode_project'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['nama_cust'].'</td>';
 
-		$resultData = [
-			"CustCode" => null,
-			"Lines"    => []
-		];
+			$id_sewa = isset($row['id_sewa']) ? $row['id_sewa'] : $row['no_doc'];
+			$data .= '<td style="text-align:center">
+						<label>
+						<input type="checkbox" 
+								name="so_selected[]" 
+								value="'.$id_sewa.'">
+						</label>
+					</td>';
 
-		$updatedIds = [];
-		foreach ($ids as $id_sewa_raw) {
-			$id_sewa = mysqli_real_escape_string($koneksi, $id_sewa_raw);
+			$data .= '</tr>';
+		}		
+	} else {
+		$data .= '<tr><td colspan="7" style="text-align:center">Data tidak ditemukan</td></tr>';
+	}
 
-			$sql_header = "SELECT 
-							t_ware_sewa.*, 
-							m_cust_tr.caption 
-						FROM t_ware_sewa 
-						LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_sewa.id_cust
-						WHERE t_ware_sewa.id_sewa = '$id_sewa' LIMIT 1";
+	$data .= '</table>';
+	echo $data;			
+}
+else if ($_POST['type'] == "SaveRentSOSAP") {
+	// echo "<pre>";
+	// print_r($_POST);
+	// echo "</pre>";
+	// exit;
 
-			$query_header = mysqli_query($koneksi, $sql_header);
-			if ($query_header) {
-				$rowh = mysqli_fetch_assoc($query_header);
-				if ($rowh) {
-					if ($resultData["CustCode"] === null) {
-						$resultData["CustCode"] = $rowh['caption'] ?? '';
+	$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
+
+	if (empty($ids)) {
+		echo json_encode([
+			"success" => false,
+			"message" => "Tidak ada data yang dipilih"
+		]);
+		exit;
+	}
+
+	$key = 0; 
+	$resultData = [];
+
+	foreach ($ids as $id_sewa) {
+		$id_sewa = mysqli_real_escape_string($koneksi, $id_sewa);
+
+		$sql_header = "SELECT 
+			t_ware_sewa.tanggal,
+			t_ware_sewa.id_quo,
+			m_cust_tr.caption,
+			sap_project.kode_project,
+			t_ware_sewa.ket AS remark,
+			m_cust_tr.nama_cust,
+			m_cust_tr.isintercomp,
+			m_cust_tr.nama_cust AS penerima,
+			t_ware_sewa.no_sewa AS no_doc
+		FROM t_ware_sewa
+		LEFT JOIN sap_project ON sap_project.rowid = t_ware_sewa.sap_rowid
+		LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_sewa.id_cust
+		WHERE t_ware_sewa.id_sewa = '$id_sewa' LIMIT 1";
+
+		$query_header = mysqli_query($koneksi, $sql_header);
+		if (!$query_header) { continue; }
+
+		while ($row = mysqli_fetch_assoc($query_header)) {
+			$id_quo = $row['id_quo'];
+			$lines = [];
+			$total_all = 0;
+
+			$sql_detail = "SELECT 
+					t_ware_sewa_detail.tanggal,
+					t_ware_sewa_detail.cbm AS qty,
+					'' AS unit,
+					t_ware_sewa_detail.harga_sewa AS harga,
+					t_ware_quo.aging_sewa
+				FROM t_ware_sewa_detail
+				LEFT JOIN t_ware_sewa ON t_ware_sewa.id_sewa = t_ware_sewa_detail.id_sewa
+				LEFT JOIN t_ware_quo ON t_ware_quo.id_quo = t_ware_sewa.id_quo
+				WHERE t_ware_sewa_detail.id_sewa = '$id_sewa'
+				";
+
+			$query_detail = mysqli_query($koneksi, $sql_detail);
+			if ($query_detail) {
+				$pq = mysqli_query($koneksi, "SELECT 
+						t_ware_sewa.*,
+						m_cust_tr.nama_cust,
+						m_cost_tr.*
+					FROM t_ware_sewa 
+					LEFT JOIN m_cust_tr ON t_ware_sewa.id_cust = m_cust_tr.id_cust
+					LEFT JOIN m_cost_tr ON t_ware_sewa.id_cost = m_cost_tr.id_cost
+					WHERE t_ware_sewa.id_sewa = '$id_sewa' LIMIT 1");
+
+				$rq = mysqli_fetch_assoc($pq);
+				$tgl_keluar = strtotime($rq['tanggal']);
+
+				$qty_new = 0;
+				while ($det = mysqli_fetch_assoc($query_detail)) {
+					$tgl_masuk = strtotime($det['tanggal']);
+					$qty = 0;
+					
+
+					if ($tgl_masuk && $tgl_keluar) {
+						$aging = round(($tgl_keluar - $tgl_masuk) / (60 * 60 * 24));
+						$qty = ($aging > (int)$det['aging_sewa']) ? (float)$det['qty'] : 0;
 					}
-					$resultData["Lines"][] = [
-						"NoSO" => $rowh['no_sewa'] ?? ''
-					];
+
+					if ($qty > 0) {
+						$harga = (float) str_replace([',', ' '], ['', ''], $det['harga']);
+						$itemKey = $rq['itemcode'] ?? '';
+
+						if (!isset($lines[$itemKey])) {
+							$lines[$itemKey] = [
+								"ItemCode"   => $rq['itemcode'] ?? '',
+								"ItemName"   => $rq['nama_cost'] ?? '',
+								"Qty"        => 0.0,
+								"UoM" 		 => $det['unit'] ?? '',
+								"Whse"       => "WH-FG",
+								"BiayaKirim" => $harga,
+								"Disc"       => 0,
+								"PPN"        => 0,
+								"PPH"        => 0,
+								"FreeText"   => '',
+								"Route"      => '',
+								"Remark"     => $row['remark'] ?? '',
+								"GLAcct"     => ($row['isintercomp'] == 1) 
+												? ($rq['sap_coa_af'] ?? '') 
+												: ($rq['sap_coa'] ?? ''),
+								"Corporate"  => $rq['sap_corporate'] ?? '',
+								"Divisi"     => $rq['sap_divisi'] ?? '',
+								"Department" => $rq['sap_dept'] ?? '',
+								"Activity"   => $rq['sap_activity'] ?? '',
+								"Location"   => $rq['sap_location'] ?? '',
+								"NoSO"       => $row['no_doc'] ?? '',
+							];
+						}
+
+						$qty_new += $qty;
+					}
 				}
+				$total_all = round($qty_new,2) * $harga;
 			}
-		} 
+			$lines[$itemKey]["Qty"] = round($qty_new,2);
 
-		// ================== SIAPKAN OUTPUT untuk sales-invoice API ==================
-		$output = [$resultData];
+			// total akhir
+			$resultData[$key] = [
+				"NoSO"           => $row['no_doc'],
+				"TglSO"          => $row['tanggal'],
+				"TglKirim"       => $row['tanggal'],
+				"CustCode"       => $row['caption'],
+				"CustName"       => $row['nama_cust'],
+				"Project"        => $row['kode_project'],
+				"Remarks"        => $row['remark'],
+				"Penerima"       => $row['penerima'],
+				"GudangPenerima" => $row['penerima'],
+				"Sales"          => 27,
+				"TipeSales"      => 6,
+				"NoSJ"           => '',
+				"Total"          => (int) round($total_all),
+				"Lines"          => array_values($lines)
+			];
 
-		// header('Content-Type: application/json');
-		// echo "<pre>";
-		// echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-		// echo "<pre>";
-		// exit;
-
-
-		$apiUrl = "http://192.168.1.153/trucking2/sales-invoice.php";
-		$ch2 = curl_init($apiUrl);
-		curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch2, CURLOPT_POST, true);
-		curl_setopt($ch2, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-		curl_setopt($ch2, CURLOPT_POSTFIELDS, json_encode($output));
-		curl_setopt($ch2, CURLOPT_TIMEOUT, 20);
-
-		$response2 = curl_exec($ch2);
-		$curlErrNo2 = curl_errno($ch2);
-		$curlErr2 = curl_error($ch2);
-		$httpCode2 = curl_getinfo($ch2, CURLINFO_HTTP_CODE);
-		curl_close($ch2);
-
-		$apiResponse = json_decode($response2, true);
-		$resultDataLog = json_encode($apiResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-		$rawData = json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-		if ($curlErrNo2) {
-			mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) VALUES (
-				'',
-				'AR RENT',
-				'" . mysqli_real_escape_string($koneksi, $rawData) . "',
-				'CURL-ERROR-" . mysqli_real_escape_string($koneksi, $curlErr2) . "',
-				'" . mysqli_real_escape_string($koneksi, $response2) . "'
-			)");
-
-			echo json_encode([
-				"success" => false,
-				"message" => "cURL error: " . $curlErr2
-			]);
-			exit;
+			$key++;
 		}
+	}
+	$resultData = array_values($resultData);
 
-		if (!$apiResponse || !isset($apiResponse['docnum'])) {
-			$mssg = $apiResponse['mssg'] ?? 'Invalid API response';
-			mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) VALUES (
-				'',
-				'AR RENT',
-				'" . mysqli_real_escape_string($koneksi, $rawData) . "',
+	// =========== NO SEND API (LIHAT JSON) ===========
+	// header('Content-Type: application/json');
+	// echo "<pre>";
+	// echo json_encode($resultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	// echo "<pre>";
+	// exit;
+		
+
+	// =========== KIRIM API ===========
+	// $apiUrl = "https://wsp.mitraadipersada.com/trucking/sales-order.php";
+	$apiUrl = "http://192.168.1.153/trucking2/sales-order.php";
+
+	$ch = curl_init($apiUrl);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, [
+		'Content-Type: application/json'
+	]);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array_values($resultData)));
+
+	$response = curl_exec($ch);
+	curl_close($ch);
+	
+	// =========== CHECK RESPONS ===========
+	// $data = json_decode($response, true);
+	// echo "<pre>";
+	// print_r($data);
+	// echo "</pre>";
+	// exit;
+
+	$apiResponse = json_decode($response, true);
+	$resultDataLog = json_encode($apiResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	$rawData = json_encode($resultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+	if (!$apiResponse || !isset($apiResponse['docnum'])) {
+		$success = false;
+		$mssg    = $apiResponse['mssg'] ?? 'Invalid API response';
+		mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result)) 
+			VALUES (
+				'', 
+				'SO RENT', 
+				'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
 				'ERROR-" . mysqli_real_escape_string($koneksi, $mssg) . "',
 				'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
-			)");
-
-			echo json_encode([
-				"success" => false,
-				"message" => "API response invalid: " . $mssg,
-				"sent" => $rawData
-			]);
-			exit;
-		} else {
-			mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) VALUES (
+			)
+		");
+	} else {
+		$success = true;
+		$desc    = 'SUCCESS';
+		mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) 
+			VALUES (
 				'" . mysqli_real_escape_string($koneksi, $apiResponse['docnum']) . "',
-				'AR RENT',
-				'" . mysqli_real_escape_string($koneksi, $rawData) . "',
-				'SUCCESS',
+				'SO RENT',  
+				'" . mysqli_real_escape_string($koneksi, $rawData) . "', 
+				'" . mysqli_real_escape_string($koneksi, $desc) . "',
 				'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
-			)");
+			)
+		");
 
+		foreach ($ids as $id_sewa) {
+			$id_sewa = (int)$id_sewa;
 			$docnum = mysqli_real_escape_string($koneksi, $apiResponse['docnum']);
-			$tanggal = date('Y-m-d');
+			$sql_update = "UPDATE t_ware_sewa
+						SET no_so = '$docnum' 
+						WHERE id_sewa = '$id_sewa'";
+			mysqli_query($koneksi, $sql_update);
+		}
+	}
 
-			foreach ($ids as $id_sewa) {
-				$id_sewa = $id_sewa;
-				$sql_update = "UPDATE t_ware_sewa SET 
-						no_ar = '$docnum',
-						tanggal = '$tanggal'
-					WHERE id_sewa = '$id_sewa'";
-				mysqli_query($koneksi, $sql_update);
+	echo json_encode([
+		"success" => $success,
+		"message" => $apiResponse['mssg'] ?? ($success ? "Berhasil" : "Gagal tanpa pesan"),
+		"sent"    => $resultData
+	], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+}
+
+// ========= UP RENT SO TO SAP =========
+else if ($_GET['type'] == "ListRentARSAP") {
+	$cari   	= mysqli_real_escape_string($koneksi, $_GET['cari']);
+	$id_sewa  	= mysqli_real_escape_string($koneksi, $_GET['id_sewa']);
+
+	$data = '<table class="table table-hover table-striped" style="width:100%">
+		<thead>
+			<tr>
+				<th width="5%" style="text-align: center;">NO</th>
+				<th width="15%" style="text-align: center;">Date</th>
+				<th width="15%" style="text-align: center;">SAP Project</th>
+				<th width="15%" style="text-align: center;">No SO SAP</th>
+				<th width="15%" style="text-align: center;">No SO</th>
+				<th width="27%" style="text-align: center;">Nama Customer</th>
+				<th width="10%" style="text-align: center;">ADD</th>
+			</tr>
+		</thead>';
+
+	$sql_data = "SELECT 
+			t_ware_sewa.tanggal,
+			t_ware_sewa.sap_rowid,
+			t_ware_sewa.id_cust
+		FROM t_ware_sewa
+		WHERE t_ware_sewa.id_sewa = '$id_sewa'
+		LIMIT 1";
+	// echo $sql_data;
+	// exit;
+
+	$query_data = mysqli_query($koneksi, $sql_data);
+
+	if ($query_data && mysqli_num_rows($query_data) > 0) {
+		$dj         = mysqli_fetch_assoc($query_data);
+
+		$tanggal	= $dj['tanggal'];
+		$rowid		= $dj['sap_rowid'];
+		$id_cust    = $dj['id_cust'];
+	} else {
+		$tanggal = $rowid = $id_cust = null;
+	}
+
+	$q_detail_ware = "SELECT 
+			t_ware_sewa.id_sewa,
+			t_ware_sewa.no_sewa,
+			t_ware_sewa.tanggal,
+			t_ware_sewa.no_so,
+			sap_project.rowid,
+			t_ware_sewa.id_cust,
+			sap_project.kode_project,
+			m_cust_tr.nama_cust
+		FROM t_ware_sewa
+		LEFT JOIN sap_project ON sap_project.rowid = t_ware_sewa.sap_rowid
+		LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_sewa.id_cust
+		WHERE t_ware_sewa.no_sewa LIKE '%$cari%' 
+			AND t_ware_sewa.tanggal = '$tanggal'
+			AND t_ware_sewa.sap_rowid = '$rowid'
+			AND t_ware_sewa.id_cust = '$id_cust'
+			AND t_ware_sewa.no_so IS NOT NULL
+		ORDER BY t_ware_sewa.no_sewa DESC 
+		LIMIT 0, 10";
+
+	// echo $q_detail_ware;
+	// exit;
+			
+	$query = mysqli_query($koneksi, $q_detail_ware);	
+	if (!$query) {
+		exit(mysqli_error($koneksi));
+	}
+
+	$posisi = 0;
+	if (mysqli_num_rows($query) > 0) {
+		while($row = mysqli_fetch_assoc($query)) {	
+			$posisi++;
+			$data .= '<tr>';		
+			$data .= '<td style="text-align:center">'.$posisi.'</td>';
+			$data .= '<td style="text-align:center">'.$row['tanggal'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['kode_project'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['no_so'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['no_sewa'].'</td>';
+			$data .= '<td style="text-align:center">'.$row['nama_cust'].'</td>';
+
+			$id_sewa = isset($row['id_sewa']) ? $row['id_sewa'] : $row['no_jo'];
+			$data .= '<td style="text-align:center">
+						<label>
+						<input type="checkbox" 
+								name="ar_selected[]" 
+								value="'.$id_sewa.'">
+						</label>
+					</td>';
+
+			$data .= '</tr>';
+		}		
+	} else {
+		$data .= '<tr><td colspan="7" style="text-align:center">Data tidak ditemukan</td></tr>';
+	}
+
+	$data .= '</table>';
+	echo $data;			
+}
+else if ($_POST['type'] == "SaveRentARSAP") {
+	// echo "<pre>";
+	// print_r($_POST);
+	// echo "</pre>";
+	// exit;
+	$ids = isset($_POST['ids']) ? $_POST['ids'] : [];
+
+	if (empty($ids)) {
+		echo json_encode([
+			"success" => false,
+			"message" => "Tidak ada data yang dipilih"
+		]);
+		exit;
+	}
+
+	$resultData = [
+		"TglAR"    => date('Y-m-d'),
+		"CustCode" => null,
+		"Lines"    => []
+	];
+
+	$updatedIds = [];
+	foreach ($ids as $id_sewa_raw) {
+		$id_sewa = mysqli_real_escape_string($koneksi, $id_sewa_raw);
+
+		$sql_header = "SELECT 
+						t_ware_sewa.*, 
+						m_cust_tr.caption 
+					FROM t_ware_sewa 
+					LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = t_ware_sewa.id_cust
+					WHERE t_ware_sewa.id_sewa = '$id_sewa' LIMIT 1";
+
+		$query_header = mysqli_query($koneksi, $sql_header);
+		if ($query_header) {
+			$rowh = mysqli_fetch_assoc($query_header);
+			if ($rowh) {
+				if ($resultData["CustCode"] === null) {
+					$resultData["CustCode"] = $rowh['caption'] ?? '';
+				}
+				$resultData["Lines"][] = [
+					"NoSO" => $rowh['no_so'] ?? ''
+				];
 			}
 		}
+	} 
+
+	// ================== SIAPKAN OUTPUT untuk sales-invoice API ==================
+	$output = [$resultData];
+
+	// header('Content-Type: application/json');
+	// echo "<pre>";
+	// echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	// echo "<pre>";
+	// exit;
+
+
+	// $apiUrl = "https://wsp.mitraadipersada.com/trucking/sales-invoice.php";
+	$apiUrl = "http://192.168.1.153/trucking2/sales-invoice.php";
+
+	$ch2 = curl_init($apiUrl);
+	curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch2, CURLOPT_POST, true);
+	curl_setopt($ch2, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+	curl_setopt($ch2, CURLOPT_POSTFIELDS, json_encode($output));
+	curl_setopt($ch2, CURLOPT_TIMEOUT, 20);
+
+	$response2 = curl_exec($ch2);
+	$curlErrNo2 = curl_errno($ch2);
+	$curlErr2 = curl_error($ch2);
+	$httpCode2 = curl_getinfo($ch2, CURLINFO_HTTP_CODE);
+	curl_close($ch2);
+
+	$apiResponse = json_decode($response2, true);
+	$resultDataLog = json_encode($apiResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	$rawData = json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+	if ($curlErrNo2) {
+		mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) VALUES (
+			'',
+			'AR RENT',
+			'" . mysqli_real_escape_string($koneksi, $rawData) . "',
+			'CURL-ERROR-" . mysqli_real_escape_string($koneksi, $curlErr2) . "',
+			'" . mysqli_real_escape_string($koneksi, $response2) . "'
+		)");
 
 		echo json_encode([
-			"success" => true,
-			"message" => $apiResponse['mssg'] ?? "Berhasil",
-			"sent"    => $rawData,
-			"docnum"  => $apiResponse['docnum'] ?? null
-		], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			"success" => false,
+			"message" => "cURL error: " . $curlErr2
+		]);
+		exit;
 	}
+
+	
+	if (!$apiResponse || !isset($apiResponse['docnum'])) {
+		$mssg = $apiResponse['mssg'] ?? 'Invalid API response';
+		mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) VALUES (
+			'',
+			'AR RENT',
+			'" . mysqli_real_escape_string($koneksi, $rawData) . "',
+			'ERROR-" . mysqli_real_escape_string($koneksi, $mssg) . "',
+			'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
+		)");
+
+		echo json_encode([
+			"success" => false,
+			"message" => "API response invalid: " . $mssg,
+			"sent" => $rawData
+		]);
+		exit;
+	} else {
+		mysqli_query($koneksi, "INSERT INTO tr_api_logs (docnum, doctype, raw_data, `desc`, result) VALUES (
+			'" . mysqli_real_escape_string($koneksi, $apiResponse['docnum']) . "',
+			'AR RENT',
+			'" . mysqli_real_escape_string($koneksi, $rawData) . "',
+			'SUCCESS',
+			'" . mysqli_real_escape_string($koneksi, $resultDataLog) . "'
+		)");
+
+		$docnum = mysqli_real_escape_string($koneksi, $apiResponse['docnum']);
+		$tanggal = date('Y-m-d');
+
+		foreach ($ids as $id_sewa) {
+			$id_sewa = $id_sewa;
+			$sql_update = "UPDATE t_ware_sewa SET 
+					no_ar = '$docnum',
+					tgl_ar = '$tanggal'
+				WHERE id_sewa = '$id_sewa'";
+			mysqli_query($koneksi, $sql_update);
+		}
+	}
+
+	echo json_encode([
+		"success" => true,
+		"message" => $apiResponse['mssg'] ?? "Berhasil",
+		"sent"    => $rawData,
+		"docnum"  => $apiResponse['docnum'] ?? null
+	], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+}
 ?>

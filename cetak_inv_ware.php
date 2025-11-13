@@ -77,8 +77,6 @@ $pdf->AliasNbPages();
 $pdf->AddPage();
 $pdf->SetAutoPageBreak(false);
 
-
-
 //RESI 1
 
 $pdf->Image("img/logo_print.jpg",7,5,25);  
@@ -178,7 +176,7 @@ while ($d1=mysqli_fetch_array($h1))
 	$aging = round($aging);
 		
 	$vol = $d1['keluar'] * $d1['vol'];
-	$volx = number_format($vol,2);
+	$volx = round($vol,2);
 	if($aging > $d1['aging_sewa'])
 	{
 		$harga = $d1['harga_handling'];
@@ -188,7 +186,7 @@ while ($d1=mysqli_fetch_array($h1))
 		$hargax = number_format($harga,0);
 	}
 			
-	$jumlah = $harga * $vol;
+	$jumlah = $harga * round($vol,2);
 			$jumlahx = number_format($jumlah,0);
 			$total = $total + $jumlah;
 	
@@ -215,7 +213,7 @@ while ($d1=mysqli_fetch_array($h1))
 	$pdf->setXY(44,$y+1);
 	$pdf->MultiCell(85,3.5,"$d1[nama]",0,'L');
 	
-	$y=$y+$tinggi;
+	$y = $y+$tinggi;
 }
 
 $totalx = number_format($total,0);

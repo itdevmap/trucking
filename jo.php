@@ -34,9 +34,8 @@
 		$hal	= '1';
 		$stat 	= 'All';
 		$field 	= 'No Order';
-		$field1 = 'No DO';
+		$field1 = 'No Quo';
 	}
-
 ?>
 
 <html>
@@ -60,12 +59,14 @@
 	<link rel="stylesheet" href="css/plugins/select2/select2.min.css">
 	<script src="css/plugins/jQuery/jQuery-2.1.4.min.js" type="text/javascript"></script>
 
-	<!-- ---------------------- LEAFLET ---------------------- -->
+	<!-- ============== LEAFLET ============== -->
 	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 	<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 	
 	<style>
-		.datepicker{z-index:1151 !important;}
+		.datepicker{
+			z-index:1151 !important;
+		}
 		.modal-backdrop.in {
 			z-index: 1040 !important;
 		}
@@ -105,6 +106,22 @@
 			});
 			var hal = $("#hal").val();
 			ReadData(hal);
+
+
+
+			let delayTimer;
+			function debounceSearch(callback, delay) {
+				clearTimeout(delayTimer);
+				delayTimer = setTimeout(callback, delay);
+			}
+
+			$("#cari_cont, #cari_vendor").on("keyup", function() {
+				clearTimeout(this.delay);
+				this.delay = setTimeout(function() {
+					ListPO();
+				}.bind(this), 300);
+			});
+
 		});
 		function changeDateFormat(inputDate){
 			var splitDate = inputDate.split('-');
@@ -185,10 +202,10 @@
 			$.get("ajax/jo_crud.php", {
 				tgl1:tgl1, 
 				tgl2:tgl2, 
-				field:field,
 				stat:stat,
 				paging:paging,
 				cari:cari,
+				field:field,
 				field1:field1,
 				cari1:cari1,
 				hal:hal,
@@ -454,22 +471,28 @@
 		}	
 
 		function GetBiayaLain(id) {
-
+			// isi ID biaya ke hidden field
 			$("#id_biaya_lain").val(id);	
-			$.post("ajax/jo_crud.php", {
-					id: id, type:"Detil_Biaya_Lain"
-				},
-				function (data, status) {
-					var data = JSON.parse(data);
-					$("#id_cost").val(data.id_cost);
-					$("#biaya_lain").val(Rupiah(data.harga));
-					$("#pph").val(Rupiah(data.pph));
-					$("#wtax").val(Rupiah(data.wtax));
-					$("#mode_biaya_lain").val('Edit');							
-				}
-			);
+
+			// ambil data detail biaya lain lewat AJAX
+			$.post("ajax/jo_crud.php", { id: id, type: "Detil_Biaya_Lain" }, function (data, status) {
+				var data = JSON.parse(data);
+
+				// set dropdown sesuai id_cost dari data
+				$("#id_cost_biaya").val(data.id_cost).trigger("change");
+
+				// isi field lain dengan nilai dari data
+				$("#biaya_lain").val(Rupiah(data.harga));
+				$("#pph").val(Rupiah(data.pph));
+				$("#wtax").val(Rupiah(data.wtax));
+				$("#remark_cost").val(data.remark);
+				$("#mode_biaya_lain").val("Edit");
+			});
+
+			// tampilkan modal setelah data di-set
 			$("#DataBiayaLain").modal("show");
 		}
+
 		function DelBiayaLain(id) {
 			var conf = confirm("Are you sure to Delete ?");
 			if (conf == true) {
@@ -632,13 +655,19 @@
 				ListPO();
 				$('#DaftarPO').modal('show');
 			}
-			function ListPO() {	
-				var cari = $("#cari_po").val();
-				$.get("ajax/jo_crud.php", {cari:cari,  type:"ListPO" }, function (data, status) {
+			function ListPO() {
+				let cari_cont = $("#cari_cont").val();
+				let cari_vendor = $("#cari_vendor").val();
+
+				$.get("ajax/jo_crud.php", {
+					cari_cont: cari_cont,
+					cari_vendor: cari_vendor,
+					type: "ListPO"
+				}, function(data) {
 					$(".tampil_po").html(data);
-					$("#hal").val(hal);
 				});
 			}
+
 			function PilihPO(id) {
 				$.post("ajax/jo_crud.php", {
 						id: id, type:"DetilPO"
@@ -647,11 +676,34 @@
 						var data = JSON.parse(data);	
 						$("#no_dox").val(data.no_tagihan);
 						$("#id_contx").val(data.id_cont);
-						$("#id_cust").val('1');
-						$("#nama_cust").val('PLANET TRANS LOGISTIC, PT');
 						$("#penerimax").val(data.nama_cust);
 						$("#id_po").val(data.id_tagihan);
 						$("#pphx").val(data.pph || 0);
+						if (data.kode == "AA") {
+							$("#id_cust").val('119');
+							$("#nama_cust").val('ARTHA ADIPERSADA, PT');
+						}
+						else if (data.kode == "AMA"){
+							$("#id_cust").val('115');
+							$("#nama_cust").val('AGRO MANDIRI ABADI, PT');
+						} 
+						else if (data.kode == "PFW"){
+							$("#id_cust").val('141');
+							$("#nama_cust").val('PLANET FIREWORK, CV');
+						} 
+						else if (data.kode == "SIM"){
+							$("#id_cust").val('146');
+							$("#nama_cust").val('SARANA INTI MAJU, CV');
+						} 
+						else if (data.kode == "TAJI"){
+							$("#id_cust").val('152');
+							$("#nama_cust").val('TRITUNGGAL ABADI JAYA, PT');
+						} 
+						else {
+							$("#id_cust").val('1');
+							$("#nama_cust").val('PLANET TRANS LOGISTIK, PT');
+						}
+
 						CekRate();
 					}
 				);
@@ -975,10 +1027,6 @@
 				alert("Tujuan harus diisi !..");
 				return;				
 			}
-			else if (uj <= 0 || ritase <= 0) {
-				alert("Check Master Price, UJ dan Ritase tidak boleh 0 !..");
-				return;				
-			}
 
 			// lanjutkan proses simpan
 			var id_cont  = $("#id_contx").val();
@@ -1237,25 +1285,25 @@
 								// 		alert("Gagal ambil file cetak: " + err);
 								// 	});
 
-								var printWindow = window.open(res.url, "_blank");
-								printWindow.onload = function () {
-									printWindow.focus();
-									printWindow.print();
-								};
-
 								// var printWindow = window.open(res.url, "_blank");
-								// var timer = setInterval(function() {
-								// 	if (printWindow.document.readyState === "complete") {
-								// 		clearInterval(timer);
+								// printWindow.onload = function () {
+								// 	printWindow.focus();
+								// 	printWindow.print();
+								// };
 
-								// 		printWindow.focus();
-								// 		printWindow.print();
+								var printWindow = window.open(res.url, "_blank");
+								var timer = setInterval(function() {
+									if (printWindow.document.readyState === "complete") {
+										clearInterval(timer);
 
-								// 		setTimeout(function() {
-								// 			printWindow.close();
-								// 		}, 2000);
-								// 	}
-								// }, 500);
+										printWindow.focus();
+										printWindow.print();
+
+										// setTimeout(function() {
+										// 	printWindow.close();
+										// }, 5000);
+									}
+								}, 500);
 
 								$("#no_ar").val('');
 								$("#username").val('')
@@ -1362,25 +1410,25 @@
 							var res = JSON.parse(data);
 
 							if (res.status === "success") {
-								var printWindow = window.open(res.url, "_blank");
-								printWindow.onload = function () {
-									printWindow.focus();
-									printWindow.print();
-								};
-
 								// var printWindow = window.open(res.url, "_blank");
-								// var timer = setInterval(function() {
-								// 	if (printWindow.document.readyState === "complete") {
-								// 		clearInterval(timer);
+								// printWindow.onload = function () {
+								// 	printWindow.focus();
+								// 	printWindow.print();
+								// };
 
-								// 		printWindow.focus();
-								// 		printWindow.print();
+								var printWindow = window.open(res.url, "_blank");
+								var timer = setInterval(function() {
+									if (printWindow.document.readyState === "complete") {
+										clearInterval(timer);
 
-								// 		setTimeout(function() {
-								// 			printWindow.close();
-								// 		}, 2000);
-								// 	}
-								// }, 500);
+										printWindow.focus();
+										printWindow.print();
+
+										// setTimeout(function() {
+										// 	printWindow.close();
+										// }, 2000);
+									}
+								}, 500);
 
 								$("#no_ar").val('');
 								$("#username").val('')
@@ -1396,6 +1444,35 @@
 					},
 					error: function (xhr, status, error) {
 						alert("AJAX Error: " + error);
+					}
+				});
+			}
+			function ApproveKB(no_kb, btnElement){
+				$(btnElement).prop("disabled", true);
+				$.ajax({
+					url: "ajax/jo_crud.php",
+					method: "POST",
+					data: {
+						no_kb: no_kb,
+						type: "sendApprovalKB"
+					},
+					success: function (data) {
+						try {
+							var res = JSON.parse(data);
+							if (res.status === "success") {
+								alert("Berhasil kirim approval ke atasan.");
+							} else {
+								alert(res.msg || "Gagal mengirim email.");
+							}
+						} catch (e) {
+							alert("Response tidak valid dari server.");
+						}
+
+						$(btnElement).prop("disabled", false);
+					},
+					error: function (xhr, status, error) {
+						alert("AJAX Error: " + error);
+						$(btnElement).prop("disabled", false);
 					}
 				});
 			}
@@ -1420,6 +1497,222 @@
 				});
 			}
 
+		// ============== APPROVE PENDING ==============
+			function ApprovePending(no_jo, btnElement){
+				$(btnElement).prop("disabled", true);
+				$.ajax({
+					url: "ajax/jo_crud.php",
+					method: "POST",
+					data: {
+						no_jo: no_jo,
+						type: "sendApprovalPending"
+					},
+					success: function (data) {
+						try {
+							var res = JSON.parse(data);
+							if (res.status === "success") {
+								alert("Berhasil kirim approval ke atasan.");
+							} else {
+								alert(res.msg || "Gagal mengirim email.");
+							}
+						} catch (e) {
+							alert("Response tidak valid dari server.");
+						}
+						$(btnElement).prop("disabled", false);
+					},
+					error: function (xhr, status, error) {
+						alert("AJAX Error: " + error);
+						$(btnElement).prop("disabled", false);
+					}
+				});
+			}
+
+		// ============== MODAL SO ==============
+			let selectedIdJO = null;
+			function ModalSO(id_jo) {
+				selectedIdJO = id_jo;
+				$('#ModalPrintSO').modal('show');
+			}
+
+			function PrintSO(jenis) {
+				if (!selectedIdJO) {
+					alert("ID JO tidak ditemukan!");
+					return;
+				}
+
+				const encodedId = btoa(selectedIdJO); 
+				let file = '';
+				switch (jenis) {
+					case 'full':
+						file = 'cetak_so.php';
+						break;
+					case 'trucking':
+						file = 'cetak_so_tr.php';
+						break;
+					case 'other':
+						file = 'cetak_so_oc.php';
+						break;
+					default:
+						alert('Jenis tidak dikenal');
+						return;
+				}
+
+				window.open(file + '?id=' + encodedId, '_blank');
+				$('#ModalPrintSO').modal('hide');
+			}
+
+		// ============== MODAL AR ==============
+			let selectedNoAR = null;
+			function ModalAR(no_ar) {
+				// alert(no_ar);
+				// return;
+				selectedNoAR = no_ar;
+				$('#ModalPrintAR').modal('show');
+			}
+			function PrintAR(jenis) {
+				if (!selectedNoAR) {
+					alert("ID JO tidak ditemukan!");
+					return;
+				}
+
+				const encodedAR = btoa(selectedNoAR); 
+				let file = '';
+				switch (jenis) {
+					case 'full':
+						file = 'cetak_ar.php';
+						break;
+					case 'trucking':
+						file = 'cetak_ar_tr.php';
+						break;
+					case 'other':
+						file = 'cetak_ar_oc.php';
+						break;
+					case 'nopph':
+						file = 'cetak_ar_nt.php';
+						break;
+					default:
+						alert('Jenis tidak dikenal');
+						return;
+				}
+
+				$.ajax({
+					url: "ajax/jo_crud.php",
+					method: "POST",
+					data: {
+						no_ar: selectedNoAR,
+						jenis: jenis,
+						file: file,
+						type: "printAR"
+					},
+					success: function (data) {
+						try {
+							var res = JSON.parse(data);
+
+							if (res.status === "success") {
+
+								var printWindow = window.open(res.url, "_blank");
+								var timer = setInterval(function() {
+									if (printWindow.document.readyState === "complete") {
+										clearInterval(timer);
+
+										printWindow.focus();
+										printWindow.print();
+
+									}
+								});
+
+								// $("#no_ar").val('');
+								// $("#username").val('')
+								// $("#password").val('')
+								$('#ModalPrintAR').modal('hide');
+								ReadData();
+							} else {
+								alert(res.msg);
+							}
+						} catch (e) {
+							alert("Response server tidak valid.");
+							console.log(data);
+						}
+					},
+					error: function (xhr, status, error) {
+						alert("AJAX Error: " + error);
+					}
+				});
+				
+			}
+
+
+		// SEND SO AR OTHER 
+		
+			function TampilOther(id_biaya) {
+				
+			}
+			function SOother(id_biaya) {
+				const link = $('a[onclick="SOother(\'' + id_biaya + '\')"]');
+
+				link.html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+				link.css({ "pointer-events": "none", "opacity": "0.6" });
+
+				$.ajax({
+					url: "ajax/jo_crud.php",
+					type: "POST",
+					data: { type: "SOother", ids: id_biaya },
+					dataType: "json",
+					success: function (res) {
+						if (res.success === false) {
+							alert("Gagal: " + res.message);
+							link.html("Send SO");
+							link.css({ "pointer-events": "auto", "opacity": "1" });
+						} else {
+							alert("Data berhasil dikirim ke SAP!");
+							link.replaceWith('<span>SO ' + (res.so_sap ?? 'Terkirim') + '</span>');
+						}
+					},
+					error: function (xhr, status, err) {
+						console.error(xhr.responseText);
+						alert("Terjadi error: " + err);
+						link.html("Send SO");
+						link.css({ "pointer-events": "auto", "opacity": "1" });
+					},
+					complete: function () {
+						$('#DaftarBiayaLain').modal('hide');
+						ReadData();
+					}
+				});
+			}
+			function ARother(id_biaya) {
+				const link = $('a[onclick="ARother(\'' + id_biaya + '\')"]');
+
+				link.html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+				link.css({ "pointer-events": "none", "opacity": "0.6" });
+
+				$.ajax({
+					url: "ajax/jo_crud.php",
+					type: "POST",
+					data: { type: "ARother", ids: id_biaya },
+					dataType: "json",
+					success: function (res) {
+						if (res.success === false) {
+							alert("Gagal: " + res.message);
+							link.html("Send SO");
+							link.css({ "pointer-events": "auto", "opacity": "1" });
+						} else {
+							alert("Data berhasil dikirim ke SAP!");
+							link.replaceWith('<span>AR ' + (res.so_sap ?? 'Terkirim') + '</span>');
+						}
+					},
+					error: function (xhr, status, err) {
+						console.error(xhr.responseText);
+						alert("Terjadi error: " + err);
+						link.html("Send AR");
+						link.css({ "pointer-events": "auto", "opacity": "1" });
+					},
+					complete: function () {
+						$('#DaftarBiayaLain').modal('hide');
+						ReadData();
+					}
+				});
+			}
 	</script>	
 	
   </head>
@@ -1470,7 +1763,8 @@
 							<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">
 								<option>No Order</option>
 								<option>No Quo</option>
-								<option>No DO</option>
+								<option>No SO SAP</option>
+								<option>No AR SAP</option>
 								<option>Customer</option>
 								<option>Origin</option>
 								<option>Destination</option>
@@ -1487,7 +1781,8 @@
 							<select size="1" id="field1"  onchange="ReadData(1)" name="field1" style="padding:4px;margin-right:2px;width: 85px">
 								<option>No Order</option>
 								<option>No Quo</option>
-								<option>No DO</option>
+								<option>No SO SAP</option>
+								<option>No AR SAP</option>
 								<option>Customer</option>
 								<option>Origin</option>
 								<option>Destination</option>
@@ -1497,17 +1792,20 @@
 								<option value="<?php echo $field1; ?>" selected hidden><?php echo $field1; ?></option>
 							</select>
 							<input type="text"  id ="search_name1" name="search_name1" value="<?php echo $search_name1; ?>" 
+
 							style="text-align: left;width:200px" onkeypress="ReadData(1)" >
-							<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
+							<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%">
+
 							<input type="hidden"  id ="jenis_role" name="jenis_role" value="<?php echo $id_role; ?>" style="text-align: left;width:5%"  >
-							<button class="btn btn-block btn-primary" style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding-top:6px;padding-bottom:6px" 
-								type="submit">
+							
+							<button class="btn btn-block btn-primary" style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding-top:6px;padding-bottom:6px"type="submit">
 								<span class="glyphicon glyphicon-search"></span>
 							</button>
 						</div>
 						<br>	
 					</div>
 				</div>
+
 				<div class="col-md-12" >
 					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
 						<div style="width:100%;background: #fff;" class="input-group" >
@@ -1847,36 +2145,33 @@
 		</div>
 	
 	<!-- ============== MODAL PO PTL ============== -->
-	<div class="modal fade" id="DaftarPO"  role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal fade" id="DaftarPO" role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">	
 				<div class="modal-body">						
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data PO</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data PO PTL</b>
+								<button class="btn btn-block btn-danger" 
+									style="margin:0px;margin-left:-2px;margin-bottom:3px;border-radius:2px;padding:5px"  
+									data-dismiss="modal">
+									<span class="glyphicon glyphicon-remove"></span>
+								</button>
 							</div>	
 							<br>
 							<div style="width:100%" class="input-group" style="background:none !important;">
-								<span class="input-group-addon" style="width:80%;text-align:left;padding:0px">
-									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Search :</b>&nbsp;&nbsp;
-									<input type="text"  id ="cari_po"  
-									style="text-align: left;width:200px" onkeypress="ListCust()" >
-									<button class="btn btn-block btn-primary" 
-									style="margin:0px;margin-left:-3px;margin-bottom:3px;border-radius:2px;padding:5px" 
-									onClick="javascript:ListPO()">
-									<span class="glyphicon glyphicon-search"></span>
-									</button>
-									<button class="btn btn-block btn-danger" 
-									style="margin:0px;margin-left:-2px;margin-bottom:3px;border-radius:2px;padding:5px"  
-									data-dismiss="modal" >
-									<span class="glyphicon glyphicon-remove"></span>
-									</button>
-								</span>
-								<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+								<span class="input-group-addon" style="width:100%;text-align:left;padding:0px">
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>No Cont :</b>&nbsp;&nbsp;
+									<input type="text" id="cari_cont"  
+										style="text-align: left;width:200px">
+
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Vendor :</b>&nbsp;&nbsp;
+									<input type="text" id="cari_vendor"  
+										style="text-align: left;width:200px">
 								</span>
 							</div>							
-							<div class="table-responsive mailbox-messages" >									
+							<div class="table-responsive mailbox-messages">									
 								<div class="tampil_po"></div>
 							</div>
 							<br>
@@ -1885,7 +2180,8 @@
 				</div>	
 			</div>
 		</div>	
-    </div>
+	</div>
+
 
 	<!-- ============== MODAL SEARCH SAP PROJECT ============== -->
 		<div class="modal fade" id="DaftarSAP"  role="dialog" aria-labelledby="myModalLabel">
@@ -2205,104 +2501,103 @@
 			</div>	
 		</div>
 	
-	<div class="modal fade" id="DaftarBiayaLain"  role="dialog" aria-labelledby="myModalLabel">
-		<div class="modal-dialog" role="document" style="width:750px;">
-			<div class="modal-content" style="background: none">
-				<div class="modal-body">						
-					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
-						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
-							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Other Cost</b>
-							</div>	
-							<div  class="input-group" style="background:none !important;">
-								<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background: none;">									
-									<input type="hidden"  id ="id_jo" name="id" value=""   >
-									<input type="hidden"  id ="stat_biaya" name="id" value=""   >
-								</span>								
-							</div>	
+	<!-- ============== AR OTHER COST ============== -->
+		<div class="modal fade" id="DaftarBiayaLain"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document" style="width:750px;">
+				<div class="modal-content" style="background: none">
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Other Cost</b>
+								</div>	
+								<div  class="input-group" style="background:none !important;">
+									<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background: none;">						
+										<input type="hidden"  id ="id_jo" name="id" value=""   >
+										<input type="hidden"  id ="stat_biaya" name="id" value=""   >
+									</span>								
+								</div>	
 
-							<?php if($m_add == '1'){?>
-								<button class="btn btn-block btn-success" id="btnBiaya"
-									style="margin-left:1px; margin-bottom:2px;padding:2px;padding-left:5px;padding-right:6px" type="button" 
-									onClick="javascript:TampilBiayaLain()"   >
-									<span class="fa  fa-plus-square"></span>
-									<b>Add Data</b>
-								</button>
-							<?php }?>
+								<?php if($m_add == '1'){?>
+									<button class="btn btn-block btn-success" id="btnBiaya"
+										style="margin-left:1px; margin-bottom:2px;padding:2px;padding-left:5px;padding-right:6px" type="button" 
+										onClick="javascript:TampilBiayaLain()"   >
+										<span class="fa  fa-plus-square"></span>
+										<b>Add Data</b>
+									</button>
+								<?php }?>
 
-							<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:-1px; margin-bottom:2px;padding:2px;padding-left:5px;padding-right:6px">
-								<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Close</b></button>	
-							<div class="table-responsive mailbox-messages" >									
-								<div class="tampil_biaya_lain"></div>
+								<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:-1px; margin-bottom:2px;padding:2px;padding-left:5px;padding-right:6px">
+									<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Close</b></button>	
+								<div class="table-responsive mailbox-messages">				
+									<div class="tampil_biaya_lain"></div>
+								</div>
 							</div>
-							
-						</div>
-					</div>		
-				</div>	
-			</div>
-		</div>	
-    </div>
-	
-	<div class="modal fade" id="DataBiayaLain"  role="dialog" aria-labelledby="myModalLabel">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content" style="background: none">
-				<div class="modal-body">
-					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
-						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
-							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Other Cost Data</b>
-							</div>	
-							<br>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Cost Name :</b></span>
-								<select id="id_cost_biaya" style="width: 80%;padding:4px">
-									<?php
-									$t1="SELECT * FROM m_cost_tr WHERE `status` = '1' AND id_cost <> '1' AND itemcode IS NOT NULL AND sap_ips LIKE '%S%' ORDER BY nama_cost  ";
-									$h1=mysqli_query($koneksi, $t1);       
-									while ($d1=mysqli_fetch_array($h1)){?>
-									<option value="<?php echo $d1['id_cost'];?>" ><?php echo $d1['nama_cost'];?></option>
-									<?php }?>
-								</select>	
-								<input type="hidden" id="id_biaya_lain"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
-								<input type="hidden" id="mode_biaya_lain"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
-							</div>	
-
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Remark :</b></span>
-								<textarea id="remark_cost" style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; border: 1px solid #444; padding: 5px;"></textarea>
-							</div>
-							
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>PPN :</b></span>
-								<input type="text" id="pph" style="text-align: right;width:20%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" value="0">
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>WTAX :</b></span>
-								<input type="text" id="wtax" style="text-align: right;width:20%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  value="0">
-							</div>
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Cost :</b></span>
-								<input type="text" id="biaya_lain" style="text-align: right;width:20%;" 
-								onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  value="0">
-							</div>
-
-							<div style="width:100%;" class="input-group">
-								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
-								<button type="button" class="btn btn-success"  onclick="AddBiayaLain()">
-								<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
-								<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:1px">
-								<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Cancel</b></button>	
-							</div>
-							<br>
-						</div>
-					</div>			
+						</div>		
+					</div>	
 				</div>
-			
-			</div>
-		</div>	
-    </div>
+			</div>	
+		</div>
+		<div class="modal fade" id="DataBiayaLain"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">
+					<div class="modal-body">
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Other Cost Data</b>
+								</div>	
+								<br>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Cost Name :</b></span>
+									<select id="id_cost_biaya" style="width: 80%;padding:4px">
+										<?php
+										$t1="SELECT * FROM m_cost_tr WHERE `status` = '1' AND id_cost <> '1' AND itemcode IS NOT NULL AND sap_ips LIKE '%S%' ORDER BY nama_cost  ";
+										$h1	= mysqli_query($koneksi, $t1);       
+										while ($d1=mysqli_fetch_array($h1)){?>
+											<option value="<?php echo $d1['id_cost'];?>" ><?php echo $d1['nama_cost'];?></option>
+										<?php }?>
+									</select>	
+									<input type="hidden" id="id_biaya_lain"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />	
+									<input type="hidden" id="mode_biaya_lain"   value="" style="text-align: right;width:25%;border:1px solid rgb(169, 169, 169)" />
+								</div>	
+
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Remark :</b></span>
+									<textarea id="remark_cost" style="resize:none;width: 80%; height: 70px; font-size: 11px; line-height: 12px; border: 1px solid #444; padding: 5px;"></textarea>
+								</div>
+								
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;min-width:150px"><b>PPN :</b></span>
+									<input type="text" id="pph" style="text-align: right;width:20%;" 
+									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)" value="0">
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;min-width:150px"><b>WTAX :</b></span>
+									<input type="text" id="wtax" style="text-align: right;width:20%;" 
+									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  value="0">
+								</div>
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;min-width:150px"><b>Cost :</b></span>
+									<input type="text" id="biaya_lain" style="text-align: right;width:20%;" 
+									onBlur ="this.value=Rupiah(this.value);" onkeypress="return isNumber(event)"  value="0">
+								</div>
+
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
+									<button type="button" class="btn btn-success"  onclick="AddBiayaLain()">
+									<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
+									<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:1px">
+									<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Cancel</b></button>	
+								</div>
+								<br>
+							</div>
+						</div>			
+					</div>
+				
+				</div>
+			</div>	
+		</div>
 	
 	<div class="modal fade" id="DaftarUJ"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document" style="width:750px;">
@@ -2527,6 +2822,86 @@
 									</button>
 									<button type="button" class="btn btn-danger" data-dismiss="modal">
 										<span class="fa fa-close"></span>&nbsp;<b>Cancel</b>
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	<!-- ============== MODAL PRINT SO ============== -->
+		<div class="modal fade" id="ModalPrintSO" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-body">
+						<div class="col-md-12" style="padding: 0;">
+							<div class="box box-success box-solid" style="padding: 5px; border: 1px solid #ccc;">
+								<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;">
+									<b><i class="fa fa-list"></i>&nbsp;PRINT SO</b>
+								</div>
+
+								<!-- <input type="hidden" id="id_jo_cancel" name="id_jo_cancel"> -->
+
+								<div class="form-group" style="margin-top: 1rem;">
+									<button type="button" class="btn btn-primary" onclick="PrintSO('full')">
+										<span class="fa fa-print"></span>&nbsp;<b>Print SO Full</b>
+									</button>
+									<button type="button" class="btn btn-success" onclick="PrintSO('trucking')">
+										<span class="fa fa-print"></span>&nbsp;<b>Print SO Trucking</b>
+									</button>
+									<button type="button" class="btn btn-warning" onclick="PrintSO('other')">
+										<span class="fa fa-print"></span>&nbsp;<b>Print SO Other Cost</b>
+									</button>
+								</div>
+
+
+				
+								<div class="form-group mt-3 text-right">
+									<button type="button" class="btn btn-danger" data-dismiss="modal">
+										<span class="fa fa-close"></span>&nbsp;<b>Close</b>
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	<!-- ============== MODAL PRINT AR ============== -->
+		<div class="modal fade" id="ModalPrintAR" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-body">
+						<div class="col-md-12" style="padding: 0;">
+							<div class="box box-success box-solid" style="padding: 5px; border: 1px solid #ccc;">
+								<div class="small-box bg" style="font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;">
+									<b><i class="fa fa-list"></i>&nbsp;PRINT AR</b>
+								</div>
+
+								<div class="form-group" style="margin-top: 1rem;">
+									<button type="button" class="btn btn-primary" onclick="PrintAR('full')">
+										<span class="fa fa-print"></span>&nbsp;<b>Print AR Full</b>
+									</button>
+									<button type="button" class="btn btn-info" onclick="PrintAR('nopph')">
+										<span class="fa fa-print"></span>&nbsp;<b>Print AR No PPH</b>
+									</button>
+									<button type="button" class="btn btn-success" onclick="PrintAR('trucking')">
+										<span class="fa fa-print"></span>&nbsp;<b>Print AR Trucking</b>
+									</button>
+									<button type="button" class="btn btn-warning" onclick="PrintAR('other')">
+										<span class="fa fa-print"></span>&nbsp;<b>Print AR Other Cost</b>
+									</button>
+									
+								</div>
+
+
+				
+								<div class="form-group mt-3 text-right">
+									<button type="button" class="btn btn-danger" data-dismiss="modal">
+										<span class="fa fa-close"></span>&nbsp;<b>Close</b>
 									</button>
 								</div>
 							</div>

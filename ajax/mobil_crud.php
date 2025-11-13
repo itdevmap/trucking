@@ -5,28 +5,25 @@ include("../koneksi.php");
 include "../lib.php";
 
 
-$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='11' ");
-$rq=mysqli_fetch_array($pq);	
+$pq = mysqli_query($koneksi, "SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='11' ");
+$rq = mysqli_fetch_array($pq);	
 
 $m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
+$m_add 	= $rq['m_add'];
+$m_del 	= $rq['m_del'];
 $m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+$m_exe 	= $rq['m_exe'];
 
-if ($_GET['type'] == "Read")
-{
+if ($_GET['type'] == "Read"){
 	$hal = $_GET['hal'];
 	$paging = $_GET['paging'];
 	$search_name = $_GET['search_name'];
 	$field = $_GET['field'];	
 	$stat = $_GET['stat'];
 	
-	if($stat == 'Tidak Aktif')
-	{
+	if($stat == 'Tidak Aktif'){
 		$stat = '0';
-	}else if($stat == 'Aktif')
-	{
+	}else if($stat == 'Aktif'){
 		$stat = '1';
 	}
 	
@@ -39,9 +36,11 @@ if ($_GET['type'] == "Read")
 					<th rowspan="2" width="5%" style="text-align: center;">YEAR<br></th>
 					<th rowspan="2" width="11%" style="text-align: center;">FRAME NUMBER</th>
 					<th rowspan="2" width="13%" style="text-align: center;">COLOR</th>
-					<th colspan="3" width="6%" style="text-align: center;">DOWNLOAD<br>DOCUMENT</th>
-					<th rowspan="2" width="7%" style="text-align: center;">VALID<br>DATE OF <br>STNK</th>	
+					<th colspan="3" width="6%" style="text-align: center;">DOWNLOAD</th>
+					<th rowspan="2" width="7%" style="text-align: center;">VALID<br>DATE OF <br>STNK</th>
 					<th rowspan="2" width="7%" style="text-align: center;">VALID<br>DATE OF <br>KIR</th>	
+					<th rowspan="2" width="7%" style="text-align: center;">VALID<br>DATE OF <br>INSURANCE</th>	
+					<th rowspan="2" width="7%" style="text-align: center;">VALID<br>DATE OF <br>TAX</th>	
 					<th rowspan="2" width="7%" style="text-align: center;">STATUS</th>
 					<th colspan="3" width="6%" style="text-align: center;">ACTION</th>						
 				</tr>
@@ -60,11 +59,12 @@ if ($_GET['type'] == "Read")
 		$page = $_GET['hal']; 
 		$posisi=0;
 	}
+
 	$jmlperhalaman = $paging;
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 
-	if($field == 'No. Police')
-	{
+	
+	if($field == 'No. Police'){
 		$f = 'm_mobil_tr.no_polisi';
 	}else if($field == 'Brand'){
 		$f = 'm_mobil_tr.merk';
@@ -76,84 +76,100 @@ if ($_GET['type'] == "Read")
 		$f = 'm_mobil_tr.no_polisi';
 	}	
 	
-		$SQL = "select * from m_mobil_tr where $f LIKE '%$search_name%'  
-			order by m_mobil_tr.no_polisi asc LIMIT $offset, $jmlperhalaman";
-	$query = mysqli_query($koneksi,$SQL);	
+	$q_mobil = "SELECT * 
+		FROM m_mobil_tr 
+		where $f LIKE '%$search_name%'  
+			AND created = '$id_user'
+		ORDER BY m_mobil_tr.no_polisi ASC 
+		LIMIT $offset, $jmlperhalaman";
+
+	$query = mysqli_query($koneksi,$q_mobil);	
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
     }
     if(mysqli_num_rows($result) > 0)
     {
-    	while($row = mysqli_fetch_assoc($result))
-    	{	
+		while($row = mysqli_fetch_assoc($result)){	
 			$posisi++;	
 			$nama = str_replace("\'","'",$row['nama_supir']);
 			$term = 0;	
-			//STNK
+			$tgl_sekarang = date('Y-m-d');
+			$tgl_sekarang_time = strtotime($tgl_sekarang);
+
+			// ======================
+			// STNK
+			// ======================
 			$tgl_stnk = ConverTgl($row['tgl_stnk']);
-			$due = date('Y-m-d',strtotime($row['tgl_stnk']) + (24*3600*$term)); 
-			$duex = ConverTgl($due);
-			$duey = strtotime($due);
-			$tgl_sekarang = date('Y-m-d');
-			$tgl_sekarang = strtotime($tgl_sekarang);
-			$aging = $tgl_sekarang - $duey; 
-			$aging = ($aging/24/60/60);
-			$aging = round($aging);
-			if($aging > 0 )
-			{
-				$label_stnk = 'danger';
-			}else if($aging >= -7)
-			{
-				$label_stnk = 'warning';
-			}else{
-				$label_stnk = 'success';
-			}
-			
-			//KIR
+			$duey = strtotime($row['tgl_stnk']);
+			$aging = ($tgl_sekarang_time - $duey) / 86400;
+			$label_stnk = ($aging > 0) ? 'danger' : (($aging >= -7) ? 'warning' : 'success');
+
+			// ======================
+			// KIR
+			// ======================
 			$tgl_kir = ConverTgl($row['tgl_kir']);
-			$due = date('Y-m-d',strtotime($row['tgl_kir']) + (24*3600*$term)); 
-			$duex = ConverTgl($due);
-			$duey = strtotime($due);
-			$tgl_sekarang = date('Y-m-d');
-			$tgl_sekarang = strtotime($tgl_sekarang);
-			$aging = $tgl_sekarang - $duey; 
-			$aging = ($aging/24/60/60);
-			$aging = round($aging);
-			if($aging > 0 )
-			{
-				$label_kir = 'danger';
-			}else if($aging >= -7)
-			{
-				$label_kir = 'warning';
-			}else{
-				$label_kir = 'success';
-			}	
-			//ID CARD
+			$duey = strtotime($row['tgl_kir']);
+			$aging = ($tgl_sekarang_time - $duey) / 86400;
+			$label_kir = ($aging > 0) ? 'danger' : (($aging >= -7) ? 'warning' : 'success');
+
+			// ======================
+			// ID CARD
+			// ======================
 			$tgl_card = ConverTgl($row['tgl_card']);
-			$due = date('Y-m-d',strtotime($row['tgl_card']) + (24*3600*$term)); 
-			$duex = ConverTgl($due);
-			$duey = strtotime($due);
-			$tgl_sekarang = date('Y-m-d');
-			$tgl_sekarang = strtotime($tgl_sekarang);
-			$aging = $tgl_sekarang - $duey; 
-			$aging = ($aging/24/60/60);
-			$aging = round($aging);
-			if($aging > 0 )
-			{
-				$label_card = 'danger';
-			}else if($aging >= -7)
-			{
-				$label_card = 'warning';
-			}else{
-				$label_card = 'success';
+			$duey = strtotime($row['tgl_card']);
+			$aging = ($tgl_sekarang_time - $duey) / 86400;
+			$label_card = ($aging > 0) ? 'danger' : (($aging >= -7) ? 'warning' : 'success');
+
+			// ======================
+			// ASURANSI
+			// ======================
+			$asuransi = ConverTgl($row['asuransi']);
+			$asuransi_raw = $row['asuransi'];
+
+			if (empty($asuransi_raw) || $asuransi_raw == '0000-00-00') {
+				$label_asuransi = 'secondary'; // abu-abu: belum ada tanggal
+				$asuransi = '0000-00-00';
+			} else {
+				$diff_asuransi = (strtotime($asuransi_raw) - $tgl_sekarang_time) / 86400;
+				if ($diff_asuransi < 0) {
+					$label_asuransi = 'danger'; // sudah lewat
+				} elseif ($diff_asuransi <= 30) {
+					$label_asuransi = 'warning'; // dalam 30 hari ke depan
+				} else {
+					$label_asuransi = 'success'; // aman
+				}
 			}
-			
-			if($row['photo'] == '')
-			{
+
+			// ======================
+			// PAJAK
+			// ======================
+			$pajak = ConverTgl($row['pajak']);
+			$pajak_raw = $row['pajak'];
+
+			if (empty($pajak_raw) || $pajak_raw == '0000-00-00') {
+				$label_pajak = 'secondary';
+				$pajak = '0000-00-00';
+			} else {
+				$diff_pajak = (strtotime($pajak_raw) - $tgl_sekarang_time) / 86400;
+				if ($diff_pajak < 0) {
+					$label_pajak = 'danger';
+				} elseif ($diff_pajak <= 30) {
+					$label_pajak = 'warning';
+				} else {
+					$label_pajak = 'success';
+				}
+			}
+
+
+			// ======================
+			// PHOTO & DOKUMEN
+			// ======================
+			if($row['photo'] == ''){
 				$photo = "mobil/no.jpg";
 			}else{
 				$photo = strtolower($row['photo']);
 			}
+
 			$data .= '<tr>							
 				<td style="text-align:center">'.$posisi.'.</td>		
 				<td style="text-align:left">
@@ -166,93 +182,105 @@ if ($_GET['type'] == "Read")
 				<td style="text-align:center">'.$row['tahun_buat'].'</td>				
 				<td style="text-align:center">'.$row['no_rangka'].'</td>
 				<td style="text-align:center">'.$row['warna_truck'].'</td>';
-				if($row['bpkp'] == '')
-				{
-					$data .='<td></td>';
-				}else{
-					$photo = strtolower($row['bpkp']);
-					$link = "'$photo'";
-					$data .= '<td>
-								<button class="btn btn-block btn-default" 
-									style="margin:-3px;border-radius:0px" type="button" 
-									onClick="window.open('.$link.') "   >
-									<span class="fa fa-file-text " ></span>
-								</button></td>';
-				}
-				if($row['stnk'] == '')
-				{
-					$data .='<td></td>';
-				}else{
-					$photo = strtolower($row['stnk']);
-					$link = "'$photo'";
-					$data .= '<td>
-								<button class="btn btn-block btn-default" 
-									style="margin:-3px;border-radius:0px" type="button" 
-									onClick="window.open('.$link.') "   >
-									<span class="fa fa-file-text " ></span>
-								</button></td>';
-				}
-				if($row['kir'] == '')
-				{
-					$data .='<td></td>';
-				}else{
-					$photo = strtolower($row['kir']);
-					$link = "'$photo'";
-					$data .= '<td>
-								<button class="btn btn-block btn-default" 
-									style="margin:-3px;border-radius:0px" type="button" 
-									onClick="window.open('.$link.') "   >
-									<span class="fa fa-file-text " ></span>
-								</button></td>';
-				}
-			
-				$data .='<td style="text-align:center">
+
+			// BPKP
+			if($row['bpkp'] == ''){
+				$data .='<td></td>';
+			}else{
+				$photo = strtolower($row['bpkp']);
+				$link = "'$photo'";
+				$data .= '<td>
+					<button class="btn btn-block btn-default" style="margin:-3px;border-radius:0px" type="button" 
+						onClick="window.open('.$link.')">
+						<span class="fa fa-file-text"></span>
+					</button>
+				</td>';
+			}
+
+			// STNK FILE
+			if($row['stnk'] == ''){
+				$data .='<td></td>';
+			}else{
+				$photo = strtolower($row['stnk']);
+				$link = "'$photo'";
+				$data .= '<td>
+					<button class="btn btn-block btn-default" style="margin:-3px;border-radius:0px" type="button"
+						onClick="window.open('.$link.')">
+						<span class="fa fa-file-text"></span>
+					</button>
+				</td>';
+			}
+
+			// KIR FILE
+			if($row['kir'] == ''){
+				$data .='<td></td>';
+			}else{
+				$photo = strtolower($row['kir']);
+				$link = "'$photo'";
+				$data .= '<td>
+					<button class="btn btn-block btn-default" style="margin:-3px;border-radius:0px" type="button"
+						onClick="window.open('.$link.')">
+						<span class="fa fa-file-text"></span>
+					</button>
+				</td>';
+			}
+
+			// ======================
+			// TANGGAL + LABEL
+			// ======================
+			$data .='
+				<td style="text-align:center">
 					<button type="button" class="btn btn-'.$label_stnk.'" style="width:100%;padding:1px;margin:-3px">'.$tgl_stnk.'</button>
 				</td>
 				<td style="text-align:center">
 					<button type="button" class="btn btn-'.$label_kir.'" style="width:100%;padding:1px;margin:-3px">'.$tgl_kir.'</button>
+				</td>
+				<td style="text-align:center">
+					<button type="button" class="btn btn-'.$label_asuransi.'" style="width:100%;padding:1px;margin:-3px">'.$asuransi.'</button>
+				</td>
+				<td style="text-align:center">
+					<button type="button" class="btn btn-'.$label_pajak.'" style="width:100%;padding:1px;margin:-3px">'.$pajak.'</button>
+				</td>
+			';
+
+			// STATUS
+			if($row['status'] =='0'){
+				$data .= '<td style="text-align:center">
+					<button type="button" class="btn btn-danger" style="margin:-3px;width:100%;padding:1px;border-radius:1px">&nbsp;In Active&nbsp;</button>
 				</td>';
-				if($row['status'] =='0' ){
-					$data .= '<td style="text-align:center">
-					<button type="button" class="btn btn-danger" style="margin:-3px;width:100%;padding:1px;border-radius:1px">&nbsp;In Active &nbsp;</button>
-					</td>';
-				} else if($row['status'] =='1'){
-					$data .= '<td style="text-align:center">
+			} else if($row['status'] =='1'){
+				$data .= '<td style="text-align:center">
 					<button type="button" class="btn btn-success" style="margin:-3px;width:100%;padding:1px;border-radius:1px">Active</button>
-					</td>';	
-				}
-				if($m_edit == '1'  ){
-					$xy1="Edit|$row[id_cust]";
-					$xy1=base64_encode($xy1);
-					$link = "'cust_data.php?id=$xy1'";
-					$data .= '<td>
-								<button class="btn btn-block btn-default" 
-									style="margin:-3px;border-radius:0px" type="button" 
-									onClick="javascript:GetData('.$row['id_mobil'].')"   >
-									<span class="fa fa-edit " ></span>
-								</button></td>';
-					$data .= '<td>
-								<button class="btn btn-block btn-default" title="Upload Photo"
-									style="margin:-3px;border-radius:0px" type="button" 
-									onClick="javascript:GetImg('.$row['id_mobil'].')"   >
-									<span class="fa fa-image" ></span>
-								</button></td>';	
-					$data .= '<td>
-								<button class="btn btn-block btn-default" title="Upload Document"
-									style="margin:-3px;border-radius:0px" type="button" 
-									onClick="javascript:GetDoc('.$row['id_mobil'].')"   >
-									<span class="fa fa-upload" ></span>
-								</button></td>';				
-				}
-				else
-				{
-					$data .='<td></td>';
-					$data .='<td></td>';
-					$data .='<td></td>';
-				}	
-				$data .='</tr>';
-    		$number++;
-    	}		
+				</td>';	
+			}
+
+			// TOMBOL AKSI
+			if($m_edit == '1'){
+				$data .= '<td>
+					<button class="btn btn-block btn-default" style="margin:-3px;border-radius:0px" type="button" 
+						onClick="javascript:GetData('.$row['id_mobil'].')">
+						<span class="fa fa-edit"></span>
+					</button>
+				</td>
+				<td>
+					<button class="btn btn-block btn-default" title="Upload Photo" style="margin:-3px;border-radius:0px" type="button"
+						onClick="javascript:GetImg('.$row['id_mobil'].')">
+						<span class="fa fa-image"></span>
+					</button>
+				</td>
+				<td>
+					<button class="btn btn-block btn-default" title="Upload Document" style="margin:-3px;border-radius:0px" type="button"
+						onClick="javascript:GetDoc('.$row['id_mobil'].')">
+						<span class="fa fa-upload"></span>
+					</button>
+				</td>';
+			} else {
+				$data .= '<td></td><td></td><td></td>';
+			}
+
+			$data .= '</tr>';
+			$number++;
+		}
     }
     else
     {
@@ -305,80 +333,82 @@ if ($_GET['type'] == "Read")
 				
     echo $data;
 
-}else if ($_POST['type'] == "add"){		
-	if($_POST['mode'] != '' )
-	{	
-		$id = $_POST['id'];
-		$no_polisi = strtoupper($_POST['no_polisi']);
-		$tgl_stnk = ConverTglSql($_POST['tgl_stnk']);
-		$tgl_kir = ConverTglSql($_POST['tgl_kir']);
-		$tgl_card = ConverTglSql($_POST['tgl_card']);
-		$merk = $_POST['merk'];
-		$tahun_buat = $_POST['tahun_buat'];
+}
+else if ($_POST['type'] == "add"){
+	if($_POST['mode'] != '' ){	
+		$id 		= $_POST['id'];
+		$no_polisi 	 = strtoupper($_POST['no_polisi']);
+		$tgl_stnk 	 = ConverTglSql($_POST['tgl_stnk']);
+		$tgl_kir 	 = ConverTglSql($_POST['tgl_kir']);
+		$tgl_card 	 = ConverTglSql($_POST['tgl_card']);
+		$merk 		 = $_POST['merk'];
+		$tahun_buat  = $_POST['tahun_buat'];
 		$tahun_rakit = $_POST['tahun_rakit'];
-		$silinder = $_POST['silinder'];
+		$silinder 	 = $_POST['silinder'];
 		$warna_truck = strtoupper($_POST['warna_truck']);
-		$no_rangka = strtoupper($_POST['no_rangka']);
-		$no_mesin = strtoupper($_POST['no_mesin']);
-		$no_bpkb = strtoupper($_POST['no_bpkb']);
-		$iden = strtoupper($_POST['iden']);
-		$warna_tnkb = strtoupper($_POST['warna_tnkb']);
-		$bbm = $_POST['bbm'];
-		$berat_max = $_POST['berat_max'];
-		$no_reg = strtoupper($_POST['no_reg']);
-		$mode = $_POST['mode'];
-		$stat = $_POST['stat'];
-		$silinder = str_replace(",","", $silinder);
+		$no_rangka 	 = strtoupper($_POST['no_rangka']);
+		$no_mesin 	 = strtoupper($_POST['no_mesin']);
+		$no_bpkb 	 = strtoupper($_POST['no_bpkb']);
+		$iden 		 = strtoupper($_POST['iden']);
+		$warna_tnkb  = strtoupper($_POST['warna_tnkb']);
+		$bbm 		 = $_POST['bbm'];
+		$berat_max 	 = $_POST['berat_max'];
+		$no_reg 	 = strtoupper($_POST['no_reg']);
+		$mode 		 = $_POST['mode'];
+		$stat 		 = $_POST['stat'];
+		$silinder 	 = str_replace(",","", $silinder);
+
+		$asuransi 	 = $_POST['asuransi'];
+		$pajak 	 	 = $_POST['pajak'];
 		
-		if($mode == 'Add')
-		{	
+		if($mode == 'Add'){	
 			$tanggal = date('Y-m-d');
-			$sql = "INSERT INTO m_mobil_tr (no_polisi,merk,tahun_buat,tahun_rakit,silinder,
-					warna_truck,no_rangka,no_mesin,no_bpkb,no_kabin,iden,warna_tnkb,bbm,berat_max,no_reg,
-					status,created,tanggal, tgl_stnk, tgl_kir)
+			$q_insert = "INSERT INTO m_mobil_tr (no_polisi,merk,tahun_buat,tahun_rakit,silinder,
+					warna_truck,no_rangka,no_mesin,no_bpkb,no_kabin,iden,warna_tnkb,bbm,berat_max,no_reg,`status`,created,tanggal, tgl_stnk, tgl_kir, asuransi, pajak)
 				values
 				('$no_polisi','$merk','$tahun_buat','$tahun_rakit','$silinder',
 				'$warna_truck','$no_rangka','$no_mesin','$no_bpkb','$no_kabin','$iden','$warna_tnkb','$bbm','$berat_max','$no_reg',
-				'1','$id_user','$tanggal','$tgl_stnk','$tgl_kir')";
-			$hasil=mysqli_query($koneksi, $sql);	
+				'1','$id_user','$tanggal','$tgl_stnk','$tgl_kir','$asuransi','$pajak')";
+			$hasil = mysqli_query($koneksi, $q_insert);	
 		}
-		else
-		{
-			$sql = "update m_mobil_tr set
-				no_polisi = '$no_polisi',
-				merk = '$merk',
-				tgl_stnk = '$tgl_stnk',
-				tgl_kir = '$tgl_kir',
-				tahun_buat = '$tahun_buat',
-				tahun_rakit = '$tahun_rakit',
-				silinder = '$silinder',
-				warna_truck = '$warna_truck',
-				no_rangka = '$no_rangka',
-				no_mesin = '$no_mesin',
-				no_bpkb = '$no_bpkb',
-				no_kabin = '$no_kabin',
-				iden = '$iden',
-				warna_tnkb = '$warna_tnkb',
-				bbm = '$bbm',
-				berat_max = '$berat_max',
-				no_reg = '$no_reg',
-				status = '$stat'
-				where id_mobil = '$id'	";
-			$hasil=mysqli_query($koneksi, $sql);;
+		else{
+			$q_update = "UPDATE m_mobil_tr SET
+					no_polisi 	= '$no_polisi',
+					merk 		= '$merk',
+					tgl_stnk 	= '$tgl_stnk',
+					tgl_kir 	= '$tgl_kir',
+					tahun_buat 	= '$tahun_buat',
+					tahun_rakit = '$tahun_rakit',
+					silinder 	= '$silinder',
+					warna_truck = '$warna_truck',
+					no_rangka 	= '$no_rangka',
+					no_mesin 	= '$no_mesin',
+					no_bpkb 	= '$no_bpkb',
+					no_kabin 	= '$no_kabin',
+					iden 		= '$iden',
+					warna_tnkb 	= '$warna_tnkb',
+					bbm 		= '$bbm',
+					berat_max 	= '$berat_max',
+					no_reg 		= '$no_reg',
+					asuransi 	= '$asuransi',
+					pajak 		= '$pajak',
+					`status` 	= '$stat'
+				WHERE id_mobil = '$id'";
+				
+			$hasil=mysqli_query($koneksi, $q_update);;
 		}
+
 		if (!$hasil) {
-	        			
 			exit(mysqli_error($koneksi));
 			echo "No. Polisi sudah terdaftar...!";
-	    }
-		else
-		{	
+	    } else{	
 			echo "Data saved!";
 		}
 	}	
 	
 	
-}else if ($_POST['type'] == "detil"){
+}
+else if ($_POST['type'] == "detil"){
 	$id = $_POST['id'];	
     $query = "select * from m_mobil_tr where id_mobil  = '$id'";
     if (!$result = mysqli_query($koneksi, $query)) {
@@ -400,8 +430,8 @@ if ($_GET['type'] == "Read")
 	
 
 
-}else if ($_GET['type'] == "ListMobil")
-{	
+}
+else if ($_GET['type'] == "ListMobil"){	
 	$cari = $_GET['cari'];
 	$data = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">

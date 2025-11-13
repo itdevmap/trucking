@@ -90,7 +90,7 @@ if($field == 'Customer')
 	
 	if($stat == 'All')
 	{
-		$t1 = "select t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, t_ware_data_detil.masuk, t_ware_data_detil.keluar, t_ware.nama, t_ware.kode, 
+		$t1 = "SELECT t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, t_ware_data_detil.masuk, t_ware_data_detil.keluar, t_ware.nama, t_ware.kode, 
 			t_ware.vol, t_ware.unit, m_cust_tr.nama_cust, m_lokasi_ware.nama as nama_lokasi
 			from  
 			t_ware_data left join t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data
@@ -101,7 +101,7 @@ if($field == 'Customer')
 			where t_ware_data.tanggal between '$tgl1x' and '$tgl2x' and $f LIKE '%$cari%' and $f1 LIKE '%$cari1%' and t_ware_data.jenis = '0'
 			order  by t_ware_data.tanggal desc ";
 	}else{
-		$t1 = "select t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, t_ware_data_detil.masuk, t_ware_data_detil.keluar, t_ware.nama, t_ware.kode, 
+		$t1 = "SELECT t_ware_data.*, t_ware_data_detil.id_detil, t_ware_data_detil.no_cont, t_ware_data_detil.masuk, t_ware_data_detil.keluar, t_ware.nama, t_ware.kode, 
 			t_ware.vol, t_ware.unit, m_cust_tr.nama_cust, m_lokasi_ware.nama as nama_lokasi
 			from  
 			t_ware_data left join t_ware_data_detil on t_ware_data.id_data = t_ware_data_detil.id_data
@@ -136,12 +136,15 @@ if($field == 'Customer')
 			<td style="text-align:center"><?php echo "$d1[nama]";?></b></td>
 			<td style="text-align:center"><?php echo "$d1[nama_cust]";?></b></td>
 			<td style="text-align:center"><?php echo "$sisa";?></b></td>
-			<td style="text-align:center"><?php echo rtrim(rtrim(number_format($cbm, 10, '.', ''), '0'), '.'); ?></td>
+			<td style="text-align:center">
+				<?php echo rtrim(rtrim(number_format($cbm, 2, '.', ''), '0'), '.'); ?>
+			</td>
+
 			<td style="text-align:center"><?php echo "$d1[nama_lokasi]";?></b></td>
 		</tr>
 
 	<?php }
-	$t_sisa = $t_tag - $t_bayar;
+		$t_sisa = $t_tag - $t_bayar;
 	?>
 	
 	

@@ -15,6 +15,7 @@
 		// die();
 
 		$rowid 		= $_POST['rowid'];
+		$id_po 		= $_POST['id_po'];
 		$mode 		= $_POST['mode'];
 		$user_req 	= $_POST['id_vendor'];	
 		$code_pr 	= $_POST['no_pr'];	
@@ -25,11 +26,10 @@
 		$remark 	= addslashes(trim($_POST['remark']));
 
 		$errors = [];
-		if (empty($rowid))      $errors[] = "SAP Project wajib diisi";
 		if (empty($user_req))   $errors[] = "Vendor wajib diisi";
 		if (empty($code_pr))    $errors[] = "No PR wajib diisi";
 		if (empty($deliv_date)) $errors[] = "Delivery Date wajib diisi";
-		if (empty($buyer))      $errors[] = "Buyer wajib diisi";
+		if (empty($buyer))      $errors[] = "Account Name wajib diisi";
 		if (empty($payment))    $errors[] = "Payment wajib diisi";
 		if (empty($remark))     $errors[] = "Remark wajib diisi";
 
@@ -39,7 +39,7 @@
 		}
 
 		if($mode == 'Add' ){
-			// ----------- BUILD CODE PR -----------
+			// ===========-- BUILD CODE PR ===========--
 				$tahun = date("y");
 				$q = "SELECT 
 					MAX(RIGHT(code_po, 4)) AS last_num
@@ -84,7 +84,7 @@
 		}else{
 			$sql = "UPDATE tr_po SET 
 						user_req = '$user_req',
-						remark = '$remark',
+						remark = '$remark'
 					WHERE id_po = '$id_po'	";
 			$hasil=mysqli_query($koneksi,$sql);
 		}
@@ -111,9 +111,9 @@
 						"SELECT 
 							tr_po.*,
 							sap_project.kode_project,
-							m_cust_tr.nama_cust
+							m_vendor_tr.nama_vendor
 						FROM tr_po 
-						LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = tr_po.user_req
+						LEFT JOIN m_vendor_tr ON m_vendor_tr.id_vendor = tr_po.user_req
 						LEFT JOIN sap_project ON sap_project.rowid = tr_po.sap_project
 						WHERE tr_po.id_po = '$id_po' ");
 						
@@ -127,12 +127,13 @@
 		$user_req 		= $rq['user_req'];
 		$deliv_date 	= $rq['delivery_date'];
 		$nama_cust 		= $rq['nama_cust'];
+		$nama_vendor 	= $rq['nama_vendor'];
 		$buyer 			= $rq['buyer'];
 		$payment 		= $rq['payment'];
 		$remark 		= $rq['remark'];
 	}
 
-	if($mode == 'View') {
+	if($mode == 'View' || $mode == 'Edit') {
 		$dis = "Disabled";
 	}
 
@@ -163,24 +164,7 @@
 		.datepicker{z-index:1151 !important;}
 	</style>
 	<script>
-		// --------- SHOW DATA ---------
-			$(document).ready(function () {
-				var id_vendor = $("#id_vendor").val();
-				if (id_vendor) {
-					checkPayment(id_vendor);
-				}
-				ReadData('route');
-
-				$(document).on("change", "#id_vendor", function () {
-					var id_vendor = $(this).val();
-					if (id_vendor) {
-						checkPayment(id_vendor);
-					} else {
-						$("#payment").val("");
-						$("#buyer").val("");
-					}
-				});
-			});
+		// =========== SHOW DATA ===========
 			function ReadData() {
 				var code_po = $("#code_po").val();
 				var id_pr   = $("#id_pr").val();
@@ -215,27 +199,44 @@
 				}
 				return (sign ? '' : '-') + num;
 			}
-			function hitungTotal() {
-				let qty   	= parseFloat(document.getElementById("qty").value.replace(/,/g,''))   || 0;
-				let harga 	= parseFloat(document.getElementById("harga").value.replace(/,/g,'')) || 0;
-				let disc  	= parseFloat(document.getElementById("disc").value.replace(/,/g,''))  || 0;
-				let ppn  	= parseFloat(document.getElementById("ppn").value.replace(/,/g,''))  || 0;
 
-				let subtotal 		= qty * harga;
-				let nominal_disc	= (subtotal * disc) /100;
-				let total    		= subtotal - nominal_disc;
-				let nominal_ppn 	= (total * ppn) /100;
-				let last_total    	= total - nominal_ppn;
-
-				document.getElementById("qty").value   			= Desimal(qty);
-				document.getElementById("harga").value 			= Desimal(harga);
-				document.getElementById("disc").value  			= Desimal(disc);
-				document.getElementById("ppn").value  			= Desimal(ppn);
-				document.getElementById("nominal_ppn").value	= Desimal(nominal_ppn);
-				document.getElementById("total").value 			= Desimal(last_total < 0 ? 0 : last_total);
+			function parseNum(val) {
+				if (!val) return 0;
+				// Hilangkan semua koma ribuan, tetap biarkan titik desimal
+				val = val.replace(/,/g, '');
+				return parseFloat(val) || 0;
 			}
 
-		// --------- SHOW MILIH PR ---------
+			function formatDesimal(num) {
+				if (isNaN(num)) return '0.00';
+				// Format dengan ribuan dan dua angka desimal
+				return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+			}
+
+			function hitungTotal() {
+				let qty    = parseNum(document.getElementById("qty").value);
+				let harga  = parseNum(document.getElementById("harga").value);
+				let disc   = parseNum(document.getElementById("disc").value);
+				let ppn    = parseNum(document.getElementById("ppn").value);
+
+				// Hitung step by step
+				let subtotal       = qty * harga;
+				let nominal_disc   = (subtotal * disc) / 100;
+				let total          = subtotal - nominal_disc;
+				let nominal_ppn    = (total * ppn) / 100;
+				let last_total     = total + nominal_ppn;
+
+				// Update nilai kembali dengan format desimal 2 digit
+				document.getElementById("qty").value          = formatDesimal(qty);
+				document.getElementById("harga").value        = formatDesimal(harga);
+				document.getElementById("disc").value         = formatDesimal(disc);
+				document.getElementById("ppn").value          = formatDesimal(ppn);
+				document.getElementById("nominal_ppn").value  = formatDesimal(nominal_ppn);
+				document.getElementById("total").value        = formatDesimal(last_total < 0 ? 0 : last_total);
+			}
+
+
+		// =========== SHOW MILIH PR ===========
 			function TampilPR() {
 				$("#cari").val('');
 				ListPR();
@@ -255,17 +256,17 @@
 					function (data, status) {
 						var data = JSON.parse(data);	
 						$("#no_pr").val(data.code_pr);
-						$("#user_req").val(data.nama_cust);
 						$("#deliv_date").val(data.tgl_pr);
 						$("#id_quo").val(data.id_quo);
 						$("#rowid").val(data.rowid);
 						$("#sap_project").val(data.kode_project);
+						$("#remark").val(data.remark);
 					}
 				);
 				$("#DaftarPR").modal("hide");
 			}
 
-		// --------- SHOW MILIH ITEM DARI PR ---------
+		// =========== SHOW MILIH ITEM DARI PR ===========
 			function TampilItemPR(jenis) {
 				$('#DaftarItemPR').modal('show');
 				ListItemPR(jenis);
@@ -284,8 +285,8 @@
 					$(".tampil_item_po").html(data);
 				});
 			}
-
 			function PilihItemPR(id) {
+
 				var jenis     = $("#jenisx").val();
 				var id_vendor = $("#id_vendor").val();
 
@@ -314,12 +315,13 @@
 					$("#origin").val(data.origin);
 					$("#destination").val(data.destination);
 					$("#itemcode").val(data.itemcode);
-					$("#description").val(data.description);
+					$("#description").val(data.description + ' - ' + data.remark);
 					$("#uom").val(data.uom);
 					$("#harga").val(data.harga);
 					$("#qty").val(data.qty_close);
 					$("#disc").val(0);
 					$("#total").val(data.harga * data.qty_close);
+					$("#pph").val(data.pph);
 
 					if (jenis === "route") {
 						$("#harga").prop("readonly", true);
@@ -398,6 +400,10 @@
 			var nominal_ppn 	= parseFloat(nominal_ppn_raw);
 			var total_raw 		= $("#total").val().replace(/,/g, '');
 			var total 			= parseFloat(total_raw);
+			var pph_raw 		= $("#pph").val().replace(/,/g, '');
+			var pph 			= parseFloat(pph_raw);
+			var nominal_pph_raw	= $("#nominal_pph").val().replace(/,/g, '');
+			var nominal_pph 	= parseFloat(nominal_pph_raw);
 
 			if (container === "") {
 				alert("Container wajib di isi !");
@@ -431,6 +437,8 @@
 				disc: disc,
 				ppn: ppn,
 				nominal_ppn: nominal_ppn,
+				pph: pph,
+				nominal_pph: nominal_pph,
 				total: total,
 
 				mode: mode,
@@ -449,22 +457,32 @@
 			});
 		}
 
-		function DelDetil(id) {
+		function DelDetail(id_detail) {
 			var conf = confirm("Are you sure to Delete ?");
-			if (conf == true) {
-				$.post("ajax/quo_crud.php", {
-						id: id, type:"Del_Detil"
-					},
-					function (data, status) {
-						 ReadData();
+			if (!conf) return;
+
+			$.ajax({
+				url: "ajax/po_crud.php",
+				type: "POST",
+				dataType: "json",
+				data: { id_detail: id_detail, type: "DelDetail" },
+				success: function (res) {
+					if (res.status === "success") {
+						alert(res.message);
+						ReadData(); // reload data
+					} else {
+						alert("Error: " + res.message);
 					}
-				);
-			}
+				},
+				error: function (xhr, status, error) {
+					console.error(error);
+					alert("Terjadi kesalahan koneksi ke server!");
+				}
+			});
 		}
 
+
 		function EditDetail(id, jenis) {
-			// alert(jenis);
-			// die();
 			$.post("ajax/po_crud.php", {
 					id: id,
 					jenis: jenis,
@@ -499,7 +517,7 @@
 				$('#modalAddDetail').modal('show');
 		}
 
-		// --------- ADD SAP ---------
+		// =========== ADD SAP ===========
 			function AddSAP() {
 				$.get("ajax/po_crud.php", { type: "AddProject" }, function (res) {
 					$("#sap_project").val(res.newKode);
@@ -508,29 +526,42 @@
 					$("#DaftarSAP").modal("hide");
 				}, "json");
 			}
-			function checkPayment(id_vendor) {
-				$.post("ajax/po_crud.php", {
-					id_vendor: id_vendor,
-					type: "checkPayment"
-				}, function (data) {
-					try {
-						var res = JSON.parse(data);
-						if (res.status === "success") {
-							$("#payment").val(res.payment);
-							$("#buyer").val(res.nama_rek);
-						} else {
-							$("#payment").val("");
-							$("#buyer").val("");
-							alert("Data bank vendor tidak ditemukan.");
-						}
-					} catch (e) {
-						console.error("Invalid JSON:", data);
-						alert("Response server tidak valid.");
-					}
-				}).fail(function (xhr, status, error) {
-					alert("AJAX Error: " + error);
+
+		// =========== SHOW MILIH ITEM DARI PR ===========
+			function TampilVendor() {
+				$('#DaftarVendor').modal('show');
+				ListVendor();
+				$('#DaftarVendor').find('input, textarea, select').val('');
+				$('#DaftarVendor').find('input[type=checkbox], input[type=radio]').prop('checked', false);
+				$("#cari_vendor").val('');
+			}
+			function ListVendor() {
+				var cari	= $("#cari_vendor").val();
+				$.get("ajax/po_crud.php", {cari:cari,type:"ListVendor" }, function (data, status) {
+					$(".tampil_vendor").html(data);
 				});
 			}
+			function PilihVendor(id_vendor) {
+				$.post("ajax/po_crud.php", {
+						id_vendor: id_vendor, type:"DetilVendor"
+					},
+					function (data, status) {
+						var data = JSON.parse(data);	
+						$("#id_vendor").val(data.id_vendor);
+						$("#nama_vendor").val(data.nama_vendor);
+						$("#buyer").val(data.nama_rek);
+						$("#payment").val(data.payment);
+						$("#no_rek").val(data.no_rek);
+					}
+				);
+				$("#DaftarVendor").modal("hide");
+			}
+
+		
+			// function DelDetail(id_detail) {
+			// 	alert(id_detail);
+			// 	return;
+			// }
     </script>
 	
   </head>
@@ -568,6 +599,7 @@
 						<input type="hidden" id ="mode" name="mode" value="<?php echo $mode; ?>" >
 						<input type="hidden" id ="id_quo" name="id_quo" value="<?php echo $id_quo; ?>" >
 						<input type="hidden" name="rowid" id="rowid" value="<?php echo $rowid; ?>" >
+						<input type="hidden" name="id_vendor" id="id_vendor" value="<?php echo $user_req; ?>" >
 
 						<div style="width:100%; display: none;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
@@ -577,39 +609,25 @@
 						<div style="width:100%;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No PR :</b></span>
 							<input type="text"  id ="no_pr" name="no_pr" value="<?php echo $no_pr;?>" style="text-align: left;width:70%" readonly >
-							<button class="btn btn-block btn-primary" id="btn_custx" style="padding:6px 12px 6px 12px; ;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilPR()">
+							<button class="btn btn-block btn-primary" id="btn_custx" style="padding:6px 12px 6px 12px; ;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilPR()" <?php echo $dis; ?>>
 								<span class="glyphicon glyphicon-search"></span>
 							</button>	
 						</div>
 						
+						
 						<div style="width:100%;" class="input-group">
                             <span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Project :</b></span>
                             <input type="text" name="sap_project" id="sap_project" style="text-transform: uppercase;text-align: left;width:70%;" value="<?php echo $kode_project; ?>"  readonly>
-                            	
-                            <!-- <button class="btn btn-block btn-primary" id="po" style="padding:6px 12px 6px 12px; ;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilSAP()">
-                                <span class="glyphicon glyphicon-search"></span>
-                            </button> -->
                         </div>
 						
 						<div style="width:100%;" class="input-group">
-							<span class="input-group-addon" style="text-align:right;background:none;min-width:150px">
-								<b>Vendor :</b>
-							</span>
-							<select id="id_vendor" name="id_vendor" style="width: 70%;padding:4px" onchange="checkPayment(this.value)">
-								<?php 
-								$t1 = "SELECT * FROM m_vendor_tr 
-										WHERE status = '1' 
-										AND caption IS NOT NULL 
-										ORDER BY nama_vendor";
-								$h1 = mysqli_query($koneksi, $t1);       
-								while ($d1 = mysqli_fetch_array($h1)) {
-									$selected = ($d1['id_vendor'] == $user_req) ? 'selected' : '';
-									?>
-									<option value="<?= $d1['id_vendor']; ?>" <?= $selected; ?>>
-										<?= strtoupper($d1['nama_vendor']); ?>
-									</option>
-								<?php } ?>
-							</select>
+							<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Vendor :</b></span>
+
+							<input type="text"  id ="nama_vendor" name="nama_vendor" value="<?php echo $nama_vendor;?>" style="text-align: left;width:70%" readonly >
+
+							<button class="btn btn-block btn-primary" id="btn_custx" style="padding:6px 12px 6px 12px; ;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilVendor()" <?php echo $dis; ?>>
+								<span class="glyphicon glyphicon-search"></span>
+							</button>	
 						</div>
 
 						<div style="width:100%;" class="input-group">
@@ -673,9 +691,9 @@
 
 				<div class="col-md-12" >
 					<div style="width:98%;background:none;margin-left:0;margin-top:0px;border-top:0px;border-bottom:0px" class="input-group">
-						<?php if($mode != 'Edit'){?>
-							<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save Order</b>&nbsp;&nbsp;</button>	
-						<?php }?>
+						<button type="submit" class="btn btn-success">
+							<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save Order</b>&nbsp;&nbsp;
+						</button>
 						<button type="button" class="btn btn-danger" onclick="window.location.href='<?php echo $link; ?>'">
 							<span class="fa fa-backward"></span>&nbsp;&nbsp;<b>Back</b>
 						</button>	
@@ -696,7 +714,7 @@
 	</div>	
 	
 
-	<!-- ---------- MODAL NAMBAH ITEM DI PO  -->
+	<!-- ===========- MODAL NAMBAH ITEM DI PO  -->
 		<div class="modal fade" id="modalAddDetail"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">
@@ -708,14 +726,15 @@
 								</div>	
 								<br>
 
-								<input type="hidden" id="idx" value=""/>
-								<input type="hidden" id="modex" value=""/>
-								<input type="hidden" id="code_po" value="<?php echo $code_po;?>"/>
-								<input type="hidden" id="jenisx" value=""/>
-								<input type="hidden" id="id_item" value=""/>
-								<input type="hidden" id ="origin" name="origin">
-								<input type="hidden" id ="destination" name="destination">
-								<input type="hidden" id="nominal_ppn" name="nominal_ppn">
+								<input type="text" id="idx" value="<?php echo $id_po;?>"/>
+								<input type="text" id="modex" value=""/>
+								<input type="text" id="code_po" value="<?php echo $code_po;?>"/>
+								<input type="text" id="jenisx" value=""/>
+								<input type="text" id="id_item" value=""/>
+								<input type="text" id ="origin" name="origin">
+								<input type="text" id ="destination" name="destination">
+								<input type="text" id="nominal_ppn" name="nominal_ppn">
+								<input type="text" id="nominal_pph" name="nominal_pph">
 
 								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b id="nama_jenis"></b> : </span>
@@ -766,6 +785,10 @@
 									<span class="input-group-addon" style="text-align:right;"><b>PPN :</b></span>
 									<input type="text" id="ppn" name="ppn" onblur="hitungTotal()" style="text-align: right;width:14%"> %
 								</div>  
+								<div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:right;"><b>PPH :</b></span>
+									<input type="text" id="pph" name="pph" style="text-align: right;width:14%"> %
+								</div>  
 								
 								<div style="width:100%;" class="input-group">
 									<span class="input-group-addon" style="text-align:right;"><b>Total :</b></span>
@@ -788,7 +811,7 @@
 			</div>	
 		</div>
 	
-	<!-- --------- MODAL PR --------- -->
+	<!-- =========== MODAL PR =========== -->
 		<div class="modal fade" id="DaftarPR"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
@@ -829,7 +852,7 @@
 			</div>	
 		</div>
 
-	<!-- --------- MODAL SAP --------- -->
+	<!-- =========== MODAL SAP =========== -->
 		<div class="modal fade" id="DaftarSAP"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
@@ -871,7 +894,7 @@
 			</div>	
 		</div>
 
-	<!-- --------- MODAL ITEM PR --------- -->
+	<!-- =========== MODAL ITEM PR =========== -->
 		<div class="modal fade" id="DaftarItemPR"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
@@ -904,6 +927,49 @@
 								</div>							
 								<div class="table-responsive mailbox-messages">									
 									<div class="tampil_item_po"></div>
+								</div>
+								<br>
+							</div>		
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
+
+	<!-- =========== MODAL VENDOR =========== -->
+		<div class="modal fade" id="DaftarVendor"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Vendor</b>
+								</div>	
+								<br>
+								<div style="width:100%" class="input-group" style="background:none !important;">
+									<span class="input-group-addon" style="width:80%;text-align:left;padding:0px">
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Search :</b>&nbsp;&nbsp;
+										<input type="text"  id ="cari_vendor" name="cari_vendor" value="<?php echo $cari; ?>" style="text-align: left;width:200px" onkeypress="ListVendor()" >
+										
+										<button class="btn btn-block btn-primary" 
+										style="margin:0px;margin-left:-3px;margin-bottom:3px;border-radius:2px;padding:5px" 
+										oninput = "ListVendor()">
+
+										<span class="glyphicon glyphicon-search"></span>
+										</button>
+
+										<button class="btn btn-block btn-danger" 
+										style="margin:0px;margin-left:-2px;margin-bottom:3px;border-radius:2px;padding:5px"  
+										data-dismiss="modal" >
+											<span class="glyphicon glyphicon-remove"></span>
+										</button>
+									</span>
+									<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+									</span>
+								</div>							
+								<div class="table-responsive mailbox-messages">									
+									<div class="tampil_vendor"></div>
 								</div>
 								<br>
 							</div>		

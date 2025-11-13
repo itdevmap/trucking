@@ -68,7 +68,7 @@ switch ($jenis) {
                             tr_pr_detail.description,
                             tr_pr_detail.uom,
                             tr_pr_detail.qty,
-                            CONCAT(m_asal.nama_kota, ' - ', m_tujuan.nama_kota) AS item
+                            CONCAT(m_asal.nama_kota, '-', m_tujuan.nama_kota) AS item
                         FROM tr_pr_detail
                         LEFT JOIN m_kota_tr AS m_asal ON m_asal.id_kota = tr_pr_detail.origin
                         LEFT JOIN m_kota_tr AS m_tujuan ON m_tujuan.id_kota = tr_pr_detail.destination
@@ -78,12 +78,12 @@ switch ($jenis) {
 
     case 'item':
         $queryDetail = "SELECT 
-                            sap_item_tr.sapitemcode AS item,
-                            tr_pr_detail.description,
-                            tr_pr_detail.uom,
+                            m_cost_tr.itemcode AS item,
+                            m_cost_tr.uom,
+                            CONCAT (tr_pr_detail.description,'-',tr_pr_detail.remark) as description,
                             tr_pr_detail.qty
                         FROM tr_pr_detail
-                        LEFT JOIN sap_item_tr ON sap_item_tr.rowid = tr_pr_detail.item
+                        LEFT JOIN m_cost_tr ON m_cost_tr.id_cost = tr_pr_detail.item
                         WHERE tr_pr_detail.code_pr = '$code_pr' AND tr_pr_detail.jenis = '$jenis' ORDER BY tr_pr_detail.id_detail";
         $ket = "Uom";
         break;
@@ -174,40 +174,54 @@ function renderPR($jenis, $pdf, $startY, $code_pr, $tgl, $tgl_pr, $user_req, $re
     $colQty   = 15;
     $colName  = $tableW - ($colNo + $colCode + $colUom + $colQty);
 
-    $pdf->SetFont('arial','B',10);
-    $pdf->SetXY($marginL, $detailY);
-    $pdf->Cell($colNo,   8, 'No',        1, 0, 'C');
+$pdf->SetFont('arial','B',10);
+$pdf->SetXY($marginL, $detailY);
+$pdf->Cell($colNo,   8, 'No', 1, 0, 'C');
+$pdf->Cell($colCode, 8, ucwords(strtolower($jenis)), 1, 0, 'C');
+$pdf->Cell($colName, 8, 'Description', 1, 0, 'C');
+$pdf->Cell($colUom,  8, $ket, 1, 0, 'C');
+$pdf->Cell($colQty,  8, 'Qty', 1, 1, 'C');
 
-    $pdf->Cell($colCode, 8, ucwords(strtolower($jenis)), 1, 0, 'C');
-    $pdf->Cell($colName, 8, 'Description', 1, 0, 'C');
-    $pdf->Cell($colUom,  8, $ket,       1, 0, 'C');
-    $pdf->Cell($colQty,  8, 'Qty',       1, 1, 'C');
+$pdf->SetFont('arial','',9);
+$no = 1;
 
-    $pdf->SetFont('arial','',9);
-    $no = 1;
+foreach ($details as $row) {
+    $x = $marginL;
+    $y = $pdf->GetY();
 
-    foreach ($details as $row) {
-        $x = $marginL;
-        $y = $pdf->GetY();
+    // Hitung tinggi baris berdasar teks terpanjang (description)
+    $nbLines = NbLines($pdf, $colName, $row['description']);
+    $rowHeight = 5 * $nbLines;
 
-        $nbLines = NbLines($pdf, $colName, $row['description']);
-        $rowHeight = 5 * $nbLines;
+    $pdf->SetXY($x, $y);
+    $pdf->Cell($colNo, $rowHeight, $no++, 1, 0, 'C');
+    $x += $colNo;
 
-        $pdf->SetXY($x, $y);
-        $pdf->Cell($colNo, $rowHeight, $no++, 1, 0, 'C');
-        $x += $colNo;
-        $pdf->SetXY($x, $y);
-        $pdf->Cell($colCode, $rowHeight, $row['item'], 1, 0, 'L');
-        $x += $colCode;
-        $pdf->SetXY($x, $y);
-        $pdf->MultiCell($colName, 5, $row['description'], 1, 'L');
-        $x += $colName;
-        $pdf->SetXY($x, $y);
-        $pdf->Cell($colUom, $rowHeight, $row['uom'], 1, 0, 'C');
-        $x += $colUom;
-        $pdf->SetXY($x, $y);
-        $pdf->Cell($colQty, $rowHeight, $row['qty'], 1, 1, 'C');
-    }
+    $pdf->SetXY($x, $y);
+    $pdf->MultiCell($colCode, $rowHeight, $row['item'], 1, 'L');
+    $x += $colCode;
+
+    $pdf->SetXY($x, $y);
+    $pdf->MultiCell($colName, 5, $row['description'], 1, 'L');
+
+    $yAfterDesc = $pdf->GetY();
+
+    $x += $colName;
+
+    $pdf->SetXY($x, $y);
+
+    // --- Kolom UOM ---
+    $pdf->Cell($colUom, $rowHeight, $row['uom'], 1, 0, 'C');
+    $x += $colUom;
+
+    // --- Kolom Qty ---
+    $pdf->SetXY($x, $y);
+    $pdf->Cell($colQty, $rowHeight, $row['qty'], 1, 0, 'C');
+
+    // Pindah ke Y paling bawah dari baris tersebut
+    $pdf->SetY($y + $rowHeight);
+}
+
 
     // ---------- KOTAK DESKRIPSI ----------
     $DescY   = $y + $rowHeight + 1.5;

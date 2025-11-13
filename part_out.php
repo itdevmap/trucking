@@ -1,40 +1,40 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-//include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	//include "lib.php";
 
-$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='12' ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+	$pq = mysqli_query($koneksi,"SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='12' ");
 
-if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
- header('location:logout.php'); 
-}
+	$rq=mysqli_fetch_array($pq);	
+	$m_edit 	= $rq['m_edit'];
+	$m_add 		= $rq['m_add'];
+	$m_del 		= $rq['m_del'];
+	$m_view 	= $rq['m_view'];
+	$m_exe 		= $rq['m_exe'];
+	$m_approval = $rq['m_approval'];
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{	
-	$hal='1';	
-	$field = $_POST['field'];
-	$search_name = $_POST['search_name'];
-	$tgl1 = $_POST['tgl1'];
-	$tgl2 = $_POST['tgl2'];
-	$paging = $_POST['paging'];
-	$stat = $_POST['stat'];
-}
-else
-{	
-	$tahun= date("Y") ;
-	$tgl1= date("01-01-$tahunx");
-	$tgl2= date("31-12-$tahun");
-	$paging='15';
-	$hal='1';
-	$field = 'Description';
-}
+	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
+		header('location:logout.php'); 
+	}
+
+	if($_SERVER['REQUEST_METHOD'] == "POST"){	
+		$hal='1';	
+		$field = $_POST['field'];
+		$search_name = $_POST['search_name'];
+		$tgl1 = $_POST['tgl1'];
+		$tgl2 = $_POST['tgl2'];
+		$paging = $_POST['paging'];
+		$stat = $_POST['stat'];
+	}
+	else{	
+		$tahun= date("Y") ;
+		$tgl1= date("01-01-$tahunx");
+		$tgl2= date("31-12-$tahun");
+		$paging='15';
+		$hal='1';
+		$field = 'Description';
+	}
 
 ?>
 
@@ -125,8 +125,7 @@ else
 			}
 			return true;
 		}
-		function ReadData(hal) 
-		{
+		function ReadData(hal) {
 			var tgl1 = $("#tgl1").val();
 			var tgl2 = $("#tgl2").val();	
 			var cari = $("#search_name").val();
@@ -144,8 +143,7 @@ else
 				$("#hal").val(hal);
 			});
 		}	
-		function Download() 
-		{
+		function Download() {
 			var tgl1 = $("#tgl1").val();
 			var tgl2 = $("#tgl2").val();	
 			var cari = $("#search_name").val();
@@ -155,6 +153,68 @@ else
 			var idx = btoa(id);
 			var win = window.open('part_out_excel.php?id='+idx);
 		}
+
+		function tampilGI(id_detil){
+			$cari = $("#cari_GI").val('');
+			ListGI(id_detil);
+			$('#tampilGI').modal('show');
+		}
+		function ListGI(id_detil) {
+			var cari = $("#cari_GI").val();
+			$.get("ajax/part_crud.php", {cari:cari,id_detil:id_detil,  type:"ListGI" }, function (data, status) {
+				$(".tampil_UpGI").html(data);
+				$("#hal").val(hal);
+			});
+		}
+		function SaveUpGI() {
+			let selected = [];
+			$('input[name="sap_selected[]"]:checked').each(function () {
+				selected.push($(this).val());
+			});
+
+			if (selected.length === 0) {
+				alert("Pilih minimal 1 data!");
+				return;
+			}
+
+			$("#btnSaveGI").prop("disabled", true).text("Processing...");
+
+			$.ajax({
+				url: "ajax/part_crud.php",
+				type: "POST",
+				data: { type: "SaveUpGI", ids: selected },
+				dataType: "json",
+				success: function (res) {
+					if (res.success === false) {
+						alert("Gagal: " + res.message);
+					} else {
+						alert("Data berhasil dikirim ke SAP!");
+						console.log(res);
+						$('#tampilGI').modal('hide');
+					}
+				},
+				error: function (xhr, status, err) {
+					console.error(xhr.responseText);
+					alert("Terjadi error: " + err);
+				},
+				complete: function () {
+					$("#btnSaveGI").prop("disabled", false).text("Save to SAP");
+					ReadData();
+				}
+			});
+		}
+
+		function ApproveGI(id_detil) {
+			$.get("ajax/part_crud.php", {
+				id_detil: id_detil,
+				type: "ApproveGI"
+			}, function (data, status) {
+				ReadData()
+			});
+		}
+
+
+
 	</script>	
 	
   </head>
@@ -169,112 +229,154 @@ else
 		</aside>	
 		
 		<form method="post" name ="myform"  class="form-horizontal" > 
-		<div class="content-wrapper" style="min-height:750px">
-			<br>
-			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Spare Part</b></font></h1></li>					
-			</ol>
-			<br>
-			
-			<div class="col-md-12" style="width:99%;border:0px solid #ddd;padding:5px">					
-				<div style="width:99%;border-bottom:2px solid #83a939;background:none;margin-left:-5px;margin-top:-5px;margin-bottom:-9px" class="input-group">	
+			<div class="content-wrapper" style="min-height:750px">
+				<br>
+				<ol class="breadcrumb">
+					<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Spare Part</b></font></h1></li>					
+				</ol>
+				<br>
+				
+				<div class="col-md-12" style="width:99%;border:0px solid #ddd;padding:5px">					
+					<div style="width:99%;border-bottom:2px solid #83a939;background:none;margin-left:-5px;margin-top:-5px;margin-bottom:-9px" class="input-group">	
 						<?php
 							$xy1="$mode|$id_joc";
 							$xy1=base64_encode($xy1);
 							$link1 = "part.php?id=$xy1";
 							$link2 = "part_in.php?id=$xy1";
 							$link3 = "part_out.php?id=$xy1";
+							$link4 = "part_gr.php?id=$xy1";
 						?>
-					<div id="tabs5" >
-						<ul> 
-							<li ><?php echo "<a href=$link1>"; ?><span><b>Data Stok </b></span></a></li> 
-							<li ><?php echo "<a href=$link2>"; ?><span><b>Data In</b></span></a></li>
-							<li id="current"><?php echo "<a href=$link3>"; ?><span><b>Data Out</b></span></a></li>
-						</ul>
-					</div>	
-				</div>					
-			</div>	
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
-					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-							<b><i class="fa fa-search"></i>&nbsp;Filter Data</b>
-					</div>
-					<br>
-					<div style="width:100%;" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
-						<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
-						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
-						&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
-						<input type="text"  id ="tgl2" name="tgl2" value="<?php echo $tgl2; ?>" 
-						style="text-align: center;width:85px" onchange="ReadData(1)" readonly >	
-					</div>	
-					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Filter By</b></span>
-						<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">
-							<option>Item Number</option>
-							<option>Description</option>
-							<option>No SPK</option>
-							<option>No Polisi</option>
-							<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
-						</select>
-						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
-						style="text-align: left;width:200px" onkeypress="ReadData(1)" >
-						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
-						<button class="btn btn-block btn-primary" style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding-top:6px;padding-bottom:6px" 
-							type="submit">
-							<span class="glyphicon glyphicon-search"></span>
-						</button>
-					</div>
-					<br>	
-				</div>
-            </div>
-			
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
-					<div style="width:100%;background: #fff;" class="input-group" >
-						<span class="input-group-addon" style="width:50%;text-align:left;padding:0px">
-							<button class="btn btn-block btn-warning" 
-								style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = ""
-								onClick="javascript:Download()">
-								<span class="fa fa-file-text"></span>
-								<b>Download</b>
-							</button>							
-						</span>
-						<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
-						Row Page :&nbsp;
-						<select size="1" id="paging"  name="paging" onchange="ReadData(1)" style="padding:4px;margin-right:2px">
-							<?php 
-							$tampil1="select * from m_paging  order by baris";
-							$hasil1=mysqli_query($koneksi, $tampil1);       
-							while ($data1=mysqli_fetch_array($hasil1)){  
-							?>
-							<option><?php echo $data1['baris'];?></option>
-							<?php }?>
-							<option value="<?php echo $paging; ?>" selected><?php echo $paging; ?></option>
-						</select>	
-						</span>	
-					</div>		
-				</div>
-            </div>			
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
-					<div class="table-responsive mailbox-messages" style="min-height:10px">									
-						<div class="tampil_data"></div>
-					</div>
+						<div id="tabs5" >
+							<ul> 
+								<li ><?php echo "<a href=$link1>"; ?><span><b>Data Stock </b></span></a></li> 
+								<li ><?php echo "<a href=$link2>"; ?><span><b>Data In (GRPO)</b></span></a></li>
+								<li id="current"><?php echo "<a href=$link3>"; ?><span><b>Data Out (GI)</b></span></a></li>
+								<li ><?php echo "<a href=$link4>"; ?><span><b>Data In (GR)</b></span></a></li>
+							</ul>
+						</div>	
+					</div>					
 				</div>	
-            </div>
-			<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
+						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+								<b><i class="fa fa-search"></i>&nbsp;Filter Data</b>
+						</div>
+						<br>
+						<div style="width:100%;" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Tanggal :</b></span>
+							<input type="text"  id ="tgl1" name="tgl1" value="<?php echo $tgl1; ?>" 
+							style="text-align: center;width:85px" onchange="ReadData(1)" readonly >
+							&nbsp;&nbsp;<b>s.d</b>&nbsp;&nbsp;
+							<input type="text"  id ="tgl2" name="tgl2" value="<?php echo $tgl2; ?>" 
+							style="text-align: center;width:85px" onchange="ReadData(1)" readonly >	
+						</div>	
+						<div style="width:100%" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Filter By</b></span>
+							<select size="1" id="field"  onchange="ReadData(1)" name="field" style="padding:4px;margin-right:2px;width: 85px">
+								<option>Item Number</option>
+								<option>Description</option>
+								<option>No SPK</option>
+								<option>No Polisi</option>
+								<option value="<?php echo $field; ?>" selected><?php echo $field; ?></option>
+							</select>
+							<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
+							style="text-align: left;width:200px" onkeypress="ReadData(1)" >
+							<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >
+							<button class="btn btn-block btn-primary" style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding-top:6px;padding-bottom:6px" 
+								type="submit">
+								<span class="glyphicon glyphicon-search"></span>
+							</button>
+						</div>
+						<br>	
+					</div>
+				</div>
+				
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
+						<div style="width:100%;background: #fff;" class="input-group" >
+							<span class="input-group-addon" style="width:50%;text-align:left;padding:0px">
+								<button class="btn btn-block btn-warning" 
+									style="margin:0px;margin-left:-1px;margin-bottom:0px;border-radius:2px" type="button"  title = ""
+									onClick="javascript:Download()">
+									<span class="fa fa-file-text"></span>
+									<b>Download</b>
+								</button>							
+							</span>
+							<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
+							Row Page :&nbsp;
+							<select size="1" id="paging"  name="paging" onchange="ReadData(1)" style="padding:4px;margin-right:2px">
+								<?php 
+								$tampil1="select * from m_paging  order by baris";
+								$hasil1=mysqli_query($koneksi, $tampil1);       
+								while ($data1=mysqli_fetch_array($hasil1)){  
+								?>
+								<option><?php echo $data1['baris'];?></option>
+								<?php }?>
+								<option value="<?php echo $paging; ?>" selected><?php echo $paging; ?></option>
+							</select>	
+							</span>	
+						</div>		
+					</div>
+				</div>			
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
+						<div class="table-responsive mailbox-messages" style="min-height:10px">									
+							<div class="tampil_data"></div>
+						</div>
+					</div>	
 				</div>
 				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-		</div>		
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+			</div>		
 		</form>
 	</div>	
+
+	<!-- ============== MODAL GI ============== -->
+	<div class="modal fade" id="tampilGI" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content" style="background: none">	
+				<div class="modal-body">						
+					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+							<div class="small-box bg" style="display:flex;align-items:center;justify-content:space-between; font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;margin-bottom:1px">
+								<div style="text-align:left;">
+									<b><i class="fa fa-list"></i>&nbsp;List Send GI</b>
+								</div>
+								<button class="btn btn-danger btn-sm" style="border-radius:2px;padding:3px 6px;" data-dismiss="modal">
+									<span class="glyphicon glyphicon-remove"></span>
+								</button>
+							</div>
+							<br>
+							<div style="width:100%" class="input-group" style="background:none !important;">
+								<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+								</span>
+							</div>							
+							<div class="table-responsive mailbox-messages">									
+								<form id="formUpGI">
+									<div class="tampil_UpGI"></div>
+								</form>
+							</div>
+
+							<br>
+							<div style="text-align:right;">
+								<button type="button" id="btnSaveGI" class="btn btn-success" style="margin:0;border-radius:2px;" onclick="SaveUpGI()">
+									<span class="fa fa-plus-square"></span>
+									<b>Save to SAP</b>
+								</button>	
+							</div>
+						</div>		
+					</div>		
+				</div>	
+			</div>
+		</div>	
+	</div>
 	
 	<?php include "footer.php"; ?>
 	<?php include "js.php"; ?>

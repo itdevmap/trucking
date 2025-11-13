@@ -7,15 +7,21 @@
 	use PHPMailer\PHPMailer\PHPMailer;
 	use PHPMailer\PHPMailer\Exception;
 
-	include("../PHPMailer/src/Exception.php"); 
-	include("../PHPMailer/src/PHPMailer.php"); 
-	include("../PHPMailer/src/SMTP.php");
+	include "PHPMailer/src/Exception.php"; 
+	include "PHPMailer/src/PHPMailer.php"; 
+	include "PHPMailer/src/SMTP.php";
 
 	if(!isset($_SESSION['id_user'])  ){
-	header('location:logout.php'); 
+		header('location:logout.php'); 
 	}
 
 	if($_SERVER['REQUEST_METHOD'] == "POST") {
+
+		// echo "<pre>";
+		// print_r($_POST);
+		// echo "</pre>";
+		// exit;
+
 		$mode 		= $_POST['mode'];
 		$id_quo 	= $_POST['id_quo'];	
 		$id_cust 	= $_POST['id_cust'];	
@@ -25,58 +31,6 @@
 		$remark 	= addslashes(trim($_POST['remark']));
 
 		if($mode == 'Add' ){
-
-			// ========= CHECK LIMIT =========
-				$q_limit = "SELECT overlimit FROM m_cust_tr WHERE id_cust = '$id_cust' LIMIT 1";
-				$r_query = mysqli_query($koneksi, $q_limit);
-				$r_limit = mysqli_fetch_assoc($r_query);
-				$limit_cust = $r_limit['overlimit'];
-			// ========= END CHECK LIMIT =========
-
-			// ========= CHECK TOTAL SO =========
-				$q_total_item = "SELECT 
-						COALESCE(SUM(tr_jo_detail.harga - (tr_jo_detail.pph * tr_jo_detail.harga / 100)), 0) AS total_item
-					FROM tr_jo
-					INNER JOIN tr_sj ON tr_sj.no_jo = tr_jo.no_jo
-					LEFT JOIN tr_jo_detail ON tr_jo_detail.id_so = tr_jo.id_jo
-					WHERE tr_jo.id_cust = '$id_cust'
-				";
-				$r_total_item = mysqli_query($koneksi, $q_total_item);
-				$row_item = mysqli_fetch_assoc($r_total_item);
-				$total_item = $row_item['total_item'] ?? 0;
-
-				$q_total_biaya = "SELECT 
-						COALESCE(SUM(tr_jo_biaya.harga - (tr_jo_biaya.pph * tr_jo_biaya.harga / 100)), 0) AS total_biaya
-					FROM tr_jo_biaya
-					LEFT JOIN tr_jo ON tr_jo.id_jo = tr_jo_biaya.id_jo
-					WHERE tr_jo.id_cust = '$id_cust'
-				";
-				$r_total_biaya = mysqli_query($koneksi, $q_total_biaya);
-				$row_biaya = mysqli_fetch_assoc($r_total_biaya);
-				$total_biaya = $row_biaya['total_biaya'] ?? 0;
-
-				$total_so = $total_item + $total_biaya;
-			// ========= END CHECK TOTAL SO =========
-			
-			// ========= CHECK AR PAID =========
-				$q_total_paid = "SELECT 
-						COALESCE(SUM(total_so), 0) as total_so
-					FROM tr_jo 
-					WHERE ar_paid = '1' 
-						AND total_so > 0 
-						AND id_cust = '$id_cust'
-				";
-
-				$r_total_paid = mysqli_query($koneksi, $q_total_paid);
-				$row_paid = mysqli_fetch_assoc($r_total_paid);
-				$total_paid = $row_paid['total_so'] ?? 0;
-			// ========= END CHECK AR PAID =========
-			
-			// echo "Total SO " . number_format($total_so, 0, ',', '.') . '</br>';
-			// echo "Total IP " .  number_format($total_paid, 0, ',', '.') . '</br>';
-			// echo "Total " .  number_format($last_total, 0, ',', '.') . '</br>';
-			// echo "LIMIT " .  number_format($limit_cust, 0, ',', '.') . '</br>';
-			// die();
 
 			// ========= BUILD CODE SO =========
 				$tahun = date("y");
@@ -121,82 +75,6 @@
 
             $tgl_jo 	= date('Y-m-d');
     		$id_user	= $_SESSION['id_user'] ?? 0;
-
-			// ============ CHECK IS PENDING OR NOT ============
-			$last_total = $total_so - $total_paid;
-			if (($last_total) > $limit_cust) {
-				echo "Total SO " . number_format($last_total, 0, ',', '.') ." melebihi " . number_format($limit_cust, 0, ',', '.') ;
-				$stat = '2';
-
-				// ============ NAMA CUST ============
-					$q_cust = "SELECT nama_cust FROM m_cust_tr WHERE id_cust = '$id_cust'";
-					$r_cust = mysqli_query($koneksi, $q_cust);
-					$d_cust = mysqli_fetch_assoc($r_cust);
-
-					$nama_cust = $d_cust['nama_cust'] ?? null;
-
-				// ============ SEND APPROVAL ============
-					$mail	= new PHPMailer(true);
-
-					$mail->isSMTP();
-					$mail->Host       = 'smtp.gmail.com';
-					$mail->SMTPAuth   = true;
-					$mail->Username   = 'itdivision.map@gmail.com';
-					$mail->Password   = 'glpykeqqsaulnhxd'; 
-					$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-					$mail->Port       = 587;
-
-					$mail->setFrom('itdivision.map@gmail.com', 'Approval Sales Order PETJ');
-					// $mail->addAddress('director.petj@gmail.com');
-					$mail->addAddress('kuroboy051@@gmail.com');
-
-					$mail->isHTML(true);
-					$mail->Subject = "Approval Sales Order Trucking" . $no_so;
-
-					$mail->Body = '
-						<table cellspacing="0" cellpadding="4">
-							<tr>
-								<td><b>No Sales Order</b></td>
-								<td>: '. $no_so . '</td>
-							</tr>
-							<tr>
-								<td><b>Tanggal SO</b></td>
-								<td>: ' . $tgl_jo . '</td>
-							</tr>
-							<tr>
-								<td><b>Tujuan Approval</b></td>
-								<td>: Approval Status Sales Order Overlimit, Limit '. $limit_cust .' Pengajuan '.$last_total.'</td>
-							</tr>
-							<tr>
-								<td><b>Customer</b></td>
-								<td>: '.$nama_cust.'</td>
-							</tr>
-						</table>
-						<br><br>
-						<a href="http://127.0.0.1/trucking-local/so_approve.php/' . $no_so . '" 
-							style="display:inline-block;
-								padding:10px 16px;
-								background-color:#28a745;
-								color:#fff;
-								text-decoration:none;
-								border-radius:4px;
-								font-weight:bold;">
-							Approve Sales Order
-						</a>
-						&nbsp;&nbsp;
-						<a href="http://127.0.0.1/trucking-local/so_reject.php/' . $no_so . '" 
-							style="display:inline-block;
-								padding:10px 16px;
-								background-color:#dc3545;
-								color:#fff;
-								text-decoration:none;
-								border-radius:4px;
-								font-weight:bold;">
-							Reject Sales Order
-						</a>
-					';
-				// ============ END SEND APPROVAL ============
-			}
 			
 			$sql = "INSERT INTO  tr_jo (
 						sap_project, 
@@ -243,9 +121,9 @@
 	}else{
 
         $idx = $_GET['id'];	
-        $x=base64_decode($idx);
+        $x = base64_decode($idx);
         $pecah = explode("|", $x);
-        $mode= $pecah[0];
+        $mode = $pecah[0];
         $cat = $pecah[2];
 
         if ($mode === "Edit") {
@@ -608,9 +486,9 @@
 							<b><i class="fa fa-list"></i>&nbsp;Data Sales Order</b>
 						</div>
 						<br>
-						<input type="hidden" id ="id_quo" name="id_quo" value="<?php echo $id_quo; ?>" >	
-						<input type="hidden" id ="id_jo" name="id_jo" value="<?php echo $id_jo; ?>" >
-						<input type="hidden" id ="mode" name="mode" value="<?php echo $mode; ?>" >
+						<input type="text" id ="id_quo" name="id_quo" value="<?php echo $id_quo; ?>" >	
+						<input type="text" id ="id_jo" name="id_jo" value="<?php echo $id_jo; ?>" >
+						<input type="text" id ="mode" name="mode" value="<?php echo $mode; ?>" >
 
 						<div style="width:100%;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
@@ -708,7 +586,7 @@
 	</div>	
 	
 
-	<!-- ---------- MODAL NAMBAH DETAIL SO -->
+	<!-- ============ MODAL NAMBAH DETAIL SO ============ -->
 	<div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">
@@ -786,7 +664,7 @@
 		</div>	
     </div>
 
-    <!-- --------- MODAL ITEM PR --------- -->
+    <!-- ============ MODAL ITEM PR ============ -->
 	<div class="modal fade" id="DaftarItemPR"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">	
@@ -827,7 +705,7 @@
 		</div>	
     </div>
 	
-    <!-- ---------- MODAL SEARCH SAP PROJECT ---------- -->
+    <!-- ============ MODAL SEARCH SAP PROJECT ============ -->
 	<div class="modal fade" id="DaftarSAP"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">	

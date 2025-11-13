@@ -5,7 +5,7 @@ include("../koneksi.php");
 include "../lib.php";
 
 
-$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='13' ");
+$pq = mysqli_query($koneksi, "SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu = '13' ");
 $rq=mysqli_fetch_array($pq);	
 $m_edit = $rq['m_edit'];
 $m_add = $rq['m_add'];
@@ -23,11 +23,13 @@ if ($_GET['type'] == "Read"){
 				<tr>					
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
 					<th rowspan="2" width="12%" style="text-align: center;">ITEM CODE</th>
-					<th rowspan="2" width="55%" style="text-align: center;">COST NAME</th>
+					<th rowspan="2" width="40%" style="text-align: center;">COST NAME</th>
+					<th rowspan="2" width="10%" style="text-align: center;">UOM</th>
 					<th rowspan="2" width="10%" style="text-align: center;">COA</th>
+					<th rowspan="2" width="10%" style="text-align: center;">COA AF</th>
 					<th rowspan="2" width="10%" style="text-align: center;">CORPORATE</th>
 					<th rowspan="2" width="10%" style="text-align: center;">DIVISI</th>
-					<th rowspan="2" width="10%" style="text-align: center;">DEPARTMENT</th>
+					<th rowspan="2" width="5%" style="text-align: center;">DEPARTMENT</th>
 					<th rowspan="2" width="10%" style="text-align: center;">ACTIVITY</th>
 					<th rowspan="2" width="10%" style="text-align: center;">LOCATION</th>
 					<th rowspan="2" width="9%" style="text-align: center;">CREATED</th>
@@ -59,7 +61,9 @@ if ($_GET['type'] == "Read"){
 				<td style="text-align:center">'.$posisi.'.</td>	
 				<td style="text-align:center">'.$row['itemcode'].'</td>
 				<td style="text-align:left">'.$row['nama_cost'].'</td>
+				<td style="text-align:center">'.$row['uom'].'</td>
 				<td style="text-align:center">'.$row['sap_coa'].'</td>
+				<td style="text-align:center">'.$row['sap_coa_af'].'</td>
 				<td style="text-align:center">'.$row['sap_corporate'].'</td>
 				<td style="text-align:center">'.$row['sap_divisi'].'</td>
 				<td style="text-align:center">'.$row['sap_dept'].'</td>
@@ -162,8 +166,10 @@ else if ($_POST['type'] == "add"){
 		$id 			= $_POST['id'];
 		$cost_name 		= addslashes(trim(strtoupper($_POST['cost_name'])));
 		$stat 			= $_POST['stat'];
+		$uom 			= $_POST['uom'];
 		
 		$sap_coa 		= $_POST['sap_coa'];
+		$sap_coa_af 	= $_POST['sap_coa_af'];
 		$sap_corporate 	= $_POST['sap_corporate'];
 		$sap_divisi 	= $_POST['sap_divisi'];
 		$sap_dept 		= $_POST['sap_dept'];
@@ -175,9 +181,9 @@ else if ($_POST['type'] == "add"){
 		
 		if($mode == 'Add') {			
 			$sql = "INSERT INTO m_cost_tr 
-					(nama_cost, id_user, item_pph, `status`, sap_coa, sap_corporate, sap_divisi, sap_divisi, sap_dept, sap_activity, sap_location) 
+					(nama_cost, id_user, item_pph, `status`, uom, sap_coa, sap_coa_af, sap_corporate, sap_divisi, sap_divisi, sap_dept, sap_activity, sap_location) 
 				VALUES
-					('$cost_name','$id_user', '$item_pph','$stat', '$sap_coa', '$sap_corporate', '$sap_divisi', '$sap_dept', '$sap_activity', '$sap_location')";
+					('$cost_name','$id_user', '$item_pph','$stat', '$uom', '$sap_coa','$sap_coa_af', '$sap_corporate', '$sap_divisi', '$sap_dept', '$sap_activity', '$sap_location')";
 		}
 		else {
 			$sql = "UPDATE m_cost_tr SET 
@@ -186,8 +192,10 @@ else if ($_POST['type'] == "add"){
 					`status` 		= '$stat',
 					jenis 			= '$st',
 					id_user 		= '$id_user',
+					uom 		= '$uom',
 					
 					sap_coa 		= '$sap_coa',
+					sap_coa_af 		= '$sap_coa_af',
 					sap_corporate 	= '$sap_corporate',
 					sap_divisi 		= '$sap_divisi',
 					sap_dept 		= '$sap_dept',

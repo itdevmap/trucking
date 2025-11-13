@@ -5,11 +5,10 @@
 	include "lib.php";
 
 	if(!isset($_SESSION['id_user'])  ){
-	header('location:logout.php'); 
+		header('location:logout.php'); 
 	}
 
-	if($_SERVER['REQUEST_METHOD'] == "POST")
-	{		
+	if($_SERVER['REQUEST_METHOD'] == "POST"){
 		
 		$mode = $_POST['mode'];
 		$id_quo = $_POST['id_quo'];	
@@ -20,9 +19,7 @@
 		$quo_datex = ConverTglSql($quo_date);
 		$sales = $_POST['sales'];
 		
-		if($mode == 'Add' )
-		{
-
+		if($mode == 'Add' ){
 			$ptgl = explode("-", $quo_date);
 			$tg = $ptgl[0];
 			$bl = $ptgl[1];
@@ -65,13 +62,11 @@
 			$hasil=mysqli_query($koneksi,$sql);
 		}
 		
-		$cat ="Data saved...";
-		$xy1="Edit|$id_quo|$cat";
-		$xy1=base64_encode($xy1);
+		$cat 	= "Data saved...";
+		$xy1	= "Edit|$id_quo|$cat";
+		$xy1	= base64_encode($xy1);
 		header("Location: quo_data.php?id=$xy1");
-	}
-	else
-	{	
+	}else{	
 		$idx = $_GET['id'];	
 		$x=base64_decode($idx);
 		$pecah = explode("|", $x);
@@ -80,8 +75,7 @@
 		$cat = $pecah[2];
 	}
 
-	if($mode == 'Add')
-	{
+	if($mode == 'Add'){
 		$quo_no = '-- Auto -- ';
 		$quo_date = date('d-m-Y');
 		
@@ -102,8 +96,7 @@
 		$disx = 'Disabled';
 	}
 
-	if($mode == 'View')
-	{
+	if($mode == 'View'){
 		$dis = "Disabled";
 	}
 
@@ -222,16 +215,16 @@
 			}	
 		}
 		
-		function TampilData() 
-		{
-			
+		function TampilData() {
 			$("#id_asal").val('141');
 			$("#penerima").val('');
-			// $("#biaya_kirim").val('');
 			$("#jenis").val('');
 			$("#modex").val('Add');
+
+			$("#origin_address").val('TERMINAL PETIKEMAS SURABAYA');
+
 			CekRate_Umum();
-			$('#Data').modal('show');
+			$('#ModalAddQuo').modal('show');
 		}
 
 		function CekRate_Umum() {
@@ -305,8 +298,8 @@
 
 			if (biaya_kirim < min_price) {
 				alert("Shipping Cost di bawah harga minimal");
-				return;
-				// sts = 2;
+				/// return;
+				sts = 2;
 			}
 
 			if (isNaN(distance) || distance <= 0) {
@@ -348,10 +341,10 @@
 					type: "Add_Detil"
 				}, function (data, status) {
 					alert(data);
-					$("#Data").modal("hide");
+					$("#ModalAddQuo").modal("hide");
 					ReadData();
 
-					$("#Data").find("input[type=text], textarea").val("");
+					$("#ModalAddQuo").find("input[type=text], textarea").val("");
 					$("#id_asal, #id_tujuan, #jenis, #price_type").prop("selectedIndex", 0);
 					$("#origin_map, #destination_map").hide();
 				});
@@ -387,7 +380,7 @@
 					destination_address();
 				}
 			);
-			$("#Data").modal("show");
+			$("#ModalAddQuo").modal("show");
 		}
 
 		function DelDetil(id) {
@@ -403,7 +396,7 @@
 			}
 		}
 		
-		// ------------------- FUNCTION CHECK LOCATION -------------------
+		// ============= FUNCTION CHECK LOCATION =============
 			let origin_lat = null;
 			let origin_lon = null;
 			let dest_lat = null;
@@ -645,6 +638,7 @@
 			function toRad(value) {
 				return value * Math.PI / 180;
 			}
+		// ============= END FUNCTION CHECK LOCATION =============
 
     </script>
 	
@@ -780,14 +774,14 @@
 	
 
 	<!-- MODAL NAMBAH QUO  -->
-	<div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal fade" id="ModalAddQuo"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background: none">
 				<div class="modal-body">
 					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
 						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
 							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Quotation</b>
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Quotation </b>
 							</div>	
 							<br>
 				

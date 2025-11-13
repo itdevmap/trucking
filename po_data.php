@@ -15,6 +15,7 @@
 		// die();
 
 		$rowid 		= $_POST['rowid'];
+		$id_po 		= $_POST['id_po'];
 		$mode 		= $_POST['mode'];
 		$user_req 	= $_POST['id_vendor'];	
 		$code_pr 	= $_POST['no_pr'];	
@@ -87,7 +88,7 @@
 		}else{
 			$sql = "UPDATE tr_po SET 
 						user_req = '$user_req',
-						remark = '$remark',
+						remark = '$remark'
 					WHERE id_po = '$id_po'	";
 			$hasil=mysqli_query($koneksi,$sql);
 		}
@@ -114,9 +115,9 @@
 						"SELECT 
 							tr_po.*,
 							sap_project.kode_project,
-							m_cust_tr.nama_cust
+							m_vendor_tr.nama_vendor
 						FROM tr_po 
-						LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = tr_po.user_req
+						LEFT JOIN m_vendor_tr ON m_vendor_tr.id_vendor = tr_po.user_req
 						LEFT JOIN sap_project ON sap_project.rowid = tr_po.sap_project
 						WHERE tr_po.id_po = '$id_po' ");
 						
@@ -129,7 +130,7 @@
 		$code_po 		= $rq['code_po'];
 		$user_req 		= $rq['user_req'];
 		$deliv_date 	= $rq['delivery_date'];
-		$nama_cust 		= $rq['nama_cust'];
+		$nama_vendor 	= $rq['nama_vendor'];
 		$buyer 			= $rq['buyer'];
 		$payment 		= $rq['payment'];
 		$remark 		= $rq['remark'];
@@ -167,23 +168,6 @@
 	</style>
 	<script>
 		// --------- SHOW DATA ---------
-			$(document).ready(function () {
-				var id_vendor = $("#id_vendor").val();
-				if (id_vendor) {
-					checkPayment(id_vendor);
-				}
-				ReadData('route');
-
-				$(document).on("change", "#id_vendor", function () {
-					var id_vendor = $(this).val();
-					if (id_vendor) {
-						checkPayment(id_vendor);
-					} else {
-						$("#payment").val("");
-						$("#buyer").val("");
-					}
-				});
-			});
 			function ReadData(jenis) {
 				var code_po = $("#code_po").val();
 				var id_pr   = $("#id_pr").val();
@@ -262,6 +246,7 @@
 						$("#id_quo").val(data.id_quo);
 						$("#rowid").val(data.rowid);
 						$("#sap_project").val(data.kode_project);
+						$("#remark").val(data.remark);
 					}
 				);
 				$("#DaftarPR").modal("hide");
@@ -509,7 +494,7 @@
 						$("#uom").val(data.uom).prop("readonly", true);
 						$("#qty").val(data.qty);
 						$("#cur").val(data.cur.toUpperCase()).prop("readonly", true);
-						$("#harga").val(data.harga).prop("readonly", true);
+						$("#harga").val(data.harga);
 						$("#disc").val(data.disc);
 						$("#ppn").val(data.ppn);
 						$("#nominal_ppn").val(data.nominal_ppn);
@@ -563,6 +548,36 @@
 				alert("AJAX Error: " + error);
 			});
 		}
+
+		// =========== SHOW MILIH ITEM DARI PR ===========
+			function TampilVendor() {
+				$('#DaftarVendor').modal('show');
+				ListVendor();
+				$('#DaftarVendor').find('input, textarea, select').val('');
+				$('#DaftarVendor').find('input[type=checkbox], input[type=radio]').prop('checked', false);
+				$("#cari_vendor").val('');
+			}
+			function ListVendor() {
+				var cari	= $("#cari_vendor").val();
+				$.get("ajax/po_crud.php", {cari:cari,type:"ListVendor" }, function (data, status) {
+					$(".tampil_vendor").html(data);
+				});
+			}
+			function PilihVendor(id_vendor) {
+				$.post("ajax/po_crud.php", {
+						id_vendor: id_vendor, type:"DetilVendor"
+					},
+					function (data, status) {
+						var data = JSON.parse(data);	
+						$("#id_vendor").val(data.id_vendor);
+						$("#nama_vendor").val(data.nama_vendor);
+						$("#buyer").val(data.nama_rek);
+						$("#payment").val(data.payment);
+						$("#no_rek").val(data.no_rek);
+					}
+				);
+				$("#DaftarVendor").modal("hide");
+			}
     </script>
 	
   </head>
@@ -600,6 +615,7 @@
 						<input type="hidden" id ="mode" name="mode" value="<?php echo $mode; ?>" >
 						<input type="hidden" id ="id_quo" name="id_quo" value="<?php echo $id_quo; ?>" >
 						<input type="hidden" name="rowid" id="rowid" value="<?php echo $rowid; ?>" >
+						<input type="hidden" name="id_vendor" id="id_vendor" value="<?php echo $id_vendor; ?>" >
 
 						<div style="width:100%; display: none;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"><b>Date :</b></span>
@@ -624,25 +640,15 @@
                         </div>
 						
 						<div style="width:100%;" class="input-group">
-							<span class="input-group-addon" style="text-align:right;background:none;min-width:150px">
-								<b>Vendor :</b>
-							</span>
-							<select id="id_vendor" name="id_vendor" style="width: 70%;padding:4px" onchange="checkPayment(this.value)">
-								<?php 
-								$t1 = "SELECT * FROM m_vendor_tr 
-										WHERE status = '1' 
-										AND caption IS NOT NULL 
-										ORDER BY nama_vendor";
-								$h1 = mysqli_query($koneksi, $t1);       
-								while ($d1 = mysqli_fetch_array($h1)) {
-									$selected = ($d1['id_vendor'] == $user_req) ? 'selected' : '';
-									?>
-									<option value="<?= $d1['id_vendor']; ?>" <?= $selected; ?>>
-										<?= strtoupper($d1['nama_vendor']); ?>
-									</option>
-								<?php } ?>
-							</select>
+							<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Vendor :</b></span>
+
+							<input type="text"  id ="nama_vendor" name="nama_vendor" value="<?php echo $nama_vendor;?>" style="text-align: left;width:70%" readonly >
+
+							<button class="btn btn-block btn-primary" id="btn_custx" style="padding:6px 12px 6px 12px; ;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilVendor()">
+								<span class="glyphicon glyphicon-search"></span>
+							</button>	
 						</div>
+
 
 						<div style="width:100%;" class="input-group">
 							<span class="input-group-addon" style="text-align:right;"><b>Delivery Date :</b></span>
@@ -719,9 +725,9 @@
 
 				<div class="col-md-12" >
 					<div style="width:98%;background:none;margin-left:0;margin-top:0px;border-top:0px;border-bottom:0px" class="input-group">
-						<?php if($mode != 'Edit'){?>
-							<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save Order</b>&nbsp;&nbsp;</button>	
-						<?php }?>
+						<button type="submit" class="btn btn-success">
+							<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save Order</b>&nbsp;&nbsp;
+						</button>
 						<button type="button" class="btn btn-danger" onclick="window.location.href='<?php echo $link; ?>'">
 							<span class="fa fa-backward"></span>&nbsp;&nbsp;<b>Back</b>
 						</button>	
@@ -950,6 +956,49 @@
 								</div>							
 								<div class="table-responsive mailbox-messages">									
 									<div class="tampil_item_po"></div>
+								</div>
+								<br>
+							</div>		
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
+
+	<!-- =========== MODAL VENDOR =========== -->
+		<div class="modal fade" id="DaftarVendor"  role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+									&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Vendor</b>
+								</div>	
+								<br>
+								<div style="width:100%" class="input-group" style="background:none !important;">
+									<span class="input-group-addon" style="width:80%;text-align:left;padding:0px">
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Search :</b>&nbsp;&nbsp;
+										<input type="text"  id ="cari_vendor" name="cari_vendor" value="<?php echo $cari; ?>" style="text-align: left;width:200px" onkeypress="ListVendor()" >
+										
+										<button class="btn btn-block btn-primary" 
+										style="margin:0px;margin-left:-3px;margin-bottom:3px;border-radius:2px;padding:5px" 
+										oninput = "ListVendor()">
+
+										<span class="glyphicon glyphicon-search"></span>
+										</button>
+
+										<button class="btn btn-block btn-danger" 
+										style="margin:0px;margin-left:-2px;margin-bottom:3px;border-radius:2px;padding:5px"  
+										data-dismiss="modal" >
+											<span class="glyphicon glyphicon-remove"></span>
+										</button>
+									</span>
+									<span class="input-group-addon" style="width:80%;text-align:right;padding:0px">									
+									</span>
+								</div>							
+								<div class="table-responsive mailbox-messages">									
+									<div class="tampil_vendor"></div>
 								</div>
 								<br>
 							</div>		

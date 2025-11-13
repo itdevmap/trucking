@@ -4,7 +4,7 @@ include "koneksi.php";
 include "session_log.php"; 
 //include "lib.php";
 
-$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='12' ");
+$pq = mysqli_query($koneksi,"SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='12' ");
 $rq=mysqli_fetch_array($pq);	
 $m_edit = $rq['m_edit'];
 $m_add = $rq['m_add'];
@@ -356,18 +356,20 @@ else
 			
 			<div class="col-md-12" style="width:99%;border:0px solid #ddd;padding:5px">					
 				<div style="width:99%;border-bottom:2px solid #83a939;background:none;margin-left:-5px;margin-top:-5px;margin-bottom:-9px" class="input-group">	
-						<?php
-							$xy1="$mode|$id_joc";
-							$xy1=base64_encode($xy1);
-							$link1 = "part.php?id=$xy1";
-							$link2 = "part_in.php?id=$xy1";
-							$link3 = "part_out.php?id=$xy1";
-						?>
+					<?php
+						$xy1="$mode|$id_joc";
+						$xy1=base64_encode($xy1);
+						$link1 = "part.php?id=$xy1";
+						$link2 = "part_in.php?id=$xy1";
+						$link3 = "part_out.php?id=$xy1";
+						$link4 = "part_gr.php?id=$xy1";
+					?>
 					<div id="tabs5" >
 						<ul> 
 							<li id="current"><?php echo "<a href=$link1>"; ?><span><b>Data Stock </b></span></a></li> 
-							<li ><?php echo "<a href=$link2>"; ?><span><b>Data In</b></span></a></li>
-							<li ><?php echo "<a href=$link3>"; ?><span><b>Data Out</b></span></a></li>
+							<li ><?php echo "<a href=$link2>"; ?><span><b>Data In (GRPO)</b></span></a></li>
+							<li ><?php echo "<a href=$link3>"; ?><span><b>Data Out (GI)</b></span></a></li>
+							<li ><?php echo "<a href=$link4>"; ?><span><b>Data In (GR)</b></span></a></li>
 						</ul>
 					</div>	
 				</div>					

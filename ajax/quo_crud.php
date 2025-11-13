@@ -527,30 +527,79 @@
 
 			if ($mode == 'Add') {
 				$sql_insert = "INSERT INTO tr_quo_data 
-					(id_quo, id_asal, id_tujuan, jenis_mobil, harga, origin_address, origin_lon, origin_lat, destination_address, destination_lon, destination_lat, distance, price_type) 
+						(id_quo, id_asal, id_tujuan, jenis_mobil, harga, origin_address, origin_lon, origin_lat, destination_address, destination_lon, destination_lat, distance, price_type) 
 					VALUES
-					('$id_quo', '$id_asal', '$id_tujuan', '$jenis', '$biaya_kirim', '$origin_address','$origin_lon','$origin_lat','$destination_address','$destination_lon','$destination_lat', '$distance', '$price_type')";
+						('$id_quo', '$id_asal', '$id_tujuan', '$jenis', '$biaya_kirim', '$origin_address','$origin_lon','$origin_lat','$destination_address','$destination_lon','$destination_lat', '$distance', '$price_type')";
 				
-				$result_insert = mysqli_query($koneksi, $sql_insert);
-				$last_id = mysqli_insert_id($koneksi);
+				$result_insert 	= mysqli_query($koneksi, $sql_insert);
+				$last_id 		= mysqli_insert_id($koneksi);
 
 				$sql_update = "UPDATE tr_quo SET `status` = '$sts' WHERE id_quo = '$id_quo'";
 				mysqli_query($koneksi, $sql_update);
 
+				
+
 				$sql_quo = "SELECT 
 						tr_quo.quo_no,
 						tr_quo.quo_date,
-						tr_quo_data.harga
+						tr_quo.created,
+						tr_quo_data.harga,
+						m_rate_tr.max_price,
+						m_rate_tr.min_price,
+						CONCAT(rute_asal.nama_kota, ' - ', rute_tujuan.nama_kota) AS rute,
+						CONCAT(m_rate_tr.origin_address, ' - ', m_rate_tr.destination_address) AS alamat,
+						m_rate_tr.origin_address,
+						m_rate_tr.destination_address,
+						tr_quo_data.jenis_mobil,
+						tr_quo_data.price_type,
+						m_cust_tr.nama_cust
 					FROM tr_quo 
-					LEFT JOIN tr_quo_data ON tr_quo_data.id_quo = tr_quo.id_quo
+					LEFT JOIN tr_quo_data 
+						ON tr_quo_data.id_quo = tr_quo.id_quo
+					LEFT JOIN m_rate_tr 
+						ON m_rate_tr.id_asal = tr_quo_data.id_asal 
+						AND m_rate_tr.id_tujuan = tr_quo_data.id_tujuan
+						AND m_rate_tr.jenis_mobil = tr_quo_data.jenis_mobil
+						AND m_rate_tr.price_type = tr_quo_data.price_type
+					LEFT JOIN m_kota_tr AS rute_asal 
+						ON rute_asal.id_kota = tr_quo_data.id_asal 
+					LEFT JOIN m_kota_tr AS rute_tujuan 
+						ON rute_tujuan.id_kota = tr_quo_data.id_tujuan 
+					LEFT JOIN m_cust_tr 
+						ON m_cust_tr.id_cust = tr_quo.id_cust
 					WHERE tr_quo.id_quo = '$id_quo'
-					AND tr_quo_data.id_detil = '$last_id'";
+				";
+
 				$query_data = mysqli_query($koneksi, $sql_quo);
 				$data_quo = mysqli_fetch_assoc($query_data);
 
-				$quo_code = $data_quo['quo_no'];
-				$quo_date = $data_quo['quo_date'];
-				$harga = $data_quo['harga'];
+				// Ambil semua rate terkait
+				$sql_rate = "SELECT 
+						m_rate_tr.max_price,
+						m_rate_tr.min_price,
+						m_rate_tr.price_type
+					FROM tr_quo_data
+					LEFT JOIN tr_quo 
+						ON tr_quo.id_quo = tr_quo_data.id_quo
+					LEFT JOIN m_rate_tr 
+						ON m_rate_tr.id_tujuan = tr_quo_data.id_tujuan 
+						AND m_rate_tr.id_asal = tr_quo_data.id_asal
+					WHERE tr_quo.id_quo = '$id_quo'
+				";
+				$query_rate = mysqli_query($koneksi, $sql_rate);
+
+				// Ambil data utama
+				$quo_code   = $data_quo['quo_no'] ?? '';
+				$quo_date   = $data_quo['quo_date'] ?? '';
+				$harga      = $data_quo['harga'] ?? 0;
+				$max_price  = $data_quo['max_price'] ?? 0;
+				$min_price  = $data_quo['min_price'] ?? 0;
+				$jenis_mobil= $data_quo['jenis_mobil'] ?? '';
+				$rute       = $data_quo['rute'] ?? '';
+				$nama_cust  = $data_quo['nama_cust'] ?? '';
+				$created  	= $data_quo['created'] ?? '';
+				$alamat  	= $data_quo['alamat'] ?? '';
+				$price_type = $data_quo['price_type'] ?? '';
 
 				if ($sts === 2 || $sts === "2") {
 					$mail = new PHPMailer(true);
@@ -562,74 +611,88 @@
 						$mail->Password   = 'glpykeqqsaulnhxd'; 
 						$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 						$mail->Port       = 587;
-	
-						$mail->setFrom('itdivision.map@gmail.com', 'Approval PETJ');
-						$mail->addAddress('itdev2.staff.map@gmail.com');
-	
+
+						$mail->setFrom('itdivision.map@gmail.com', 'noreply@planetexpress.co.id');
+						// $mail->addAddress('itdev2.staff.map@gmail.com');
+						$mail->addAddress('itinfra.coord.map@gmail.com');
+
 						$mail->isHTML(true);
-						$mail->Subject = "Approval Quotation Trucking " . $quo_code;
-	
+						$mail->Subject = "Approval harga di bawah Price List trucking PETJ";
+
+						// Siapkan baris harga rate
+						$rate_rows = '';
+						while ($rate = mysqli_fetch_assoc($query_rate)) {
+							$rate_rows .= '
+								<tr>
+									<td><b>Range Harga (' . htmlspecialchars($rate['price_type']) . ')</b></td>
+									<td>: Rp ' . number_format($rate['min_price'], 0, ",", ".") . ' - Rp ' . number_format($rate['max_price'], 0, ",", ".") . '</td>
+								</tr>
+							';
+						}
+
 						$mail->Body = '
-							<table cellspacing="0" cellpadding="4">
+							<table cellspacing="0" cellpadding="4" style="font-family:Arial, sans-serif; font-size:13px;">
 								<tr>
 									<td><b>No Quotation</b></td>
-									<td>: ' . $quo_code . '</td>
+									<td>: ' . htmlspecialchars($quo_code) . '</td>
 								</tr>
 								<tr>
 									<td><b>Tanggal Kebutuhan</b></td>
-									<td>: ' . $quo_date . '</td>
+									<td>: ' . htmlspecialchars($quo_date) . '</td>
 								</tr>
 								<tr>
 									<td><b>Yang Mengajukan</b></td>
-									<td>: HAMDAN</td>
+									<td>: ' . htmlspecialchars($created) . '</td>
 								</tr>
 								<tr>
 									<td><b>Tujuan Approval</b></td>
-									<td>: Approval Harga Quotation Trucking</td>
+									<td>: Approval harga di bawah  Price List trucking PETJ</td>
 								</tr>
 								<tr>
-									<td><b>Perusahaan</b></td>
-									<td>: PETJ</td>
+									<td><b>Nama Customer</b></td>
+									<td>: ' . htmlspecialchars($nama_cust) . '</td>
 								</tr>
 								<tr>
-									<td><b>Harga</b></td>
-									<td>: Rp ' . number_format($harga, 0, ",", ".") . '</td>
+									<td><b>Jenis Container</b></td>
+									<td>: ' . htmlspecialchars($jenis_mobil) . '</td>
+								</tr>
+								<tr>
+									<td><b>Rute Pengiriman</b></td>
+									<td>: ' . htmlspecialchars($rute) . '</td>
+								</tr>
+								<tr>
+									<td><b>Alamat Pengiriman</b></td>
+									<td>: ' . htmlspecialchars($alamat) . '</td>
+								</tr>
+								' . $rate_rows . '
+								<tr>
+									<td style="color:red;"><b>Harga Pengajuan ('. $price_type .')</b></td>
+									<td style="color:red;"><b>: Rp ' . number_format($harga, 0, ",", ".") . '</b></td>
 								</tr>
 							</table>
 							<br><br>
-							<a href="http://127.0.0.1/trucking-local/quo_approve.php/' . $id_quo . '" 
-								style="display:inline-block;
-									padding:10px 16px;
-									background-color:#28a745;
-									color:#fff;
-									text-decoration:none;
-									border-radius:4px;
-									font-weight:bold;">
+							<a href="http://http://192.168.1.210:8089/tr-dummy/quo_approve.php?no_doc=' . $quo_code . '" 
+								style="display:inline-block; padding:10px 16px; background-color:#28a745; color:#fff; text-decoration:none; border-radius:4px; font-weight:bold;">
 								Approve Quo
 							</a>
 							&nbsp;&nbsp;
-							<a href="http://127.0.0.1/trucking-local/quo_reject.php/' . $id_quo . '" 
-								style="display:inline-block;
-									padding:10px 16px;
-									background-color:#dc3545;
-									color:#fff;
-									text-decoration:none;
-									border-radius:4px;
-									font-weight:bold;">
+							<a href="http://http://192.168.1.210:8089/tr-dummy/quo_reject.php" 
+								style="display:inline-block; padding:10px 16px; background-color:#dc3545; color:#fff; text-decoration:none; border-radius:4px; font-weight:bold;">
 								Reject Quo
 							</a>
 						';
-	
+
 						if ($mail->send()) {
 							echo "✅ Email terkirim<br>";
 						} else {
 							echo "❌ Email gagal: " . $mail->ErrorInfo . "<br>";
 						}
-	
+
 					} catch (Exception $e) {
-						echo "❌ Exception: {$mail->ErrorInfo}<br>";
+						echo "❌ Gagal mengirim email: {$mail->ErrorInfo}";
 					}
 				}
+
 			} else {
 				$sql_update_detail = "UPDATE tr_quo_data SET 
 						id_asal = '$id_asal',

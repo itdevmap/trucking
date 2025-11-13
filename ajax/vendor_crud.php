@@ -5,7 +5,7 @@ include("../koneksi.php");
 include "../lib.php";
 
 
-$sql = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='9' ");
+$sql = mysqli_query($koneksi,"SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='9' ");
 $data=mysqli_fetch_array($sql);
 $m_edit = $data['m_edit'];
 $m_add = $data['m_add'];
@@ -24,27 +24,30 @@ if ($_GET['type'] == "read"){
 			<thead style="font-weight:500px !important">
 				<tr>	
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>		
-					<th rowspan="2" width="42%" style="text-align: center;">VENDOR NAME</th>
+					<th rowspan="2" width="20%" style="text-align: center;">VENDOR NAME</th>
 					<th rowspan="2" width="6%" style="text-align: center;">CODE</th>
 					<th rowspan="2" width="10%" style="text-align: center;">CONTACT PERSON</th>
-					<th rowspan="2" width="8%" style="text-align: center;">PHONE</th>
-					<th rowspan="2" width="16%" style="text-align: center;">EMAIL</th>
+					<th rowspan="2" width="30%" style="text-align: center;">ADDRESS</th>
 					<th rowspan="2" width="5%" style="text-align: center;">PPN</th>
+					<th rowspan="2" width="5%" style="text-align: center;">PPH</th>
+					<th rowspan="2" width="5%" style="text-align: center;">TOP</th>
 					<th rowspan="2" width="6%" style="text-align: center;">STATUS</th>
-					<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>						
+					<th rowspan="2" width="2%" style="text-align: center;">BANK</th>
 				</tr>
-			</thead>';			
+			</thead>';	
+					
 	if(!isset($_GET['hal'])){ 
 		$page = 1;       
-		} else { 
+	} else { 
 		$page = $_GET['hal']; 
 		$posisi=0;
 	}
+
 	$jmlperhalaman = $paging;
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 
 	
-	$SQL = "SELECT * FROM m_vendor_tr WHERE nama_vendor LIKE '%$search_name%' ORDER BY nama_vendor LIMIT $offset, $jmlperhalaman";	
+	$SQL = "SELECT * FROM m_vendor_tr WHERE caption LIKE '%$search_name%' ORDER BY nama_vendor LIMIT $offset, $jmlperhalaman";	
 
 	$query = mysqli_query($koneksi, $SQL);	
 	if (!$result = $query) {
@@ -56,18 +59,20 @@ if ($_GET['type'] == "read"){
     	{	
 			$posisi++;	
 			$tanggal = ConverTgl($row['tanggal']);
-			$batas = number_format($row['batas'],0);
-			$xy1="View|$row[id_vendor]";
-			$xy1=base64_encode($xy1);
-			$link = "cust_data.php?id=$xy1";
+			$batas 	 = number_format($row['batas'],0);
+			$xy1	 = "View|$row[id_vendor]";
+			$xy1	 = base64_encode($xy1);
+			$link 	 = "cust_data.php?id=$xy1";
 			$data .= '<tr>							
 				<td style="text-align:center">'.$posisi.'.</td>	
 				<td style="text-align:left">'.$row['nama_vendor'].'</td>
 				<td style="text-align:center">'.$row['caption'].'</td>
 				<td style="text-align:center">'.$row['kontak'].'</td> 	
-				<td style="text-align:center">'.$row['telp'].'</td> 
-				<td style="text-align:center">'.$row['email'].'</td>
-				<td style="text-align:center">'.$row['ppn'].'</td>';
+				<td style="text-align:left">'.$row['alamat'].'</td>
+				<td style="text-align:center">'.$row['ppn'].'</td>
+				<td style="text-align:center">'.$row['pph'].'</td>
+				<td style="text-align:center">'.$row['payment_term'].'</td>
+				';
 				
 			if($row['status'] =='0' ){
 					$data .= '<td style="text-align:center">
@@ -78,18 +83,29 @@ if ($_GET['type'] == "read"){
 					<button type="button" class="btn btn-success" style="margin:-3px;width:100%;padding:1px;border-radius:1px">Active</button>
 					</td>';	
 			}
+
+			// if($m_edit == '1' ){
+			// 	$data .= '<td>
+			// 			<button class="btn btn-block btn-default" 
+			// 			style="margin:-3px;border-radius:0px" type="button" 
+			// 			onClick="javascript:GetData('.$row['id_vendor'].')"   >
+			// 			<span class="fa fa-edit " ></span>
+			// 			</button></td>';					
+			// }else{
+			// 	$data .='<td></td>';
+			// }	
 			if($m_edit == '1' ){
 				$data .= '<td>
 						<button class="btn btn-block btn-default" 
-						style="margin:-3px;border-radius:0px" type="button" 
-						onClick="javascript:GetData('.$row['id_vendor'].')"   >
-						<span class="fa fa-edit " ></span>
-						</button></td>';					
-				}
-				else
-				{
-					$data .='<td></td>';
-				}	
+							style="margin:-3px;border-radius:0px" type="button" 
+							onClick="setBank(\''.$row['caption'].'\')">
+							<span class="fa fa-edit"></span>
+						</button>
+					</td>';
+				
+			}else{
+				$data .='<td></td>';
+			}	
 				$data .='</tr>';
     		$number++;
     	}		
@@ -102,7 +118,7 @@ if ($_GET['type'] == "read"){
 	$data .= '<div class="paginate paginate-dark wrapper">
 				<ul>';
 				
-				$pq = mysqli_query($koneksi, "select count(*) as jml from m_vendor_tr where nama_vendor LIKE '%$search_name%' ");
+				$pq = mysqli_query($koneksi, "SELECT count(*) as jml from m_vendor_tr where nama_vendor LIKE '%$search_name%' ");
 				
 				$rq=mysqli_fetch_array($pq);
 				$total_record = $rq['jml'];										
@@ -147,7 +163,7 @@ if ($_GET['type'] == "read"){
 				
     echo $data;
 }
-else if ($_POST['type'] == "AddData"){		
+else if ($_POST['type'] == "AddData"){
 	if($_POST['mode'] != '' ){	
 		$id_vendor 		= $_POST['id_vendor'];
 		$nama_vendor	= trim(addslashes(strtoupper($_POST['nama_vendor'])));
@@ -211,10 +227,9 @@ else if ($_POST['type'] == "DetilData"){
         $response['message'] = "Data not found!";
     }
     echo json_encode($response);
+}
 
-	
-}else if ($_GET['type'] == "ListCust")
-{	
+else if ($_GET['type'] == "ListCust"){
 	$cari = $_GET['cari'];
 	$data = '<table class="table table-hover table-striped" style="width:100%">
 			<thead style="font-weight:500px !important">
@@ -257,5 +272,65 @@ else if ($_POST['type'] == "DetilData"){
 	
 
 }
+
+else if ($_POST['type'] == "DetailVendorBank"){
+
+	// echo "<pre>";
+	// print_r($_POST);
+	// echo "</pre>";
+	// die();
+
+	$caption = $_POST['caption'];	
+    $query = "SELECT * from m_vendor_bank_tr where caption  = '$caption'";
+    if (!$result = mysqli_query($koneksi, $query)) {
+        exit(mysqli_error($koneksi));
+    }
+    $response = array();
+    if(mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $response = $row;
+        }
+    }
+    else
+    {
+        $response['status'] = 200;
+        $response['message'] = "Data not found!";
+    }
+    echo json_encode($response);
+}
+else if ($_POST['type'] == "AddBank") {
+
+    $caption    = trim($_POST['caption']);	
+    $nama_bank  = trim($_POST['nama_bank']);	
+    $nama_rek   = trim($_POST['nama_rek']);	
+    $no_rek     = trim($_POST['no_rek']);	
+
+    $q_checkBank = "SELECT * FROM m_vendor_bank_tr WHERE caption = '$caption'";
+    $r_checkBank = mysqli_query($koneksi, $q_checkBank);
+    $d_checkBank = mysqli_fetch_array($r_checkBank);
+
+    if ($d_checkBank) {
+        $sql_bank = "UPDATE m_vendor_bank_tr SET 
+                        nama_bank = '$nama_bank',
+                        nama_rek = '$nama_rek',
+                        no_rek = '$no_rek'
+                     WHERE caption = '$caption'";
+    } else {
+        $sql_bank = "INSERT INTO m_vendor_bank_tr 
+                        (caption, nama_bank, nama_rek, no_rek, status) 
+                     VALUES 
+                        ('$caption', '$nama_bank', '$nama_rek', '$no_rek', '1')";
+    }
+
+    $r_sql = mysqli_query($koneksi, $sql_bank);
+
+    if ($r_sql) {
+        echo "Data bank berhasil disimpan.";
+    } else {
+        echo "Gagal menyimpan data: " . mysqli_error($koneksi);
+    }
+}
+
+
 
 ?>

@@ -137,16 +137,21 @@ $pdf->Cell(20,5,"QTY",1,0,'C');
 $pdf->Cell(20,5,"VOL",1,1,'C');
 
 $y=57;
-$t1 = "select t_ware_data_detil.*, t_ware_data_detil1.no_cont, t_ware_data.tanggal,
-			t_ware.nama, t_ware.kode, t_ware.vol, 
-			t_ware_data1.tanggal as tgl_sj
-			from 
-			t_ware_data_detil inner join t_ware_data_detil as t_ware_data_detil1 on 
-			t_ware_data_detil.id_detil_masuk = t_ware_data_detil1.id_detil
-			left join t_ware_data on t_ware_data_detil1.id_data = t_ware_data.id_data
-			left join t_ware on t_ware_data_detil.id_ware = t_ware.id_ware
-			left join t_ware_data as t_ware_data1 on t_ware_data_detil.id_data = t_ware_data1.id_data
-			where t_ware_data_detil.id_data = '$id_data'  order by  t_ware_data_detil.id_detil";
+$t1 = "SELECT 
+		t_ware_data_detil.*, 
+		t_ware_data_detil1.no_cont, 
+		t_ware_data.tanggal,
+		t_ware.nama, 
+		t_ware.kode, 
+		t_ware.vol, 
+		t_ware_data1.tanggal AS tgl_sj
+		FROM t_ware_data_detil 
+		INNER JOIN t_ware_data_detil AS t_ware_data_detil1 ON 
+		t_ware_data_detil.id_detil_masuk = t_ware_data_detil1.id_detil
+		LEFT JOIN t_ware_data ON t_ware_data_detil1.id_data = t_ware_data.id_data
+		LEFT JOIN t_ware ON t_ware_data_detil.id_ware = t_ware.id_ware
+		LEFT JOIN t_ware_data AS t_ware_data1 ON t_ware_data_detil.id_data = t_ware_data1.id_data
+		WHERE t_ware_data_detil.id_data = '$id_data' ORDER BY t_ware_data_detil.id_detil";
 
 $h1 = mysqli_query($koneksi, $t1); 
 while ($d1=mysqli_fetch_array($h1))
@@ -156,7 +161,7 @@ while ($d1=mysqli_fetch_array($h1))
 	$vol = $d1['keluar'] * $d1['vol'];
 	$volx = number_format($vol,2);
 	$t_qty = $t_qty + $d1['keluar'];
-	$t_vol = $t_vol + $vol;
+	$t_vol = $t_vol + round($vol,2);
 	
 	$ket = strlen($d1['nama']);		
 	if($ket <= '38' )
@@ -188,7 +193,7 @@ while ($d1=mysqli_fetch_array($h1))
 	$pdf->setXY(53,$y+1);
 	$pdf->MultiCell(75,3.5,"$d1[nama]",0,'L');
 	
-	$y=$y+$tinggi;
+	$y = $y+$tinggi;
 	
 }
 

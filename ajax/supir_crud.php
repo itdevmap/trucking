@@ -5,7 +5,7 @@ include("../koneksi.php");
 include "../lib.php";
 
 
-$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='11' ");
+$pq = mysqli_query($koneksi, "SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='11' ");
 $rq=mysqli_fetch_array($pq);	
 $m_edit = $rq['m_edit'];
 $m_add = $rq['m_add'];
@@ -26,13 +26,14 @@ if ($_GET['type'] == "Read")
 			<thead style="font-weight:500px !important">
 				<tr>	
 					<th rowspan="2" width="3%" style="text-align: center;">NO</th>
-					<th rowspan="2" width="31%" style="text-align: center;">DRIVER NAME</th>	
+					<th rowspan="2" width="20%" style="text-align: center;">DRIVER NAME</th>	
 					<th rowspan="2" width="7%" style="text-align: center;">DATE OF <br>BIRTH</th>
 					<th rowspan="2" width="7%" style="text-align: center;">GEBDER</th>
 					<th rowspan="2" width="7%" style="text-align: center;">MARITIAL<br>STATUS</th>
 					<th rowspan="2" width="7%" style="text-align: center;">RELIGION</th>
 					<th rowspan="2" width="8%" style="text-align: center;">NO. TELP</th>	
-					<th rowspan="2" width="5%" style="text-align: center;">SIM<br>TYPE</th>	
+					<th rowspan="2" width="10%" style="text-align: center;">SIM<br>TYPE</th>	
+					<th rowspan="2" width="5%" style="text-align: center;">BACKUP</th>	
 					<th rowspan="2" width="7%" style="text-align: center;">SIM<br>VALIDITY <br>PERIOD</th>	
 					<th colspan="3" width="6%" style="text-align: center;">DOWNLOAD<br>DOCUMENT</th>	
 					<th rowspan="2" width="6%" style="text-align: center;">STATUS</th>
@@ -46,7 +47,8 @@ if ($_GET['type'] == "Read")
 					<th rwidth="2%" style="text-align: center;">PHOTO</th>
 					<th rwidth="2%" style="text-align: center;">DOC</th>
 				</tr>
-			</thead>';			
+			</thead>';		
+				
 	if(!isset($_GET['hal'])){ 
 		$page = 1;       
 		} else { 
@@ -57,7 +59,7 @@ if ($_GET['type'] == "Read")
 	$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
 	$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 
 	
-	$SQL = "select * from m_supir_tr where nama_supir LIKE '%$search_name%'  order by nama_supir 
+	$SQL = "SELECT * from m_supir_tr where nama_supir LIKE '%$search_name%'  order by nama_supir 
 			LIMIT $offset, $jmlperhalaman";
 	
 	$query = mysqli_query($koneksi, $SQL);	
@@ -114,6 +116,7 @@ if ($_GET['type'] == "Read")
 				<td style="text-align:center">'.$row['agama'].'</td>	
 				<td style="text-align:center">'.$row['telp'].'</td>
 				<td style="text-align:center">'.$row['jenis_sim'].'</td>
+				<td style="text-align:center">'.$row['cadangan'].'</td>
 				<td style="text-align:center">
 					<button type="button" class="btn btn-'.$label_sim.'" style="width:100%;padding:1px;margin:-3px">'.$masa_berlaku.'</button>
 				</td>';

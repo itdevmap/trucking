@@ -100,13 +100,13 @@ if($stat == 'In Progress')
 	
 	if($stat == 'All')
 	{
-		$t1 = "select t_ware_data.*, m_cust_tr.nama_cust
+		$t1 = "SELECT t_ware_data.*, m_cust_tr.nama_cust
 			from 
 			t_ware_data inner join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
 			where t_ware_data.tanggal between '$tgl1x' and '$tgl2x' and t_ware_data.jenis = '1'
 			order  by t_ware_data.tanggal asc ";
 	}else{
-		$t1 = "select t_ware_data.*, m_cust_tr.nama_cust
+		$t1 = "SELECT t_ware_data.*, m_cust_tr.nama_cust
 			from 
 			t_ware_data inner join m_cust_tr on t_ware_data.id_cust = m_cust_tr.id_cust
 			where t_ware_data.tanggal between '$tgl1x' and '$tgl2x' and t_ware_data.jenis = '1' and t_ware_data.status = '$stat'
@@ -120,13 +120,13 @@ if($stat == 'In Progress')
 	{
 		if($d1['jasa'] == '1')
 		{
-			$t2 = "select  t_ware_jasa_biaya.*, m_cost_tr.nama_cost
+			$t2 = "SELECT  t_ware_jasa_biaya.*, m_cost_tr.nama_cost
 			from 
 			 t_ware_jasa_biaya inner join t_ware_quo_biaya on t_ware_jasa_biaya.id_biaya = t_ware_quo_biaya.id_detil
 			left join m_cost_tr on t_ware_quo_biaya.id_biaya = m_cost_tr.id_cost
 			where t_ware_jasa_biaya.id_data = '$d1[id_data]'  order by  t_ware_jasa_biaya.id_detil";
 		}else{
-			$t2 = "select t_ware_data_detil.*, t_ware_data_detil1.no_cont, t_ware_data.tanggal,
+			$t2 = "SELECT t_ware_data_detil.*, t_ware_data_detil1.no_cont, t_ware_data.tanggal,
 			t_ware.nama, t_ware.kode, t_ware.vol, t_ware.unit, 
 			t_ware_data1.tanggal as tgl_sj, t_ware_quo.aging_sewa, t_ware_quo.harga_handling
 			from 
@@ -159,21 +159,19 @@ if($stat == 'In Progress')
 			$harga = 0;
 		}
 		
-		
-		if($d1['jasa'] == '1')
-		{
+		if($d1['jasa'] == '1'){
 			$tgl_sj = $d1['tanggal'];
 			$kode = $d2['nama_cost'];
 			$nama = $d2['rem'];
 			$qty = $d2['qty'];
-			$cbm = $d2['qty']; 
+			$cbm = round($d2['qty'],2); 
 			$harga = $d2['harga'];
 		}else{
 			$tgl_sj = $d2['tgl_sj'];
 			$kode = $d2['kode'];
 			$nama = $d2['nama'];
 			$qty = $d2['keluar'];
-			$cbm = $vol;
+			$cbm = round($vol,2);
 			
 		}
 		$jumlah = $harga * $cbm;

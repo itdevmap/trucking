@@ -19,33 +19,69 @@ if (!function_exists('set_magic_quotes_runtime')) {
 		
 class PDF extends FPDF
 {
-   function SetDash($black=null, $white=null)
-    {
-        if($black!==null)
-            $s=sprintf('[%.3F %.3F] 0 d',$black*$this->k,$white*$this->k);
-        else
-            $s='[] 0 d';
-        $this->_out($s);
-    }	
-  function Header()
-  {  
-	
-  }
-  function Footer()
-  {  
-	$this->SetTextColor(51, 102, 153);
-	$this->SetY(-25);   
-    $this->SetFont('arial','BI',11);
-    //$this->Cell(190,5,"'Partner of you logistics cargo services'",0,1,'C');
-	$this->SetFont('arial','BI',11);
-    //$this->Cell(190,5,"www.senopati.co.id",0,0,'C');
-	$tanggal_cetak =date("d-m-Y h:i:s");
-	$this->SetTextColor(0, 0, 0);
-    $this->SetY(-15);   
-    $this->SetFont('arial','',6);
-	$this->SetX(6); 
-    //$this->Cell(0,10,"Print Date : $tanggal_cetak -- $_SESSION[id_user]",0,0,'L');
-  }   
+	function SetDash($black=null, $white=null){
+		if($black!==null)
+			$s=sprintf('[%.3F %.3F] 0 d',$black*$this->k,$white*$this->k);
+		else
+			$s='[] 0 d';
+		$this->_out($s);
+	}	
+	function Header(){  
+	}
+	function Footer(){  
+		$this->SetTextColor(51, 102, 153);
+		$this->SetY(-25);   
+		$this->SetFont('arial','BI',11);
+		$this->SetFont('arial','BI',11);
+		$tanggal_cetak =date("d-m-Y h:i:s");
+		$this->SetTextColor(0, 0, 0);
+		$this->SetY(-15);   
+		$this->SetFont('arial','',6);
+		$this->SetX(6); 
+	}   
+
+	function NbLines($w, $txt){
+        $cw = &$this->CurrentFont['cw'];
+        if ($w == 0)
+            $w = $this->w - $this->rMargin - $this->x;
+        $wmax = ($w - 2 * $this->cMargin) * 1000 / $this->FontSize;
+        $s = str_replace("\r", '', (string)$txt);
+        $nb = strlen($s);
+        if ($nb > 0 && $s[$nb - 1] == "\n")
+            $nb--;
+        $sep = -1;
+        $i = 0;
+        $j = 0;
+        $l = 0;
+        $nl = 1;
+        while ($i < $nb) {
+            $c = $s[$i];
+            if ($c == "\n") {
+                $i++;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+                continue;
+            }
+            if ($c == ' ')
+                $sep = $i;
+            $l += $cw[$c];
+            if ($l > $wmax) {
+                if ($sep == -1) {
+                    if ($i == $j)
+                        $i++;
+                } else
+                    $i = $sep + 1;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+            } else
+                $i++;
+        }
+        return $nl;
+    }
 
 }
 

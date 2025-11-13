@@ -5,15 +5,16 @@ include("../koneksi.php");
 include "../lib.php";
 
 
-$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role' and id_menu ='63' ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+$pq = mysqli_query($koneksi, "SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='63' ");
 
-// -------------- READ DATA --------------
+$rq		= mysqli_fetch_array($pq);	
+$m_edit = $rq['m_edit'];
+$m_add 	= $rq['m_add'];
+$m_del 	= $rq['m_del'];
+$m_view = $rq['m_view'];
+$m_exe 	= $rq['m_exe'];
+
+// ======== READ DATA ========
 	if ($_GET['type'] == "Read"){
 		$cari = trim($_GET['cari']);
 		$hal = $_GET['hal'];
@@ -41,14 +42,14 @@ $m_exe = $rq['m_exe'];
 		$posisi = (($page * $jmlperhalaman) - $jmlperhalaman); 	
 		$SQL = "SELECT 
 					m_route_tr.*, 
-					m_cust_tr.nama_cust,
+					m_vendor_tr.nama_vendor,
 					m_asal.nama_kota AS asal,
 					m_tujuan.nama_kota AS tujuan
 				FROM m_route_tr 
-				INNER JOIN m_cust_tr on m_cust_tr.id_cust = m_route_tr.vendor 
+				INNER JOIN m_vendor_tr on m_vendor_tr.id_vendor = m_route_tr.vendor 
 				LEFT JOIN m_kota_tr AS m_asal ON m_asal.id_kota = m_route_tr.id_asal
 				LEFT JOIN m_kota_tr AS m_tujuan ON m_tujuan.id_kota = m_route_tr.id_tujuan
-				WHERE m_cust_tr.nama_cust LIKE '%$cari%'
+				WHERE m_vendor_tr.nama_vendor LIKE '%$cari%'
 				ORDER BY m_route_tr.vendor
 				LIMIT $offset, $jmlperhalaman";	
 
@@ -63,10 +64,11 @@ $m_exe = $rq['m_exe'];
 				$posisi++;		
 					$data .= '<tr>							
 					<td style="text-align:center">'.$posisi.'.</td>	
-					<td style="text-align:left">'.$row['nama_cust'].'</td>
+					<td style="text-align:left">'.$row['nama_vendor'].'</td>
 					<td style="text-align:center">'.$row['asal'].'</td>
 					<td style="text-align:center">'.$row['tujuan'].'</td>
 					<td style="text-align:center">'.number_format($row['cost'], 0, ',', '.').'</td>';
+
 					if($m_edit == '1'  && $row['id_user'] != 'admin'){
 						$data .= '
 						<td>
@@ -76,17 +78,14 @@ $m_exe = $rq['m_exe'];
 								<span class="fa fa-edit " ></span>
 							</button>
 						</td>';
-					}
-					else
-					{
+					}else{
 						$data .='<td></td>';
 					}
+
 					$data .='</tr>';
 				$number++;
 			}		
-		}
-		else
-		{
+		} else{
 			$data .= '<tr><td colspan="7">Records not found!</td></tr>';
 		}
 		$data .= '</table>';
@@ -96,13 +95,16 @@ $m_exe = $rq['m_exe'];
 					$pq = mysqli_query($koneksi, "select count(*) as jml from m_route_tr where rute LIKE '%$cari%' ");					
 					$rq=mysqli_fetch_array($pq);
 					$total_record = $rq['jml'];										
-					$total_halaman = ceil($total_record / $jmlperhalaman);					
+					$total_halaman = ceil($total_record / $jmlperhalaman);	
+
 					if ($total_record > $jmlperhalaman){
 						$perhal=4;
+
 						if($hal > 1){ 
 							$prev = ($page - 1); 
 							$data .='<li><a href=# onclick="ReadData('.$prev.')">Prev</a></li> '; 
 						}
+
 						if($total_halaman<=$jmlperhalaman){
 							$hal1=1;
 							$hal2=$total_halaman;
@@ -110,18 +112,20 @@ $m_exe = $rq['m_exe'];
 							$hal1=$hal-$perhal;
 							$hal2=$hal+$perhal;
 						}
+
 						if($hal<=5){
 							$hal1=1;
-						} 
+						}
+
 						if($hal<$total_halaman){
 							$hal2=$hal+$perhal;
-							}else{
+						}else{
 							$hal2=$hal;
 						}
 						for($i = $hal1; $i <= $hal2; $i++){ 
 							if(($hal) == $i){ 
 								$data .='<li><a href="#" class="active">'.$i.'</a></li> '; 
-								}else{ 
+							}else{ 
 								if($i<=$total_halaman){
 									$data .='<li><a href=# onclick="ReadData('.$i.')">'.$i.'</a></li> ';
 								}
@@ -137,7 +141,7 @@ $m_exe = $rq['m_exe'];
 		echo $data;
 	}
 
-// -------------- STORE DATA --------------
+// ======== STORE DATA ========
 	else if ($_POST['type'] == "Add_Data"){
 		if(!empty($_POST['mode'])) {	
 			$id      = $_POST['id'] ?? 0;
@@ -149,7 +153,6 @@ $m_exe = $rq['m_exe'];
 			$cost    = str_replace(",","", $raw_cost);
 			$id_user = $_SESSION['id'] ?? 0;
 
-			// definisikan rute biar tidak null
 			$rute = $origin . "-" . $destination;
 
 			if ($mode == 'Add') {
@@ -199,6 +202,7 @@ $m_exe = $rq['m_exe'];
 				}
 				exit;
 			}
+
 			else if ($mode == 'Edit') {
 				$sql = "UPDATE m_route_tr SET 
 							vendor     	= '$vendor',
@@ -220,7 +224,7 @@ $m_exe = $rq['m_exe'];
 		}
 	}
 
-// -------------- EDIT --------------
+// ======== EDIT ========
 	else if ($_POST['type'] == "Detil_Data"){
 		$id = $_POST['id'];	
 
@@ -228,14 +232,13 @@ $m_exe = $rq['m_exe'];
 		if (!$result = mysqli_query($koneksi, $query)) {
 			exit(mysqli_error($koneksi));
 		}
+
 		$response = array();
 		if(mysqli_num_rows($result) > 0) {
 			while ($row = mysqli_fetch_assoc($result)) {
 				$response = $row;
 			}
-		}
-		else
-		{
+		}else{
 			$response['status'] = 200;
 			$response['message'] = "Data not found!";
 		}

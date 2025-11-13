@@ -1,4 +1,18 @@
+<?php
+    include "koneksi.php"; 
 
+    $no_doc     = $_GET['no_doc'] ?? null;
+    $userAgent  = $_SERVER['HTTP_USER_AGENT'];
+    
+    $no_doc  = mysqli_real_escape_string($koneksi, $no_doc);
+
+    // =============== LOG APPROVAL ===============
+    $q_approval   = "INSERT INTO tr_approval_logs
+                    (no_doc, keterangan, device)
+                VALUES 
+                    ('$no_doc','Reject Harga Quotation','$userAgent')";
+    mysqli_query($koneksi, $q_approval);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

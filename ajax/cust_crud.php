@@ -30,11 +30,12 @@ if ($_GET['type'] == "read"){
 				<th rowspan="2" width="10%" style="text-align: center;">PHONE</th>
 				<th rowspan="2" width="16%" style="text-align: center;">EMAIL</th>
 				<th rowspan="2" width="2%" style="text-align: center;">TOP</th>					
-				<th rowspan="2" width="2%" style="text-align: center;">LIMIT</th>					
-				<th rowspan="2" width="7%" style="text-align: center;">CREATED</th>					
-				<th rowspan="2" width="6%" style="text-align: center;">ITEM PPH</th>
+				<th rowspan="2" width="2%" style="text-align: center;">LIMIT</th>
+				<th rowspan="2" width="4%" style="text-align: center;">ITEM </br> PPH</th>
+				<th rowspan="2" width="4%" style="text-align: center;">INCL </br> AP</th>
+				<th rowspan="2" width="7%" style="text-align: center;">CREATED</th>
 				<th rowspan="2" width="6%" style="text-align: center;">STATUS</th>
-				<th rowspan="2" width="2%" style="text-align: center;">EDIT</th>				
+				
 			</tr>
 		</thead>';			
 	if(!isset($_GET['hal'])){ 
@@ -52,16 +53,21 @@ if ($_GET['type'] == "read"){
 	if (!$result = $query) {
         exit(mysqli_error($koneksi));
     }
-    if(mysqli_num_rows($result) > 0)
-    {
-    	while($row = mysqli_fetch_assoc($result))
-    	{	
+    if(mysqli_num_rows($result) > 0){
+    	while($row = mysqli_fetch_assoc($result)){	
 			$posisi++;	
-			$tanggal = ConverTgl($row['tanggal']);
-			$overlimit 		= number_format($row['overlimit'],0);
-			$xy1="View|$row[id_cust]";
-			$xy1=base64_encode($xy1);
-			$link = "cust_data.php?id=$xy1";
+			$tanggal 	= ConverTgl($row['tanggal']);
+			$overlimit	= number_format($row['overlimit'],0);
+			$xy1		= "View|$row[id_cust]";
+			$xy1		= base64_encode($xy1);
+			$link 		= "cust_data.php?id=$xy1";
+
+			if ($row['include_ap'] === "1") {
+				$include_ap = 'YES';
+			} else {
+				$include_ap = 'NO';
+			}
+			
 			$data .= '<tr>							
 				<td style="text-align:center">'.$posisi.'.</td>	
 				<td style="text-align:left; text-transform:uppercase;">'.$row['nama_cust'].'</td>
@@ -71,8 +77,30 @@ if ($_GET['type'] == "read"){
 				<td style="text-align:center">'.$row['email'].'</td>
 				<td style="text-align:center; text-transform:uppercase;">'.$row['tgl_tempo'].'</td>
 				<td style="text-align:center; text-transform:uppercase;">'.$overlimit.'</td>
-				<td style="text-align:center; text-transform:uppercase;">'.$row['created'].'</td>
-				<td style="text-align:center; text-transform:uppercase;">'.$row['pph'].'</td>
+				<td style="text-align:center; text-transform:uppercase;">'.$row['pph'].'</td>';
+
+				if ($include_ap == 'YES') {
+					$data .= '<td style="text-align:center">
+						<button type="button" class="btn btn-success" 
+						style="margin:-3px;width:100%;padding:1px;border-radius:1px"
+						onclick="inclAP(' . $row['id_cust'] . ', \'' . $include_ap . '\')">
+						' . $include_ap . '
+						</button>
+					</td>';
+
+				} else {
+					$data .= '<td style="text-align:center">
+						<button type="button" class="btn btn-danger" 
+						style="margin:-3px;width:100%;padding:1px;border-radius:1px"
+						onclick="inclAP(' . $row['id_cust'] . ', \'' . $include_ap . '\')">
+						' . $include_ap . '
+						</button>
+					</td>';
+
+				}
+				
+				$data .= '
+					<td style="text-align:center; text-transform:uppercase;">'.$row['created'].'</td>
 				';	
 			
 			if($row['status'] =='0' ){
@@ -85,20 +113,14 @@ if ($_GET['type'] == "read"){
 					</td>';	
 			}
 			
-			if($m_edit == '1' && $row['id_cust'] != '1'){
-				$data .= '
-				<td>
-					<button class="btn btn-block btn-default" 
-					style="margin:-3px;border-radius:0px" type="button" 
-					onClick="javascript:GetData('.$row['id_cust'].')"   >
-					<span class="fa fa-edit " ></span>
-					</button>
-				</td>';					
-			}
-			else
-			{
-				$data .='<td></td>';
-			}	
+				// $data .= '
+				// <td>
+				// 	<button class="btn btn-block btn-default" 
+				// 	style="margin:-3px;border-radius:0px" type="button" 
+				// 	onClick="javascript:GetData('.$row['id_cust'].')"   >
+				// 	<span class="fa fa-edit " ></span>
+				// 	</button>
+				// </td>';
 	
 			// $data .='
 			// 	<td   style="text-align:center">
@@ -185,6 +207,8 @@ else if ($_POST['type'] == "AddData"){
 		$item_pph 	= $_POST['item_pph'];
 		$mode 		= $_POST['mode'];
 		$tgl_tempo 	= $_POST['tgl_tempo'];
+		$include_ap = $_POST['include_ap'];
+
 		$tanggal 	= ConverTglSql($_POST['tanggal']);
 		$batas 		= str_replace(",","", $batas);
 
@@ -209,7 +233,8 @@ else if ($_POST['type'] == "AddData"){
 					`status` 		= '$stat',
 					email 			= '$email',
 					tgl_tempo 		= '$tgl_tempo',
-					overlimit 		= '$overlimit'
+					overlimit 		= '$overlimit',
+					include_ap 		= '$include_ap'
 					WHERE id_cust 	= '$id_cust'";
 			$hasil=mysqli_query($koneksi, $sql);
 		}
@@ -492,6 +517,34 @@ else if ($_POST['type'] == "DetilCust_Quo"){
     }
     echo json_encode($response);
 	
+}
+
+else if ($_POST['type'] == "inclAP") {
+
+    $id_cust = $_POST['id_cust'];
+    $jenis   = $_POST['jenis'];
+
+    if ($jenis == 'NO') {
+        $sq_update = "UPDATE m_cust_tr SET include_ap = '1' WHERE id_cust = '$id_cust'";
+    } else {
+        $sq_update = "UPDATE m_cust_tr SET include_ap = '0' WHERE id_cust = '$id_cust'";
+    }
+
+    $r_update = mysqli_query($koneksi, $sq_update);
+
+    if ($r_update) {
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Berhasil update customer'
+        ]);
+    } else {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Gagal update customer: ' . mysqli_error($koneksi)
+        ]);
+    }
+
+    exit;
 }
 
 ?>

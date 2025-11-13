@@ -2,8 +2,6 @@
 ob_start(); 
 session_start();
 require('pdf/code128.php');
-require('pdf/viewpref.php');
-require('pdf/FPDF_Protection.php');
 include "koneksi.php"; 
 include "session_log.php"; 
 include "lib.php";
@@ -17,7 +15,7 @@ if (!function_exists('set_magic_quotes_runtime')) {
     }
 }
 
-class PDF extends FPDF_Protection {
+class PDF extends FPDF {
     
     function SetDash($black=null, $white=null)
     {
@@ -131,21 +129,21 @@ $pdf->setXY(135,23);
 $pdf->Cell(50,8,"Tanggal : $tgl_kb",0,1,'C');
 
 
-$pdf->setXY(5,35);
+$pdf->setXY(5,30);
 $pdf->Cell(0,8,"Customer : $caption",0,1,'L');
-$pdf->setXY(5,43);
+$pdf->setXY(5,38);
 $pdf->SetFont('arial','B',10);
 $pdf->MultiCell(70, 5, $nama_cust, 0, 'L');
 
 $pdf->SetFont('arial','',10);
-$pdf->setXY(120,35);
+$pdf->setXY(120,30);
 $pdf->Cell(0,8,"Alamat :",0,1,'L');
-$pdf->setXY(120,43);
+$pdf->setXY(120,38);
 $pdf->MultiCell(70, 5, $alamat, 0, 'L');
 
 // ================= TABLE DETAIL =================
 $pdf->SetFont('arial','B',10);
-$pdf->setXY(5,60);
+$pdf->setXY(5,50);
 $pdf->Cell(10, 6, "No", 1, 0, 'C'); 
 $pdf->Cell(30, 6, "No Invoice", 1, 0, 'C'); 
 $pdf->Cell(40, 6, "Tgl Invoice", 1, 0, 'C'); 
@@ -161,9 +159,9 @@ $q_detail = mysqli_query($koneksi,
         tr_jo.no_ar,
         tr_jo.tgl_ar,
         tr_jo.print_kb,
-        GROUP_CONCAT(tr_jo_detail.container ORDER BY tr_jo_detail.container SEPARATOR ', ') AS containers
+        GROUP_CONCAT(tr_sj.container ORDER BY tr_sj.container SEPARATOR ', ') AS containers
     FROM tr_jo
-    LEFT JOIN tr_jo_detail ON tr_jo_detail.id_so = tr_jo.id_jo
+    LEFT JOIN tr_sj ON tr_sj.no_jo = tr_jo.no_jo
     WHERE tr_jo.no_kb = '$no_kb'
     GROUP BY tr_jo.no_ar, tr_jo.tgl_ar"
 );
@@ -200,7 +198,7 @@ while ($row = mysqli_fetch_assoc($q_detail)) {
     $print_count    = $row['print_kb'];
 }
 
-$y = 66;
+$y = 56;
 $no = 1;
 foreach ($results as $r) {
     $no_ar   = $r['no_ar'];
@@ -208,23 +206,39 @@ foreach ($results as $r) {
     $jth_tempo = $r['jth_tempo_formatted'];
     $containers = $r['containers'];
 
-    $containerHeight = $pdf->GetMultiCellHeight(60, 6, $containers);
-    $rowHeight = max(6, $containerHeight);
+    // Hitung tinggi maksimum dari kolom "Container"
+    $cellHeight = 6;
+    $containerHeight = $pdf->GetMultiCellHeight(75, $cellHeight, $containers);
+    $rowHeight = max($cellHeight, $containerHeight);
+
+    // Simpan posisi awal baris
+    $startX = 5;
+    $startY = $y;
 
     $pdf->SetFont('arial','',10);
-    $pdf->SetXY(5, $y);
-    $pdf->Cell(10, $rowHeight, $no, 1, 0, 'C');
-    $pdf->Cell(30, $rowHeight, $no_ar, 1, 0, 'C');
-    $pdf->Cell(40, $rowHeight, $tgl_ar, 1, 0, 'C');
-    $pdf->Cell(40, $rowHeight, $jth_tempo, 1, 0, 'C');
-    $x = $pdf->GetX();
-    $curY = $y;
-    $pdf->MultiCell(75, 6, $containers, 1, 'L');
 
+    // Kolom No
+    $pdf->SetXY($startX, $startY);
+    $pdf->Cell(10, $rowHeight, $no, 1, 0, 'C');
+
+    // Kolom No Invoice
+    $pdf->Cell(30, $rowHeight, $no_ar, 1, 0, 'C');
+
+    // Kolom Tgl Invoice
+    $pdf->Cell(40, $rowHeight, $tgl_ar, 1, 0, 'C');
+
+    // Kolom Jatuh Tempo
+    $pdf->Cell(40, $rowHeight, $jth_tempo, 1, 0, 'C');
+
+    // Kolom Container (gunakan MultiCell agar teks wrap tapi tetap tinggi sama)
+    $pdf->SetXY($pdf->GetX(), $startY);
+    $pdf->MultiCell(75, $cellHeight, $containers, 1, 'L');
+
+    // Update posisi Y untuk baris berikutnya
     $y += $rowHeight;
     $no++;
-    
 }
+
 
 $pdf->SetXY(5 + 30, 5+$y);
 $pdf->Cell(30, 6, "TTD SPV Sales", 0, 0, 'C'); 
@@ -233,35 +247,35 @@ $pdf->Cell(30, 6, "TTD Sales", 0, 0, 'C');
 $pdf->SetXY(95 + 30, 5+$y);
 $pdf->Cell(30, 6, "TTD Customer", 0, 0, 'C'); 
 
-$pdf->SetXY(5 + 30, 35+$y);
+$pdf->SetXY(5 + 30, 15+$y);
 $pdf->Cell(30, 6, "(                                )", 0, 0, 'C'); 
-$pdf->SetXY(50 + 30, 35+$y);
+$pdf->SetXY(50 + 30, 15+$y);
 $pdf->Cell(30, 6, "(                                )", 0, 0, 'C'); 
-$pdf->SetXY(95 + 30, 35+$y);
+$pdf->SetXY(95 + 30, 15+$y);
 $pdf->Cell(30, 6, "(                                )", 0, 0, 'C'); 
 
 $pdf->SetFont('arial','B',10);
-$pdf->SetXY(130, 43+$y);
-$pdf->Cell(30, 6, "Nama, Tgl Terima & Stapel", 0, 0, 'C'); 
+$pdf->SetXY(130, 25+$y);
+$pdf->Cell(30, 6, "Nama, Tgl Terima & Stampel", 0, 0, 'C'); 
 
 $pdf->SetFont('arial','B',8);
-$pdf->SetXY(5, 50+$y);
+$pdf->SetXY(5, 20+$y);
 $pdf->Cell(0, 6, "Keterangan : ", 0, 0, 'L'); 
-$pdf->SetXY(5, 55+$y);
+$pdf->SetXY(5, 25+$y);
 $pdf->Cell(0, 6, "*) Diisi Oleh Customer : ", 0, 0, 'L'); 
-$pdf->SetXY(5, 60+$y);
+$pdf->SetXY(5, 30+$y);
 $pdf->Cell(0, 6, "1) Lembar Putih : Sales (diserahkan ke pelanggan setelah semua Invoice yang tercantum Lunas)", 0, 0, 'L'); 
-$pdf->SetXY(5, 65+$y);
+$pdf->SetXY(5, 35+$y);
 $pdf->Cell(0, 6, "2) Lembar Merah : Customer (sebagai tanda terima penyerahan Invoice Asli)", 0, 0, 'L'); 
-$pdf->SetXY(5, 70+$y);
+$pdf->SetXY(5, 40+$y);
 $pdf->Cell(0, 6, "3) Lembar Kuning : Finance Awal (sebagai bukti penyerahan berkas ke Sales)", 0, 0, 'L'); 
-$pdf->SetXY(5, 75+$y);
+$pdf->SetXY(5, 45+$y);
 $pdf->Cell(0, 6, "4) Lembar Hijau : Finance Akhir (diserahkan ke Finance setelah semua Invoice yang tercantum Lunas)", 0, 0, 'L'); 
-$pdf->SetXY(5, 80+$y);
+$pdf->SetXY(5, 50+$y);
 $pdf->Cell(0, 6, "# Sebelum semua Invoice lunas, lembar putih dan hijau harus diserahkan ke Finance)", 0, 0, 'L'); 
 
 // Print Number row
-$pdf->setXY(150, 55+$y);
+$pdf->setXY(150, 45+$y);
 $pdf->Cell(20, 5, "Print Number", 0, 0, 'L');
 $pdf->Cell(5, 5, ":", 0, 0, 'C');
 $pdf->SetTextColor(0, 128, 0);
@@ -270,16 +284,12 @@ $pdf->SetTextColor(0, 0, 0);
 
 // Print On row
 $day_date = date('d-m-Y H:i:s');
-$pdf->setXY(150, 60+$y);
+$pdf->setXY(150, 50+$y);
 $pdf->Cell(20, 5, "Print On", 0, 0, 'L');
 $pdf->Cell(5, 5, ":", 0, 0, 'C');
 $pdf->SetTextColor(148, 109, 0);
 $pdf->Cell(40, 5, $day_date, 0, 1, 'L');
 $pdf->SetTextColor(0, 0, 0);
 
-
-
-
 ob_end_clean();
-$pdf->SetProtection(['print', 'copy', 'modify']);
-$pdf->Output('cetak_kb.pdf', 'I'); 
+$pdf->Output();

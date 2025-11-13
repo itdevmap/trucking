@@ -1,16 +1,24 @@
 <?php
-include "koneksi.php"; 
+    include "koneksi.php"; 
 
-$urlPath = $_SERVER['REQUEST_URI'];
-$parts   = explode('/', trim($urlPath, '/'));
-$id_quo  = end($parts);
+    $no_doc     = $_GET['no_doc'] ?? null;
+    $userAgent  = $_SERVER['HTTP_USER_AGENT'];
 
-$q_quo  = "UPDATE tr_quo 
-            SET `status` = 0 
-          WHERE id_quo = '$id_quo'";
-$hasil = mysqli_query($koneksi, $q_quo);
+    $no_doc  = mysqli_real_escape_string($koneksi, $no_doc);
+    $q_quo   = "UPDATE tr_quo SET 
+                    `status` = 0 
+                WHERE quo_no = '$no_doc'";
 
-$success = $hasil ? true : false;
+    $hasil   = mysqli_query($koneksi, $q_quo);
+    $success = $hasil ? true : false;
+    $success = $hasil ? true : false;
+
+    // =============== LOG APPROVAL ===============
+    $q_approval   = "INSERT INTO tr_approval_logs
+                    (no_doc, keterangan, device)
+                VALUES 
+                    ('$no_doc','Approval Harga Quotation','$userAgent')";
+    mysqli_query($koneksi, $q_approval);
 ?>
 <!DOCTYPE html>
 <html lang="en">

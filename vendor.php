@@ -1,36 +1,33 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php"; 
-include "lib.php";
+	session_start();
+	include "koneksi.php"; 
+	include "session_log.php"; 
+	include "lib.php";
 
-$pq = mysqli_query($koneksi, "SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='9' ");
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+	$pq = mysqli_query($koneksi, "SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='9' ");
+	$rq=mysqli_fetch_array($pq);	
+	$m_edit = $rq['m_edit'];
+	$m_add = $rq['m_add'];
+	$m_del = $rq['m_del'];
+	$m_view = $rq['m_view'];
+	$m_exe = $rq['m_exe'];
 
-if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
- header('location:logout.php'); 
-}
+	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
+		header('location:logout.php'); 
+	}
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{	
-	$hal = $_POST['hal'];
-	$field = $_POST['field'];
-	$search_name = $_POST['search_name'];
-	$paging = $_POST['paging'];
-}
-else
-{	
-	$paging='25';
-	$hal='1';
-}
+	if($_SERVER['REQUEST_METHOD'] == "POST"){	
+		$hal = $_POST['hal'];
+		$field = $_POST['field'];
+		$search_name = $_POST['search_name'];
+		$paging = $_POST['paging'];
+	}
+	else{	
+		$paging='25';
+		$hal='1';
+	}
 
 ?>
-
 
 <html>
   <head>
@@ -79,8 +76,7 @@ else
 			var hal = $("#hal").val();
 			ReadData(hal);
 		}
-		function TampilData() 
-		{
+		function TampilData() {
 			var today = new Date();
 			var dd = today.getDate();
 			var mm = today.getMonth()+1; 
@@ -107,6 +103,7 @@ else
 			$("#mode").val('Add');
 			$('#Data').modal('show');
 		}
+
 		function AddData() {
 			if(!$("#nama_vendor").val()){
 				alert("Vendor Name must fill !..");
@@ -198,6 +195,43 @@ else
 			var day = splitDate[1]; 
 			return month + '-' + day + '-' + year;
 		}
+
+		function setBank(caption) {
+			$.post("ajax/vendor_crud.php", {
+					caption: caption, 
+					type:"DetailVendorBank"
+				},
+				function (data, status) {
+					var data = JSON.parse(data);
+					$("#caption_bank").val(caption);
+					$("#nama_bank").val(data.nama_bank);
+					$("#nama_rek").val(data.nama_rek);
+					$("#no_rek").val(data.no_rek);
+					$("#modeBank").val('Edit');							
+				}
+			);
+			$("#ModalBank").modal("show");
+		}
+		function AddBank() {
+			var mode 		= $("#modeBank").val();
+			var caption 	= $("#caption_bank").val();
+			var nama_bank 	= $("#nama_bank").val();
+			var nama_rek 	= $("#nama_rek").val();
+			var no_rek 		= $("#no_rek").val();
+			$.post("ajax/vendor_crud.php", {
+				mode:mode,
+				caption:caption,
+				nama_bank:nama_bank,
+				nama_rek:nama_rek,
+				no_rek:no_rek,
+				type : "AddBank"
+			}, 
+			function (data, status) {
+				alert(data);
+				$("#Data").modal("hide");				
+				ReadData(1);
+			});
+		}
 		
     </script>
 	
@@ -212,84 +246,82 @@ else
 			<?php include "menu.php" ; ?>	
 		</aside>	
 		
-		
 		<form method="post" name ="myform" action="vendor.php?action=cari" class="form-horizontal" > 
-		<div class="content-wrapper" style="min-height:750px">
-			<br>
-			<ol class="breadcrumb">
-				<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Vendor</b></font></h1></li>					
-			</ol>
-			<br>
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
-					<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-							<b><i class="fa fa-search"></i>&nbsp;Filter Data</b>
+			<div class="content-wrapper" style="min-height:750px">
+				<br>
+				<ol class="breadcrumb">
+					<li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Vendor</b></font></h1></li>					
+				</ol>
+				<br>
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">					
+						<div class="small-box bg" style="font-size:11px;font-family: 'Tahoma';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+								<b><i class="fa fa-search"></i>&nbsp;Filter Data</b>
+						</div>
+						<br>					
+						<div style="width:100%" class="input-group">
+							<span class="input-group-addon" style="text-align:right;"><b>Find Vendor :</b></span>
+							<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
+							style="text-align: left;margin-left:-5px;width:200px" onkeypress="ReadData(1)" >
+							<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >						
+							<button class="btn btn-block btn-primary" 
+								style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding:6px" type="submit" 
+								onClick="window.location.href = 'paket_data.php?id=<?php echo $xy1; ?>' ">
+								<span class="glyphicon glyphicon-search"></span>
+							</button>
+						</div>
+						<br>	
 					</div>
-					<br>					
-					<div style="width:100%" class="input-group">
-						<span class="input-group-addon" style="text-align:right;"><b>Find Vendor :</b></span>
-						<input type="text"  id ="search_name" name="search_name" value="<?php echo $search_name; ?>" 
-						style="text-align: left;margin-left:-5px;width:200px" onkeypress="ReadData(1)" >
-						<input type="hidden"  id ="hal" name="hal" value="<?php echo $hal; ?>" style="text-align: left;width:5%"  >						
-						<button class="btn btn-block btn-primary" 
-							style="margin:0px;margin-left:0px;margin-bottom:3px;border-radius:2px;padding:6px" type="submit" 
-							onClick="window.location.href = 'paket_data.php?id=<?php echo $xy1; ?>' ">
-							<span class="glyphicon glyphicon-search"></span>
-						</button>
-					</div>
-					<br>	
 				</div>
-            </div>
-			
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
-					<div style="width:100%;background: #fff;" class="input-group" >
-						<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background:#fff;">
-							<?php if ($m_add == '1'){?>
-							<!-- <button class="btn btn-block btn-success" 
-								style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:3px" type="button" 
-								onClick="javascript:TampilData()">
-								<span class="fa  fa-plus-square"></span>
-								<b>Add New</b>
-							</button>	 -->
-							<?php }?>
-						</span>
-						<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
-						Row Page :&nbsp;
-						<select size="1" id="paging"  name="paging" onchange="Tampil()" style="padding:4px;margin-right:2px">
-							<?php 
-							$tampil1="select * from m_paging  order by baris";
-							$hasil1=mysqli_query($koneksi, $tampil1);       
-							while ($data1=mysqli_fetch_array($hasil1)){  
-							?>
-							<option><?php echo $data1['baris'];?></option>
-							<?php }?>
-							<option value="<?php echo $paging; ?>" selected><?php echo $paging; ?></option>
-						</select>	
-						</span>	
-					</div>		
-				</div>
-            </div>			
-			<div class="col-md-12" >
-				<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
-					<div class="table-responsive mailbox-messages" style="min-height:10px">									
-						<div class="tampil_data"></div>
+				
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
+						<div style="width:100%;background: #fff;" class="input-group" >
+							<span class="input-group-addon" style="width:50%;text-align:left;padding:0px;background:#fff;">
+								<?php if ($m_add == '1'){?>
+								<!-- <button class="btn btn-block btn-success" 
+									style="margin:0px;margin-left:0px;margin-bottom:0px;border-radius:3px" type="button" 
+									onClick="javascript:TampilData()">
+									<span class="fa  fa-plus-square"></span>
+									<b>Add New</b>
+								</button>	 -->
+								<?php }?>
+							</span>
+							<span class="input-group-addon" style="width:50%;text-align:right;padding:0px;background:#fff">
+							Row Page :&nbsp;
+							<select size="1" id="paging"  name="paging" onchange="Tampil()" style="padding:4px;margin-right:2px">
+								<?php 
+								$tampil1="select * from m_paging  order by baris";
+								$hasil1=mysqli_query($koneksi, $tampil1);       
+								while ($data1=mysqli_fetch_array($hasil1)){  
+								?>
+								<option><?php echo $data1['baris'];?></option>
+								<?php }?>
+								<option value="<?php echo $paging; ?>" selected><?php echo $paging; ?></option>
+							</select>	
+							</span>	
+						</div>		
 					</div>
-				</div>	
-            </div>
-			<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
+				</div>			
+				<div class="col-md-12" >
+					<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc;background:#fff !important;">	
+						<div class="table-responsive mailbox-messages" style="min-height:10px">									
+							<div class="tampil_data"></div>
+						</div>
+					</div>	
 				</div>
 				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-				<div style="width:100%;border:none;background:none" class="input-group">
-					<span class="input-group-addon" style="text-align:right;background:none"></span>						
-				</div>
-		</div>		
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+					<div style="width:100%;border:none;background:none" class="input-group">
+						<span class="input-group-addon" style="text-align:right;background:none"></span>						
+					</div>
+			</div>		
 		</form>
 	</div>	
-	
 	
 	<div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog" role="document">
@@ -362,11 +394,55 @@ else
 			</div>
 		</div>	
     </div>
-	
-	
 
-	
+	<!-- ======== MODAL BANK VENDOR ======== -->
+	<div class="modal fade" id="ModalBank"  role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content" style="background: none">
+				<div class="modal-body">
+					<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+						<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+							<div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
+								&nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Bank Vendor</b>
+							</div>	
+							<br>
 
+							<input type="hidden" id="modeBank"/>
+
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Code Vendor :</b></span>
+								<input type="text" id="caption_bank"  value="" style="text-transform: uppercase;
+								text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" readonly/>	
+							</div>	
+							
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Bank :</b></span>								
+								<input type="text" id="nama_bank"  value="" style="text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
+							</div>		
+
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>Nama Rekening :</b></span>								
+								<input type="text" id="nama_rek"  value="" style="text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
+							</div>		
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>No Rekening :</b></span>								
+								<input type="text" id="no_rek"  value="" style="text-align: left;width:80%;border:1px solid rgb(169, 169, 169)" />	
+							</div>		
+							<div style="width:100%;" class="input-group">
+								<span class="input-group-addon" style="text-align:right;background:none;min-width:150px"></span>
+								<button type="button" class="btn btn-success" onclick="AddBank()">
+								<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;</button>	
+								<button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-left:1px">
+								<span class="fa fa-close"></span>&nbsp;&nbsp;<b>Cancel</b></button>	
+							</div>
+							<br>
+						</div>
+					</div>			
+				</div>
+			
+			</div>
+		</div>	
+    </div>
 	
 	
 	<?php include "footer.php"; ?>

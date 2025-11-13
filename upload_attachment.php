@@ -1,6 +1,11 @@
 <?php
     include("koneksi.php");
 
+    // echo "<pre>";
+    // print_r($_POST);
+    // echo "</pre>";
+    // die();
+
     $smbHost   = "//192.168.1.237/Doc_System";
     $smbUser   = "helpdesk";
     $smbPass   = "P@ssw0rd";
@@ -13,7 +18,11 @@
         exit;
     }
 
-    $query = "SELECT no_cont FROM tr_jo WHERE id_jo = '$id_jo' LIMIT 1";
+    $query = "SELECT 
+                tr_sj.container 
+            FROM tr_jo 
+            LEFT JOIN tr_sj ON tr_sj.no_jo = tr_jo.no_jo
+            WHERE tr_jo.id_jo = '$id_jo' LIMIT 1";
     $result = mysqli_query($koneksi, $query);
 
     if (!$row = mysqli_fetch_assoc($result)) {
@@ -117,19 +126,6 @@
             continue;
         }
 
-        // $safePrefixLike = mysqli_real_escape_string($koneksi, $prefix . '%');
-        // $check = mysqli_query($koneksi, "SELECT id, attachment FROM tr_jo_attachment WHERE id_jo = '$id_jo' AND attachment LIKE '$safePrefixLike' LIMIT 1");
-
-        // if ($exist = mysqli_fetch_assoc($check)) {
-        //     $oldFileEsc = escapeshellarg($smbFolder . $exist['attachment']);
-        //     $deleteCmd = "smbclient '{$smbHost}' -U '{$smbUser}%{$smbPass}' -c 'del {$oldFileEsc}' 2>&1";
-        //     exec($deleteCmd, $delOutput, $delRet);
-        //     $imageNameEsc = mysqli_real_escape_string($koneksi, $imageName);
-        //     $sql = "UPDATE tr_jo_attachment SET attachment = '$imageNameEsc' WHERE id = '{$exist['id']}'";
-        // } else {
-        //     $imageNameEsc = mysqli_real_escape_string($koneksi, $imageName);
-        //     $sql = "INSERT INTO tr_jo_attachment (id_jo, attachment) VALUES ('$id_jo', '$imageNameEsc')";
-        // }
         $imageNameEsc = mysqli_real_escape_string($koneksi, $imageName);
         if ($field === 'file_sj') {
 

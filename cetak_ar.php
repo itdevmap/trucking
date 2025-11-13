@@ -98,12 +98,16 @@ $pq = mysqli_query($koneksi,
         sap_project.kode_project,
         m_cust_tr.nama_cust,
         m_cust_tr.caption,
-        m_cust_tr.tgl_tempo
+        m_cust_tr.tgl_tempo,
+        m_cust_tr.pph
     FROM tr_jo
     LEFT JOIN sap_project ON tr_jo.sap_project = sap_project.rowid
     LEFT JOIN m_cust_tr ON tr_jo.id_cust = m_cust_tr.id_cust
     WHERE tr_jo.no_ar = '$no_ar'"
 );
+
+// echo $pq;
+// exit;
 
 $id_jos = [];
 $header = null;
@@ -124,6 +128,7 @@ $code_cust      = $header['caption'];
 $kode_project   = $header['kode_project'];
 $penerima       = $header['penerima'];
 $print_count    = $header['print_count'];
+$pph            = $header['pph'];
 
 // ================= Cetak =================
 $pdf = new PDF('P','mm','A4');
@@ -208,7 +213,9 @@ $q_detail = mysqli_query($koneksi,
             tr_jo_detail.jenis_mobil,
             tr_sj.itemname,
             m_supir_tr.nama_supir,
-            tr_jo_detail.harga
+            tr_jo_detail.harga,
+            tr_jo.penerima,
+            (tr_jo_detail.pph * tr_jo_detail.harga / 100) AS wtax
         FROM tr_sj
         LEFT JOIN tr_jo ON tr_jo.no_jo = tr_sj.no_jo
         LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = tr_jo.id_cust
@@ -220,7 +227,7 @@ $q_detail = mysqli_query($koneksi,
 
 $biaya = mysqli_query($koneksi, 
         "SELECT 
-            CONCAT(m_cost_tr.nama_cost, '-', tr_jo_biaya.remark) AS nama_biaya,
+            CONCAT(tr_jo_biaya.remark) AS nama_biaya,
             tr_jo_biaya.harga,
             tr_jo_biaya.pph AS pph,
             (tr_jo_biaya.wtax * tr_jo_biaya.harga / 100) AS wtax,
@@ -231,29 +238,31 @@ $biaya = mysqli_query($koneksi,
         WHERE tr_jo_biaya.id_jo IN ($id_jo_list)"
 );
 
+
 $dataGabungan = [];
 $pdf->SetFont('arial','',8);
 $no       = 1;
 $y        = 61;
 $subtotal = 0;
-$dp       = 0;
 $pph      = 0;
 
 while ($row = mysqli_fetch_assoc($q_detail)) {
     $dataGabungan[] = [
-        'desc'  => $row['container'] . "#" . $row['nama_cust'] . " " . $tgl_jo_fmt . " " . $kode_project ." 1X" . $row['jenis_mobil'] . " " . $row['itemname'],
+        'desc'  => $row['container'] . "#" . $row['nama_cust'] . "-" . $row['penerima'] . " " . $tgl_jo_fmt . " " . $kode_project ." 1X" . $row['jenis_mobil'] . " " . $row['itemname'],
         'harga' => $row['harga']
     ];
+    $pph += $row['wtax'];
 }
 
 while ($row = mysqli_fetch_assoc($biaya)) {
     $dataGabungan[] = [
         'desc'  => $row['nama_biaya'],
-        'harga' => $row['harga'],
-        'wtax'  => $row['wtax'] 
+        'harga' => $row['harga']
     ];
+
     $pph += $row['wtax'];
 }
+
 
 // ================= CETAK DATA GABUNGAN =================
 $pdf->SetFont('arial','',8);
@@ -294,7 +303,8 @@ $subtotal_fmt = number_format($subtotal, 0, ',', '.');
 $dp_fmt       = number_format($dp, 0, ',', '.');
 $pph_fmt      = number_format($pph, 0, ',', '.');
 
-$total        = $subtotal - $pph;
+$total        = $subtotal;
+// $total        = $subtotal - $pph;
 $total_fmt    = number_format($total, 0, ',', '.');
 
 // ================= AFTER TABLE =================
@@ -329,12 +339,21 @@ $pdf->setXY(0, 15+$y);
 $pdf->Cell(0, 5, $pph_fmt, 0, 1, 'R');
 
 // TOTAL
+// $pdf->setXY($setx, 15+$y);
+// $pdf->Cell($cellx, 5, "TOTAL", 0, 1, 'R');
+// $pdf->setXY($setx2, 15+$y);
+// $pdf->Cell(5, 5, ":", 0, 1, 'C');
+// $pdf->setXY(0, 15+$y);
+// $pdf->Cell(0, 5, $total_fmt, 0, 1, 'R');
+
 $pdf->setXY($setx, 20+$y);
 $pdf->Cell($cellx, 5, "TOTAL", 0, 1, 'R');
 $pdf->setXY($setx2, 20+$y);
 $pdf->Cell(5, 5, ":", 0, 1, 'C');
 $pdf->setXY(0, 20+$y);
 $pdf->Cell(0, 5, $total_fmt, 0, 1, 'R');
+
+
 
 // ================= FOOTER =================
 $pdf->setXY(160, 30+$y);

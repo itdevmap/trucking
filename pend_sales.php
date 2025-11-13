@@ -4,7 +4,7 @@
 	include "session_log.php"; 
 	include "lib.php";
 
-	$pq = mysqli_query($koneksi, "select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='29' ");
+	$pq = mysqli_query($koneksi, "SELECT * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='29' ");
 	$rq=mysqli_fetch_array($pq);	
 	$m_edit = $rq['m_edit'];
 	$m_add = $rq['m_add'];
@@ -13,18 +13,15 @@
 	$m_exe = $rq['m_exe'];
 
 	if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
-	header('location:logout.php'); 
+		header('location:logout.php'); 
 	}
 
-	if($_SERVER['REQUEST_METHOD'] == "POST")
-	{	
+	if($_SERVER['REQUEST_METHOD'] == "POST"){	
 		$hal = $_POST['hal'];
 		$field = $_POST['field'];
 		$tahun = $_POST['tahun'];
 		$paging = $_POST['paging'];
-	}
-	else
-	{	
+	} else{	
 		$paging='25';
 		$hal='1';
 		$tahun = date('Y');

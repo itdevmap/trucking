@@ -206,25 +206,34 @@
 
         // ============ EXECUTE DATA ============
             function Confirm(id) {
-                var hal = $("#hal").val();
-                var conf = confirm("Are you sure to Closed ?");
-                if (conf == true) {
-                    $.post("ajax/po_crud.php", {
-                            id: id,
-                            type: "Executed"
-                        },
-                        function (data, status) {
-                            if (data.includes("GAGAL")) {
-                                alert(data);
-                            } else {
-                                alert("Berhasil");
-                                ReadData(hal);
-                            }
-                        }
-                    ).fail(function(xhr, status, error) {
-                        alert("Request gagal: " + error);
-                    });
-                }
+                const hal = $("#hal").val();
+                const conf = confirm("Are you sure to Close ?");
+                
+                if (!conf) return;
+
+                $.post("ajax/po_crud.php", {
+                    id: id,
+                    type: "Executed"
+                }, function (response) {
+                    // Coba parse JSON
+                    let res;
+                    try {
+                        res = typeof response === "object" ? response : JSON.parse(response);
+                    } catch (e) {
+                        alert("Response tidak valid: " + response);
+                        return;
+                    }
+
+                    if (res.success) {
+                        alert(res.message || "Berhasil");
+                        ReadData(hal);
+                    } else {
+                        alert("Gagal: " + (res.message || "Terjadi kesalahan"));
+                    }
+
+                }).fail(function (xhr, status, error) {
+                    alert("Request gagal: " + error);
+                });
             }
 
         // ============ AJAX UP AP TO SAP ============
@@ -256,7 +265,7 @@
 				$.ajax({
 					url: "ajax/po_crud.php",
 					type: "POST",
-					data: { type: "SaveAP", ids: selected },
+					data: { type: "SaveAPWH", ids: selected },
 					dataType: "json",
 					success: function (res) {
 						if (res.success === false) {
@@ -277,9 +286,46 @@
 					}
 				});
 			}
-            $(document).on('click', '#btnSaveAP', function () {
-				SaveAP();
-			});
+
+        // ============ CONFIRM AP ============
+            // function ModalConfirmAP(id_po) {
+            //     $("#id_po_ap").val(id_po);
+            //     $('#ModalConfirmAP').modal('show');
+            // }
+            function ConfirmAP() {
+                var no_ap = $("#no_ap").val();
+                var id_po_ap = $("#id_po_ap").val();
+
+                $("#btnConfimAP").prop("disabled", true).text("Processing...");
+
+                $.ajax({
+                    url: "ajax/po_crud.php",
+                    type: "POST",
+                    data: {
+                        type: "ConfimAP",
+                        id_po_ap: id_po_ap,
+                        no_ap: no_ap
+                    },
+                    dataType: "json",
+                    success: function (res) {
+                        if (res.success === false) {
+                            alert("Gagal: " + res.message);
+                        } else {
+                            alert("Sukses Confirm AP!");
+                            $('#ModalConfirmAP').modal('hide');
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error(xhr.responseText);
+                        alert("Terjadi error: " + err);
+                    },
+                    complete: function () {
+                        $("#btnConfimAP").prop("disabled", false).text("Confirm AP");
+                        ReadData();
+                    }
+                });
+            }
+
 
     </script>
 	
@@ -295,7 +341,7 @@
 		</aside>	
 
 		<!-- ============ CONTENT ============ -->
-		<form method="post" name ="myform" action="po.php" class="form-horizontal" > 
+		<form method="post" name ="myform" action="po_wh.php" class="form-horizontal" > 
             <div class="content-wrapper" style="min-height:750px">
                 <br>
                 <ol class="breadcrumb">
@@ -442,12 +488,48 @@
 
 								<br>
 								<div style="text-align:right;">
-									<button type="button" id="btnSaveAP" class="btn btn-success" style="margin:0;border-radius:2px;">
+									<button type="button" id="btnSaveAP" class="btn btn-success" style="margin:0;border-radius:2px;" onclick="SaveAP()">
 										<span class="fa fa-plus-square"></span>
 										<b>Create AP</b>
 									</button>	
 								</div>
 
+							</div>		
+						</div>		
+					</div>	
+				</div>
+			</div>	
+		</div>
+
+    <!-- ============ MODAL CONFIRM AP ============ -->
+        <div class="modal fade" id="ModalConfirmAP" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content" style="background: none">	
+					<div class="modal-body">						
+						<div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
+							<div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
+								<div class="small-box bg" style="display:flex;align-items:center;justify-content:space-between; font-size:12px;font-family:'Arial';color:#fff;margin:0;background-color:#4783b7;padding:5px;margin-bottom:1px">
+									<div style="text-align:left;">
+										<b><i class="fa fa-list"></i>&nbsp;Modal Confirm AP</b>
+									</div>
+									<button class="btn btn-danger btn-sm" style="border-radius:2px;padding:3px 6px;" data-dismiss="modal">
+										<span class="glyphicon glyphicon-remove"></span>
+									</button>
+								</div>
+								<br>
+                                <input type="hidden" id ="id_po_ap">
+                                <div style="width:100%;" class="input-group">
+									<span class="input-group-addon" style="text-align:left;background:none;min-width:100px"><b>NO AP :</b></span>
+									<input type="text" id ="no_ap" style="width:80%">
+								</div>	
+
+								<br>
+								<div style="text-align:right;">
+									<button type="button" id="btnConfimAP" class="btn btn-success" style="margin:0;border-radius:2px;" onclick="ConfirmAP()">
+										<span class="fa fa-plus-square"></span>
+										<b>Confirm AP</b>
+									</button>	
+								</div>
 							</div>		
 						</div>		
 					</div>	

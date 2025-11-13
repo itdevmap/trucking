@@ -1,34 +1,31 @@
 <?php
-session_start();
-include "koneksi.php"; 
-include "session_log.php";
-$pq = mysqli_query($koneksi,"select * from m_role_akses_tr where id_role = '$id_role'  and id_menu ='63' ");
+    session_start();
+    include "koneksi.php"; 
+    include "session_log.php";
+    $pq = mysqli_query($koneksi,"SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='63' ");
 
-$rq=mysqli_fetch_array($pq);	
-$m_edit = $rq['m_edit'];
-$m_add = $rq['m_add'];
-$m_del = $rq['m_del'];
-$m_view = $rq['m_view'];
-$m_exe = $rq['m_exe'];
+    $rq     = mysqli_fetch_array($pq);	
+    $m_edit = $rq['m_edit'];
+    $m_add  = $rq['m_add'];
+    $m_del  = $rq['m_del'];
+    $m_view = $rq['m_view'];
+    $m_exe  = $rq['m_exe'];
 
-if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
- header('location:logout.php'); 
-}
+    if(!isset($_SESSION['id_user'])  ||  $m_view != '1'  ){
+        header('location:logout.php'); 
+    }
 
-if($_SERVER['REQUEST_METHOD'] == "POST")
-{	
-	$hal = $_POST['hal'];
-	$search_name = $_POST['search_name'];
-	$paging = $_POST['paging'];
-}
-else
-{	
-	$paging='15';
-	$hal='1';
-}
+    if($_SERVER['REQUEST_METHOD'] == "POST"){	
+        $hal         = $_POST['hal'];
+        $search_name = $_POST['search_name'];
+        $paging      = $_POST['paging'];
+    }
+    else {	
+        $paging = '15';
+        $hal    = '1';
+    }
 
 ?>
-
 
 <html>
   <head>
@@ -55,7 +52,7 @@ else
 		.datepicker{z-index:1151 !important;}
 	</style>
 	<script>
-        // ----------------- READ DATA -----------------
+        // ============ READ DATA ============
             $(document).ready(function () {
                 var hal = $("#hal").val();
                 ReadData(hal);
@@ -70,14 +67,13 @@ else
                 });
             }
 
-        // ----------------- SHOW MODAL -----------------
-            function TampilData() 
-            {
+        // ============ SHOW MODAL ============
+            function TampilData() {
                 $("#mode").val('Add');
                 $('#Data').modal('show');
             }
 
-        // ----------------- FORMAT RUPIAH -----------------
+        // ============ FORMAT RUPIAH ============
             function Desimal(num) {
                 num = num.toString().replace(/\$|\,/g,'');
                 if(isNaN(num))
@@ -102,7 +98,7 @@ else
                 return true;
             }
 
-        // ----------------- EDIT DATA -----------------
+        // ============ EDIT DATA ============
             function GetData(id) {
                 $("#id").val(id);	
                 $.post("ajax/route_crud.php", {
@@ -127,7 +123,7 @@ else
                 $("#Data").modal("show");
             }
 
-        // ----------------- STORE/UPDATE DATA -----------------
+        // ============ STORE/UPDATE DATA ============
             function add() {
                 var r = confirm("Are you sure ?...");
                 if (r == true) {	
@@ -176,12 +172,12 @@ else
 			<?php include "menu.php" ; ?>	
 		</aside>	
 
-		<!-- ------------ CONTENT----------- -->
+		<!-- ============ CONTENT ============ -->
 		<form method="post" name ="myform" action="route.php" class="form-horizontal" > 
             <div class="content-wrapper" style="min-height:750px">
                 <br>
                 <ol class="breadcrumb">
-                    <li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Route</b></font></h1></li>					
+                    <li><h1><i class="fa fa-list"></i><font size="4">&nbsp;&nbsp;<b>Data Pricelist Vendor</b></font></h1></li>					
                 </ol>
                 <br>
                 <div class="col-md-12" >
@@ -252,7 +248,7 @@ else
             </div>		
 		</form>
 	</div>
-    <!-- ------------ MODAL ------------ -->
+    <!-- ============ MODAL ============ -->
     <div class="modal fade" id="Data"  role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content" style="background: none">							
@@ -260,7 +256,7 @@ else
                     <div class="col-md-12" style="min-height:40px;border:0px solid #ddd;padding:0px;border-radius:5px;">
                         <div class="box box-success box-solid" style="padding:5px;border:1px solid #ccc">	
                             <div class="small-box bg" style="font-size:12px;font-family: 'Arial';color :#fff;margin:0px;background-color:#4783b7;text-align:left;padding:5px;margin-bottom:1px">							
-                                &nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Route</b>
+                                &nbsp;&nbsp;<b><i class="fa fa-list"></i>&nbsp;Data Pricelist Vendor</b>
                             </div>	
                             <br>
                             

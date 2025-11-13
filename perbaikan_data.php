@@ -239,20 +239,20 @@ if($mode == 'View')
 		function TampilPart(){	
 			var cari = $("#cari_part").val();
 			cari='';
-			$.get("ajax/part_crud.php", {cari:cari, type:"ListPart" }, function (data, status) {
+			$.get("ajax/part_crud.php", {cari:cari, type:"ListPart_car" }, function (data, status) {
 				$(".tampil_part").html(data);
 			});
 			$('#DataPart').modal('show');
 		}
 		function ListPart() {		
 			var cari = $("#cari_part").val();
-			$.get("ajax/part_crud.php", {cari:cari, type:"ListPart" }, function (data, status) {
+			$.get("ajax/part_crud.php", {cari:cari, type:"ListPart_car" }, function (data, status) {
 				$(".tampil_part").html(data);
 			});
 		}
 		function PilihPart(id) {		
 			$.post("ajax/part_crud.php", {
-					id: id, type:"Detil_Data"
+					id: id, type:"Detil_Data_car"
 				},
 				function (data, status) {
 					var data = JSON.parse(data);
@@ -455,7 +455,7 @@ if($mode == 'View')
 						<span class="input-group-addon" style="text-align:right;min-width:160px"><b>Jenis Pekerjaan :</b></span>
 						<select id="jenis" name="jenis" onchange="jenis" <?php echo $dis;?> style="width: 80%;padding:4px">
 							<?php
-							$t1="select * from  m_jenis_spk where status = '1' order by nama  ";
+							$t1="SELECT * from  m_jenis_spk where status = '1' order by nama  ";
 							$h1=mysqli_query($koneksi, $t1);       
 							while ($d1=mysqli_fetch_array($h1)){?>
 							<option value="<?php echo $d1['nama'];?>" ><?php echo $d1['nama'];?></option>

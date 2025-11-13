@@ -6,7 +6,7 @@ include "../lib.php";
 
 
 $pq = mysqli_query($koneksi, 
-"SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='63' ");
+"SELECT * FROM m_role_akses_tr WHERE id_role = '$id_role' AND id_menu ='64'");
 $rq=mysqli_fetch_array($pq);	
 $m_edit = $rq['m_edit'];
 $m_add = $rq['m_add'];
@@ -33,7 +33,7 @@ $m_exe = $rq['m_exe'];
 						<th rowspan="2" width="10%" style="text-align: center;">DRIVER</th>
 						<th rowspan="2" width="10%" style="text-align: center;">NO POL</th>
 						<th colspan="4" width="10%" style="text-align: center;">AP</th>
-						<th colspan="3" width="10%" style="text-align: center;">ACTION</th>
+						<th colspan="4" width="10%" style="text-align: center;">ACTION</th>
 					</tr>
 					<tr>
 						<th width="5%" style="text-align: center;">TRAVEL<br>EXPENSE</th>
@@ -42,6 +42,7 @@ $m_exe = $rq['m_exe'];
 						<th width="5%" style="text-align: center;">CLAIM</th>
 
 						<th rowspan="2" width="3%" style="text-align: center;">PRINT</th>
+						<th rowspan="2" width="3%" style="text-align: center;">EDIT</th>
 						<th rowspan="2" width="3%" style="text-align: center;">DEL</th>
 						<th rowspan="2" width="3%" style="text-align: center;">ATCH</th>
 					</tr>
@@ -64,6 +65,7 @@ $m_exe = $rq['m_exe'];
 					tr_sj.*,
 					m_supir_tr.nama_supir,
 					m_mobil_tr.no_polisi,
+					tr_jo.id_jo,
 					tr_jo_detail.uj,
 					tr_jo_detail.ritase,
 					tr_sj.uj_lain,
@@ -148,8 +150,20 @@ $m_exe = $rq['m_exe'];
 					</button>
 				</td>';
 
+				// ============== EDIT SJ ==============
+				if($m_del == '1' && $row['id_user'] != 'admin') {
+					$data .= '<td>
+						<button class="btn btn-block btn-default" title="Edit"
+							style="margin:-3px;border-radius:0px;" type="button" 
+							onClick="javascript:Edit('.$row['id_sj'].')"  >
+							<span class="fa fa-edit"></span>
+						</button>
+					</td>';
+				} else {
+					$data .= '<td></td>';
+				}
 				// ============== DELETE SJ ==============
-				if($m_edit == '1' && $row['id_user'] != 'admin') {
+				if($m_del == '1' && $row['id_user'] != 'admin') {
 					$data .= '<td>
 						<button class="btn btn-block btn-default" title="Delete"
 							style="margin:-3px;border-radius:0px;" type="button" 
@@ -165,7 +179,7 @@ $m_exe = $rq['m_exe'];
 				$data .= '<td>
 					<button class="btn btn-block btn-default" title="Add Attachment"
 						style="margin:-3px;border-radius:0px" type="button"
-						onClick="AddAttc(' . $row['id_jo'] . ')">
+						onClick="AddAttc(' . $row['id_sj'] . ')">
 						<span class="fa fa-file"></span>
 					</button>
 				</td>';
@@ -243,27 +257,72 @@ $m_exe = $rq['m_exe'];
 			$desc   		= $_POST['desc'];
 			$tanggal 		= date("Y-m-d");
 
-			// BUILD SJ
+			// ========= BUILD SJ =========
 				$tahun = date("y");
 				$q = "SELECT MAX(RIGHT(code_sj,4)) as last_num 
 					FROM tr_sj 
 					WHERE SUBSTRING(code_sj,4,2) = '$tahun'";
-
 				$res = mysqli_query($koneksi, $q);
 				$row = mysqli_fetch_assoc($res);
 				$nextNum = ($row['last_num'] ?? 0) + 1;
-
 				$urut = str_pad($nextNum, 4, "0", STR_PAD_LEFT);
 				$code_sj = "SJ-" . $tahun . $urut;
-
 				$code_sj = $tahun . $urut;
 				$code_sj = "SJ-" . $code_sj;
 
+
+			// ========= CHECK ID CUST =========
+				$q_cust		= "SELECT id_cust, id_jo FROM tr_jo WHERE no_jo = '$no_jo'";
+				$r_query	= mysqli_query($koneksi, $q_cust);
+				$r_cust 	= mysqli_fetch_assoc($r_query);
+				$id_cust 	= $r_cust['id_cust'];
+				$id_jo 		= $r_cust['id_jo'];
+			// ========= END CHECK ID CUST =========
+
+			// ========= CHECK LIMIT =========
+				$q_lmt 	= "SELECT overlimit FROM m_cust_tr WHERE id_cust = '$id_cust' LIMIT 1";
+				$r_query 	= mysqli_query($koneksi, $q_lmt);
+				$r_limit 	= mysqli_fetch_assoc($r_query);
+				$limit_cust = $r_limit['overlimit'];
+			// ========= END CHECK LIMIT =========
+
+			// ========= CHECK TRAVEL EXPENSE =========
+				$q_harga 	= "SELECT harga FROM tr_jo_detail WHERE id_so = '$id_jo' LIMIT 1";
+				$r_query 	= mysqli_query($koneksi, $q_harga);
+				$r_harga 	= mysqli_fetch_assoc($r_query);
+				$harga 		= $r_harga['harga'];
+			// ========= END CHECK TRAVEL EXPENSE =========
+
+
+			// ========= CHECK TOTAL SO =========
+				$q_totalso 	= "SELECT SUM(total_so) AS total_so FROM tr_jo WHERE id_cust ='$id_cust'";
+				$r_query 	= mysqli_query($koneksi, $q_totalso);
+				$r_totalso 	= mysqli_fetch_assoc($r_query);
+				$total_so 	= $r_totalso['total_so'] ?? 0;
+			// ========= END CHECK TOTAL SO =========
+
+			// ========= CHECK TOTAL AR =========
+				$q_total_ar = "SELECT SUM(nominal_paid) FROM tr_jo WHERE id_cust ='$id_cust'";
+				$r_query 	= mysqli_query($koneksi, $q_total_ar);
+				$r_total_ar = mysqli_fetch_assoc($r_query);
+				$total_ar 	= $r_total_ar['nominal_paid'] ?? 0;
+			// ========= END CHECK TOTAL AR =========
+
+			$new_total_so = (int)$harga + (int)$total_so;
+
+			// var_dump($new_total_so, (int)$harga, (int)$total_so);
+			// exit;
+
+			if ($limit_cust > 0) {
+				if ($new_total_so - $total_ar > $limit_cust) {
+					$u_tr_jo = "UPDATE tr_jo SET `status` = '2' WHERE id_jo = '$id_jo'";
+					$r_query 	= mysqli_query($koneksi, $u_tr_jo);
+				}
+			}
+
 			$id_user = $_SESSION['id'] ?? 0;
-
 			if ($mode == 'Add') {
-
-				$sql = "INSERT INTO tr_sj (
+				$i_sj = "INSERT INTO tr_sj (
 					no_jo, 
 					project_code, 
 					code_sj, 
@@ -290,8 +349,10 @@ $m_exe = $rq['m_exe'];
 					'$id_supir',
 					'$desc'
 				)";
+				$hasil = mysqli_query($koneksi, $i_sj);
 
-				$hasil = mysqli_query($koneksi, $sql);
+				$u_total_so = "UPDATE tr_jo SET total_so = '$new_total_so' WHERE id_jo = '$id_jo'";
+				$r_query 	= mysqli_query($koneksi, $u_total_so);
 
 				if ($hasil) {
 					echo "DATA BERHASIL DI TAMBAHKAN";
@@ -301,13 +362,13 @@ $m_exe = $rq['m_exe'];
 				exit;
 
 			} else if ($mode == 'Edit') {
-				$sql = "UPDATE m_route_tr SET 
-							vendor     = '$vendor',
-							rute       = '$rute',
-							cost       = '$cost',
-							updated_by = '$id_user',
-							updated_at = NOW()
-						WHERE id_route = '$id'";
+				$sql = "UPDATE tr_sj SET 
+							container   = '$container',
+							seal       	= '$seal',
+							id_mobil    = '$id_mobil',
+							id_supir    = '$id_supir',
+							keterangan	= '$desc'
+						WHERE id_sj = '$id'";
 				$hasil = mysqli_query($koneksi, $sql);
 
 				if ($hasil) {
@@ -329,9 +390,9 @@ $m_exe = $rq['m_exe'];
 						<th width="5%" style="text-align: center;">NO</th>
 						<th width="10%" style="text-align: center;">NO JO</th>
 						<th width="10%" style="text-align: center;">PROJECT CODE</th>
-						<th width="10%" style="text-align: center;">CONTAINER</th>
+						<th width="10%" style="text-align: center;">CUSTOMER</th>
 						<th width="20%" style="text-align: center;">ROUTE</th>
-						<th width="10%" style="text-align: center;">ADD</th>
+						<th width="5%" style="text-align: center;">ADD</th>
 					</tr>
 				</thead>';	
 		$offset = (($page * $jmlperhalaman) - $jmlperhalaman);  
@@ -347,7 +408,8 @@ $m_exe = $rq['m_exe'];
 				m_tujuan.nama_kota AS tujuan,
 				tr_jo_detail.id,
 				CONCAT(m_asal.nama_kota, ' - ', m_tujuan.nama_kota) AS rute,
-				tr_jo_detail.container
+				tr_jo_detail.container,
+				m_cust_tr.nama_cust
 			FROM tr_jo
 			LEFT JOIN tr_quo ON tr_quo.id_quo = tr_jo.id_quo
 			LEFT JOIN tr_jo_detail ON tr_jo_detail.id_so = tr_jo.id_jo
@@ -371,7 +433,7 @@ $m_exe = $rq['m_exe'];
 				$data .= '<td style="text-align:center">'.$posisi.'.</td>';
 				$data .= '<td style="text-align:center"><a href="#" onclick="PilihSO('.$row['id'].')" >'.$row['no_jo'].'</a></td>';
 				$data .= '<td style="text-align:center"><a href="#" onclick="PilihSO('.$row['id'].')" >'.$row['project_code'].'</a></td>';
-				$data .= '<td style="text-align:center"><a href="#" onclick="PilihSO('.$row['id'].')" >'.$row['container'].'</a></td>';
+				$data .= '<td style="text-align:center"><a href="#" onclick="PilihSO('.$row['id'].')" >'.$row['nama_cust'].'</a></td>';
 				$data .= '<td style="text-align:center"><a href="#" onclick="PilihSO('.$row['id'].')" >'.$row['rute'].'</a></td>';
 				$data .= '<td style="text-align:center">
 						<button type="button" class="btn btn-default" onClick="javascript:PilihSO('.$row['id'].')" 
@@ -431,7 +493,6 @@ $m_exe = $rq['m_exe'];
 			$response['message'] = "Data not found!";
 		}
 		echo json_encode($response);
-
 	}
 
 // ============ READ SJ ============
@@ -511,9 +572,29 @@ $m_exe = $rq['m_exe'];
 
 // ============ DEL SJ ============
 	else if ($_POST['type'] == "Del_Order"){
-		$id = $_POST['id']; 	
-	
-		$query = "DELETE FROM tr_sj WHERE id_sj = '$id' ";
+		$id_sj = $_POST['id']; 
+		
+		// ========= CHECK TRAVEL EXPENSE =========
+			$q_harga 	="SELECT 
+							tr_jo_detail.harga,
+							tr_jo.id_jo,
+							tr_jo.total_so
+						FROM tr_jo_detail 
+						LEFT JOIN tr_jo ON tr_jo.id_jo = tr_jo_detail.id_so
+						LEFT JOIN tr_sj ON tr_sj.no_jo = tr_jo.no_jo
+						WHERE tr_sj.id_sj = '$id_sj' LIMIT 1";
+			$r_query 	= mysqli_query($koneksi, $q_harga);
+			$r_harga 	= mysqli_fetch_assoc($r_query);
+			$harga 		= (int) $r_harga['harga'] ?? 0;
+			$total_so 	= (int) $r_harga['total_so'] ?? 0;
+			$id_jo 		= $r_harga['id_jo'];
+		// ========= END CHECK TRAVEL EXPENSE =========
+
+		$new_total_so 	= $total_so - $harga;
+		$u_total_so 	= "UPDATE tr_jo SET total_so = '$new_total_so' WHERE id_jo = '$id_jo'";
+		$r_query 		= mysqli_query($koneksi, $u_total_so);
+		$query 			= "DELETE FROM tr_sj WHERE id_sj = '$id_sj' ";
+
 		if (!$result = mysqli_query($koneksi, $query)) {
 			exit(mysqli_error($koneksi));
 		}	
@@ -649,7 +730,7 @@ $m_exe = $rq['m_exe'];
 		
 	}
 
-// ============ ADD AP CLAIm ============
+// ============ ADD AP CLAIM ============
 	else if ($_POST['type'] == "Add_Claim") {
 
 		// echo "<pre>";
@@ -673,5 +754,45 @@ $m_exe = $rq['m_exe'];
 		} else {
 			echo "Data saved!";
 		}
+	}
+
+// ============ EDIT SJ============
+	else if ($_POST['type'] == "EditSJ"){
+		// echo "<pre>";
+		// print_r($_POST);
+		// echo "</pre>";
+		// exit;
+
+		$id_sj = $_POST['id_sj'];	
+		$query = "SELECT 
+				tr_sj.no_jo,
+				tr_sj.project_code,
+				m_cust_tr.nama_cust,
+				tr_jo.penerima,
+				tr_sj.itemname AS `route`,
+				tr_sj.container,
+				tr_sj.seal,
+				tr_sj.id_mobil,
+				tr_sj.id_supir,
+				tr_sj.keterangan
+			FROM tr_sj
+			LEFT JOIN tr_jo ON tr_jo.no_jo = tr_sj.no_jo
+			LEFT JOIN m_cust_tr ON m_cust_tr.id_cust = tr_jo.id_cust
+			WHERE tr_sj.id_sj = '$id_sj'";
+
+		if (!$result = mysqli_query($koneksi, $query)) {
+			exit(mysqli_error($koneksi));
+		}
+		$res = array();
+		if(mysqli_num_rows($result) > 0) {
+			while ($row = mysqli_fetch_assoc($result)) {
+				$res = $row;
+			}
+		}
+		else{
+			$res['status'] = 200;
+			$res['message'] = "Data not found!";
+		}
+		echo json_encode($res);
 	}
 ?>

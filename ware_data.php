@@ -5,11 +5,10 @@
 	include "lib.php";
 
 	if(!isset($_SESSION['id_user'])  ){
-	header('location:logout.php'); 
+		header('location:logout.php'); 
 	}
 
-	if($_SERVER['REQUEST_METHOD'] == "POST")
-	{		
+	if($_SERVER['REQUEST_METHOD'] == "POST"){
 		$mode = $_POST['mode'];
 		$id_quo = $_POST['id_quo'];	
 		$quo_date = $_POST['quo_date'];	
@@ -26,8 +25,7 @@
 		$harga_sewa = str_replace(",","", $harga_sewa);
 		$harga_handling = str_replace(",","", $harga_handling);
 		
-		if($mode == 'Add' )
-		{
+		if($mode == 'Add' ){
 			$ptgl = explode("-", $quo_date);
 			$tg = $ptgl[0];
 			$bl = $ptgl[1];
@@ -104,9 +102,7 @@
 		$xy1="Edit|$id_quo|$cat";
 		$xy1=base64_encode($xy1);
 		header("Location: ware_data.php?id=$xy1");
-	}
-	else
-	{	
+	}else{	
 		// die("lorem");
 		$idx = $_GET['id'];	
 		$x=base64_decode($idx);
@@ -116,14 +112,12 @@
 		$cat = $pecah[2];
 	}
 
-	if($mode == 'Add')
-	{
+	if($mode == 'Add'){
 		$quo_no = '-- Auto -- ';
 		$quo_date = date('d-m-Y');
 		
 	}else{
-		
-		$pq = mysqli_query($koneksi, "select t_ware_quo.*, m_cust_tr.nama_cust
+		$pq = mysqli_query($koneksi, "SELECT t_ware_quo.*, m_cust_tr.nama_cust
 			from 
 			t_ware_quo left join m_cust_tr on t_ware_quo.id_cust = m_cust_tr.id_cust
 			where t_ware_quo.id_quo = '$id_quo'  ");
@@ -145,8 +139,7 @@
 		$disx = 'Disabled';
 	}
 
-	if($mode == 'View')
-	{
+	if($mode == 'View'){
 		$dis = "Disabled";
 	}
 ?>
@@ -279,8 +272,7 @@
 		}
 		
 		
-		function TampilData() 
-		{
+		function TampilData() {
 			$("#modex").val('Add');
 			$("#kode").val('');
 			$("#nama").val('');
@@ -386,7 +378,7 @@
 
 
 			var vol = (panjang * lebar * tinggi) / 1000000;
-			var formatted = parseFloat(vol.toFixed(8)).toString();
+			var formatted = parseFloat(vol.toFixed(2)).toString();
 			$("#vol").val(formatted);
 
 			var m = panjang * lebar;
@@ -403,8 +395,7 @@
 			}
 		}	
 
-		function Download() 
-		{
+		function Download() {
 			var quo_no = $("#quo_no").val();
 			var win = window.open('ware_data_excel.php?quo_no='+quo_no);
 		}	

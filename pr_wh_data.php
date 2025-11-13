@@ -15,6 +15,7 @@
 		// die();
 
 		$mode 		= $_POST['mode'];
+		$id_pr 		= $_POST['id_pr'];
 
 		$tgl 		= date('Y-m-d');
 		$tgl_pr 	= $_POST['tgl_pr'];
@@ -64,7 +65,7 @@
 		}else{
 			$sql = "UPDATE tr_pr SET
 						tgl_pr = '$tgl_pr',
-						remark = '$remark',
+						remark = '$remark'
 					WHERE id_pr = '$id_pr'	";
 			$hasil=mysqli_query($koneksi,$sql);
 		}
@@ -144,51 +145,51 @@
 		.datepicker{z-index:1151 !important;}
 	</style>
 	<script>
-		// --------- SHOW DATA ---------
-			$(document).ready(function () {
-				ReadData('route');
+		// ========= SHOW DATA =========
+		$(document).ready(function () {
+			ReadData('route');
 
-				$("#name-item").on("change", function() {
-					let selectedName = $(this).find(":selected").data("name") || "";
-					console.log("DEBUG:", selectedName); // cek di console
-					$("#desc").val(selectedName.toUpperCase());
-				});
-			});	
-			function ReadData() {
-				var code_pr = $("#code_pr").val();
-				var id_pr   = $("#id_pr").val();
-				var mode    = $("#mode").val();
-				var jenis   = 'item';
+			$("#name-item").on("change", function() {
+				let selectedName = $(this).find(":selected").data("name") || "";
+				console.log("DEBUG:", selectedName); // cek di console
+				$("#desc").val(selectedName.toUpperCase());
+			});
+		});	
+		function ReadData() {
+			var code_pr = $("#code_pr").val();
+			var id_pr   = $("#id_pr").val();
+			var mode    = $("#mode").val();
+			var jenis   = 'item';
 
-				$("button[data-jenis]").removeClass("btn-warning").addClass("btn-primary");
+			$("button[data-jenis]").removeClass("btn-warning").addClass("btn-primary");
 
-				$("button[data-jenis='" + jenis + "']")
-					.removeClass("btn-primary")
-					.addClass("btn-warning");
+			$("button[data-jenis='" + jenis + "']")
+				.removeClass("btn-primary")
+				.addClass("btn-warning");
 
-				$.get("ajax/pr_crud.php", {
-					mode: mode,
-					code_pr: code_pr,
-					id_pr: id_pr,
-					jenis: jenis,
-					type: "Read_Detil"
-				}, function (data, status) {
-					$(".tampil_data").html(data);
-				});
+			$.get("ajax/pr_crud.php", {
+				mode: mode,
+				code_pr: code_pr,
+				id_pr: id_pr,
+				jenis: jenis,
+				type: "Read_Detil_WH"
+			}, function (data, status) {
+				$(".tampil_data").html(data);
+			});
+		}
+
+		function Desimal(num) {
+			num = num.toString().replace(/\$|\,/g,'');
+			if(isNaN(num)) num = "0";
+			let sign = (num == (num = Math.abs(num)));
+			num = Math.floor(num).toString();
+
+			for (let i = 0; i < Math.floor((num.length-(1+i))/3); i++) {
+				num = num.substring(0,num.length-(4*i+3))+','+
+					num.substring(num.length-(4*i+3));
 			}
-
-			function Desimal(num) {
-				num = num.toString().replace(/\$|\,/g,'');
-				if(isNaN(num)) num = "0";
-				let sign = (num == (num = Math.abs(num)));
-				num = Math.floor(num).toString();
-
-				for (let i = 0; i < Math.floor((num.length-(1+i))/3); i++) {
-					num = num.substring(0,num.length-(4*i+3))+','+
-						num.substring(num.length-(4*i+3));
-				}
-				return (sign ? '' : '-') + num;
-			}
+			return (sign ? '' : '-') + num;
+		}
 
 		function TampilData(jenis) {
 			$("#modex").val('Add');
@@ -208,6 +209,7 @@
 			
 				$("#id_asal").val('');
 				$("#id_tujuan").val('');
+				$("#remark_item").val('');
 				$("#qty").val(0);
 				$("#form-origin, #form-destination, #form-item, #form-service, #form-itemcode").hide();
 				$("#name-origin, #name-destination, #name-item, #name-service, #name-itemcode, #uom").val('');
@@ -223,6 +225,7 @@
 		function AddData() {
 			var code_pr		= $("#code_pr").val().trim();
 			var desc 		= $("#desc").val().trim();
+			var remark 		= $("#remark_item").val().trim();
 			
 			var uom 		= $("#uom").val().trim();
 			var id 			= $("#idx").val();
@@ -258,6 +261,7 @@
 				name: name,
 				itemcode: itemcode,
 				desc: desc,
+				remark: remark,
 				uom: uom,
 				qty: qty,
 				jenisx: jenisx,
@@ -311,7 +315,7 @@
 			return true;
 		}
 
-		// ------------------- AJAX TAMPIL SQ -------------------
+		// ========= AJAX TAMPIL SQ =========
 			function TampilSQ() {
 				$cari = $("#cari_SQ").val('');
 				ListSQ();
@@ -336,7 +340,7 @@
 				$("#DaftarSQ").modal("hide");
 			}
 
-		// ------------------- AJAX TAMPIL ITEM -------------------
+		// ========= AJAX TAMPIL ITEM =========
 			function TampilItem() {
 				$cari = $("#cari_Item").val('');
 				ListItem();
@@ -365,7 +369,6 @@
 
 		// ========= Edit DATA =========
             function EditDetail(id_detail, jenis) {
-
 				$.post("ajax/pr_crud.php", {
 					id_detail: id_detail,
 					jenis: jenis,
@@ -384,6 +387,7 @@
 						$("#desc").val(data.description);
 						$("#uom").val(data.uom).prop("readonly", true);
 						$("#qty").val(data.qty);
+						$("#remark_item").val(data.remark);
 					} 
 				}, "json");
 				$('#Data').modal('show');
@@ -487,7 +491,7 @@
                             <span class="input-group-addon" style="text-align:right;background:none;min-width:150px"><b>SAP Project :</b></span>
                             <input type="text" name="sap_project" id="sap_project" style="text-transform: uppercase;text-align: left;width:70%;" value="<?php echo $kode_project; ?>"  readonly>
                             	
-                            <button class="btn btn-block btn-primary" id="po" style="padding:6px 12px 6px 12px; ;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilSAP()">
+                            <button class="btn btn-block btn-primary" id="po" style="padding:6px 12px 6px 12px; ;margin-top:-3px;border-radius:2px;margin-left:5px" type="button" onClick="javascript:TampilSAP()" <?php echo $dis; ?>>
                                 <span class="glyphicon glyphicon-search"></span>
                             </button>
                         </div>
@@ -535,9 +539,9 @@
 
 				<div class="col-md-12" >
 					<div style="width:98%;background:none;margin-left:0;margin-top:0px;border-top:0px;border-bottom:0px" class="input-group">
-						<?php if($mode != 'Edit'){?>
-							<button type="submit" class="btn btn-success"><span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save Request</b>&nbsp;&nbsp;</button>	
-						<?php }?>
+						<button type="submit" class="btn btn-success">
+							<span class="fa fa-save"></span>&nbsp;&nbsp;<b>Save</b>&nbsp;&nbsp;
+						</button>	
 						<button type="button" class="btn btn-danger" onclick="window.location.href='<?php echo $link; ?>'">
 							<span class="fa fa-backward"></span>&nbsp;&nbsp;<b>Back</b>
 						</button>	
@@ -557,7 +561,7 @@
 		</form>
 	</div>	
 	
-	<!-- ---------- MODAL NAMBAH ITEM DI PR  -->
+	<!-- ========== MODAL NAMBAH ITEM DI PR ========== -->
 		<div class="modal fade" id="Data" role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">
@@ -581,10 +585,15 @@
 									</button>
 								</div>
 
-								<!-- ------------ INPUT BIASA ------------ -->
+								<!-- =========== INPUT BIASA =========== -->
 								<div class="input-group" style="width:100%;">
 									<span class="input-group-addon" style="text-align: right;"><b>Description :</b></span>
 									<textarea id="desc" style="text-transform:uppercase;width:80%;height:50px;font-size:11px;line-height:12px;"></textarea>
+								</div>
+
+								<div class="input-group" style="width:100%;">
+									<span class="input-group-addon" style="text-align: right;"><b>Remark :</b></span>
+									<textarea id="remark_item" style="text-transform:uppercase;width:80%;height:50px;font-size:11px;line-height:12px;"></textarea>
 								</div>
 
 								<div class="input-group" style="width:100%;">
@@ -615,7 +624,7 @@
 			</div>	
 		</div>
 
-	<!-- ---------- MODAL SEARCH SQ PROJECT ---------- -->
+	<!-- ========== MODAL SEARCH SQ PROJECT ========== -->
 		<div class="modal fade" id="DaftarSQ"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
@@ -655,7 +664,7 @@
 			</div>	
 		</div>
 
-	<!-- ---------- MODAL SEARCH ITEM ---------- -->
+	<!-- ========== MODAL SEARCH ITEM ========== -->
 		<div class="modal fade" id="DaftarItem"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
@@ -669,7 +678,7 @@
 								<div style="width:100%" class="input-group" style="background:none !important;">
 									<span class="input-group-addon" style="width:80%;text-align:left;padding:0px">
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Search :</b>&nbsp;&nbsp;
-										<input type="text" id ="cari_Item" style="text-align: left;width:200px">
+										<input type="text" id ="cari_Item" style="text-align: left;width:200px" oninput="ListItem()">
 
 										<button class="btn btn-block btn-primary" style="margin:0px;margin-left:-3px;margin-bottom:3px;border-radius:2px;padding:5px" onClick="javascript:ListItem()">
 											<span class="glyphicon glyphicon-search"></span>
@@ -695,7 +704,7 @@
 			</div>	
 		</div>
 
-	<!-- --------- MODAL SAP --------- -->
+	<!-- ========== MODAL SAP ========== -->
 		<div class="modal fade" id="DaftarSAP"  role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content" style="background: none">	
